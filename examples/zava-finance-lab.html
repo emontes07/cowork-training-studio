@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Turn a fictional month-end workbook into a checked variance story and a decision-ready briefing with Copilot in Excel.">
+  <title>Zava Finance: From Close to CFO Summary</title>
+  <style>
+:root {
+  --brand-primary: #1f3864;
+  --brand-secondary: #2e75b6;
+  --brand-accent: #7c3aed;
+  --surface: #ffffff;
+  --bg: #f4f6fb;
+  --text: #17243b;
+  --muted: #52627a;
+  --border: #d7dfec;
+  --callout-tip-bg: #edf8f1;
+  --callout-warning-bg: #fff5df;
+  --callout-important-bg: #fff0f2;
+  --callout-note-bg: #eef5ff;
+  --callout-instructor-bg: #f2edff;
+  --callout-real-world-bg: #e9f8f6;
+  --callout-stretch-bg: #faf0ff;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 "Segoe UI", system-ui, sans-serif; }
+a { color: var(--brand-secondary); text-underline-offset: .2em; }
+button, input { font: inherit; }
+button { cursor: pointer; border: 1px solid var(--border); border-radius: .6rem; padding: .5rem .85rem; background: var(--surface); color: var(--brand-primary); font-weight: 600; }
+button:hover { border-color: var(--brand-secondary); background: var(--callout-note-bg); }
+:focus-visible { outline: 3px solid var(--brand-accent); outline-offset: 4px; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--brand-primary); overflow-wrap: anywhere; }
+h1 { margin: .6rem 0 1rem; font-size: clamp(2.2rem, 4vw, 3.6rem); letter-spacing: -.035em; }
+h2 { font-size: 1.8rem; margin: .4rem 0 1rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.05rem; }
+p { margin: .6rem 0 1rem; overflow-wrap: anywhere; }
+li { margin-block: .4rem; overflow-wrap: anywhere; }
+.hero { background: linear-gradient(115deg, var(--brand-primary), var(--brand-secondary) 70%, var(--brand-accent)); color: white; }
+.hero-inner { max-width: 1440px; margin: auto; padding: 3.5rem 2rem; }
+.hero h1 { color: white; max-width: 1000px; }
+.eyebrow { text-transform: uppercase; font-weight: 700; font-size: .75rem; letter-spacing: .13em; }
+.subtitle { font-size: 1.2rem; max-width: 900px; opacity: .95; }
+.tags { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: 1.6rem 0 0; }
+.tags li { border: 1px solid #ffffff66; background: #ffffff19; border-radius: 2rem; padding: .3rem .9rem; font-size: .85rem; }
+.layout { max-width: 1440px; margin: auto; padding: 1.75rem 2rem; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 2rem; align-items: start; }
+.sidebar { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; padding: .8rem 0; }
+.nav-title { font-weight: 700; padding-inline: .75rem; color: var(--brand-primary); }
+.nav-link { display: block; padding: .5rem .75rem; margin: .15rem 0; border-left: 3px solid transparent; border-radius: 0 .4rem .4rem 0; font-size: .9rem; color: var(--muted); text-decoration: none; }
+.nav-link:hover, .nav-link.active { background: var(--callout-note-bg); color: var(--brand-primary); border-left-color: var(--brand-accent); }
+.scenario-link { font-weight: 700; margin-top: .75rem; }
+.lab-link { padding-left: 1.3rem; display: flex; gap: .5rem; justify-content: space-between; }
+.lab-link span { white-space: nowrap; font-size: .75rem; }
+#studio--nav-toggle { display: none; }
+main { min-width: 0; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem; font-size: .8rem; color: var(--muted); }
+.toolbar div { display: flex; gap: .5rem; flex-wrap: wrap; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; margin-bottom: 1.5rem; padding: 1.75rem; box-shadow: 0 4px 18px #1f386407; }
+.anchor { scroll-margin-top: 1.5rem; }
+.objectives li { padding-left: .5rem; }
+.muted, .summary-hint, .source { color: var(--muted); }
+.fictional-badge { display: inline-block; font-size: .8rem; color: var(--brand-primary); background: var(--callout-tip-bg); padding: .25rem .7rem; border-radius: .4rem; }
+.resources p { font-size: .9rem; margin-top: .2rem; }
+summary { cursor: pointer; list-style-position: outside; margin-left: 1rem; }
+summary::marker { color: var(--brand-secondary); }
+summary h2, summary h3 { display: inline; }
+summary .eyebrow, summary .lab-meta, summary .summary-hint { display: block; }
+.summary-hint { font-size: .85rem; margin-top: .4rem; }
+.scenario-body { padding-top: 1.5rem; }
+.story { margin: 0 0 1.5rem; padding: 1rem; border-left: 4px solid var(--brand-accent); background: var(--bg); border-radius: .5rem; }
+.story:empty { display: none; }
+.story div { display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 1rem; margin: .5rem 0; }
+dt { font-size: .8rem; font-weight: 700; color: var(--brand-primary); }
+dd { margin: 0; font-size: .9rem; overflow-wrap: anywhere; }
+.lab { border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; margin-top: 1rem; }
+.lab[open] > summary { padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.lab-meta { font-size: .75rem; text-transform: uppercase; font-weight: 700; color: var(--brand-secondary); margin-bottom: .35rem; }
+.lab-body { padding-top: .75rem; }
+.exercise { margin-top: 1.5rem; }
+.prompt-block { border: 1px solid var(--border); border-radius: .65rem; overflow: hidden; margin: 1rem 0; }
+.prompt-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .6rem .85rem; background: var(--callout-note-bg); color: var(--brand-primary); font-size: .8rem; font-weight: 700; }
+.copy-button { font-size: .8rem; white-space: nowrap; }
+pre { margin: 0; padding: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; background: #fbfcff; font: .85rem/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; }
+code { font: inherit; }
+.expected { font-size: .9rem; }
+.callout { padding: .9rem 1rem; margin: 1rem 0; border-left: 4px solid var(--brand-secondary); border-radius: .4rem; font-size: .9rem; }
+.callout strong { text-transform: uppercase; font-size: .75rem; letter-spacing: .07em; }
+.callout p { margin: .3rem 0 0; }
+.callout-tip { background: var(--callout-tip-bg); border-color: #26734d; }
+.callout-warning { background: var(--callout-warning-bg); border-color: #9b6700; }
+.callout-important { background: var(--callout-important-bg); border-color: #b2334d; }
+.callout-note { background: var(--callout-note-bg); }
+.callout-instructor { background: var(--callout-instructor-bg); border-color: var(--brand-accent); }
+.callout-real-world { background: var(--callout-real-world-bg); border-color: #14796f; }
+.callout-stretch { background: var(--callout-stretch-bg); border-color: #a53ab8; }
+.self-check { padding: 1rem; background: var(--bg); border-radius: .5rem; margin-top: 1.5rem; }
+.self-check h4 { margin: 0 0 .75rem; }
+.self-check ul { list-style: none; padding: 0; margin: 0; }
+.self-check label { display: flex; align-items: baseline; gap: .5rem; cursor: pointer; font-size: .9rem; }
+.self-check input { accent-color: var(--brand-accent); }
+.page-footer { color: var(--muted); font-size: .8rem; padding: .5rem 0 2rem; }
+.copy-status:not(:empty) { position: fixed; bottom: 1rem; right: 1rem; max-width: calc(100vw - 2rem); background: var(--brand-primary); color: white; padding: .75rem 1rem; border-radius: .5rem; box-shadow: 0 4px 18px #0003; z-index: 20; }
+.skip-link { position: fixed; left: 1rem; top: -10rem; z-index: 30; padding: .7rem; background: white; }
+.skip-link:focus { top: 1rem; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: .75rem; padding: 1rem; }
+  .hero-inner { padding: 2.5rem 1.25rem; }
+  .sidebar { position: static; max-height: none; padding: 0; }
+  #studio--nav-toggle { display: block; width: 100%; }
+  body.js-ready #studio--navigation { display: none; }
+  body.js-ready #studio--navigation.is-open { display: block; }
+  .card { padding: 1.25rem; }
+  .story div { grid-template-columns: 1fr; gap: .1rem; }
+  .lab { padding: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media print {
+  body { background: white; color: black; font-size: 10pt; }
+  .hero { background: white; color: black; border-bottom: 2px solid black; }
+  .hero h1 { color: black; font-size: 24pt; }
+  .hero-inner { padding: 0 0 1rem; }
+  .tags li { border-color: #888; }
+  .layout { display: block; padding: 0; }
+  .sidebar, .toolbar, .copy-button, .copy-status, .skip-link { display: none !important; }
+  .card, .lab { box-shadow: none; padding: 1rem; }
+  details > :not(summary) { display: block !important; }
+  details::details-content { content-visibility: visible; display: block; }
+  .prompt-block, .callout, .self-check { break-inside: avoid; }
+  summary { list-style: none; margin-left: 0; }
+  h2, h3, h4 { break-after: avoid; }
+  a { color: black; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#studio--content">Skip to content</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Zava Supply Co. / Finance</p>
+      <h1>Zava Finance: From Close to CFO Summary</h1>
+      <p class="subtitle">Turn a fictional month-end workbook into a checked variance story and a decision-ready briefing with Copilot in Excel.</p>
+      <ul class="tags" aria-label="Session details">
+<li>Copilot in Excel</li><li>Microsoft 365 Copilot</li>        <li>Finance controllers</li>
+        <li>Intermediate</li>
+        <li>60 minutes</li>
+        <li>6 hands-on labs</li>
+      </ul>
+    </div>
+  </header>
+  <div class="layout">
+<aside class="sidebar">
+  <button type="button" id="studio--nav-toggle" aria-expanded="false" aria-controls="studio--navigation">
+    Session navigation
+  </button>
+  <nav id="studio--navigation" aria-label="Session navigation">
+    <p class="nav-title">Your lab journey</p>
+    <a class="nav-link active" aria-current="location" href="#overview">Overview</a>
+    <a class="nav-link" href="#setup">Setup</a>
+    <a class="nav-link scenario-link" href="#month-end-close">1. Close the month with evidence</a>
+    <a class="nav-link lab-link" href="#build-close-table">1. Build a trustworthy close table <span>10m</span></a>
+    <a class="nav-link lab-link" href="#calculate-variances">2. Calculate and verify expense variances <span>10m</span></a>
+    <a class="nav-link lab-link" href="#review-department-movement">3. Build the close review <span>10m</span></a>
+    <a class="nav-link scenario-link" href="#cfo-summary">2. Turn the close into a CFO conversation</a>
+    <a class="nav-link lab-link" href="#model-forecast-bridge">4. Model an explicit forecast assumption <span>10m</span></a>
+    <a class="nav-link lab-link" href="#chart-close-variance">5. Make the movement readable <span>10m</span></a>
+    <a class="nav-link lab-link" href="#draft-cfo-brief">6. Draft a review-ready CFO summary <span>10m</span></a>
+<a class="nav-link" href="#capstone">Capstone</a>  </nav>
+</aside>
+    <main id="studio--content" tabindex="-1">
+      <div class="toolbar" aria-label="Lab controls">
+        <span>2 scenarios / 7 prompts</span>
+        <div>
+          <button type="button" id="studio--expand">Expand all</button>
+          <button type="button" id="studio--collapse">Collapse all</button>
+          <button type="button" id="studio--print">Print guide</button>
+        </div>
+      </div>
+<section id="overview" class="card anchor" aria-labelledby="overview--title">
+  <p class="eyebrow">Start here</p>
+  <h2 id="overview--title">Overview</h2>
+  <p>Zava Supply Co. is a wholly fictional distributor preparing its September 2026 close. You are the practice controller: establish the evidence, explain the movement, and hand the fictional CFO a concise summary with visible limitations.</p>
+<p class="fictional-badge">Fictional practice company</p>  <h3>What you will learn</h3>
+  <ol class="objectives"><li>Create and reconcile an Excel table from a small fictional close dataset.</li><li>Calculate expense variances and distinguish observed movements from unverified causes.</li><li>Build a department-level view and a readable variance chart.</li><li>Compare an explicitly hypothetical forecast with the closed period without mixing assumptions and actuals.</li><li>Draft a CFO summary that cites checked cells, flags uncertainty, and requests a clear decision.</li></ol>
+  <p class="muted">Open a lab, follow its exercises, copy the prompts, and use the self-checks before moving on.</p>
+</section>
+<section id="setup" class="card anchor" aria-labelledby="setup--title">
+  <p class="eyebrow">Prepare your workspace</p>
+  <h2 id="setup--title">Setup</h2>
+  <h3>Prerequisites</h3>
+  <ul><li>Access to Excel and Copilot in Excel in an approved practice environment; availability depends on your license and configuration.</li><li>A blank workbook reserved for fictional practice data. The first lab supplies every source row.</li><li>Basic familiarity with Excel tables, formulas, and worksheet navigation.</li><li>Budget 10 minutes per lab. Use the capstone as the final self-check within lab six rather than extra session time.</li></ul>
+  <h3>Resources</h3>
+  <ul class="resources">
+    <li>
+<strong>Fictional close dataset</strong><p>The first prompt contains a six-row tab-separated dataset. No external workbook download or real tenant content is needed.</p>    </li>
+    <li>
+<a href="https://learn.microsoft.com/">Microsoft Learn</a><p>Optional product reference; requires internet. This page itself has no external assets.</p>    </li>
+  </ul>
+  <h3>Ground rules</h3>
+  <ul><li>Use only the supplied fictional Zava data. Do not upload customer workbooks, real employee details, or tenant content.</li><li>Copilot drafts are not accounting evidence: verify formulas, source ranges, totals, signs, and period labels yourself.</li><li>Do not infer business causes from expense movements. Label a cause as a hypothesis until evidence supports it.</li><li>Nothing in this lab is posted, approved, saved, or sent by the Training Studio server. Review any action proposed by Copilot.</li></ul>
+</section>
+<details class="scenario card anchor" id="month-end-close" open>
+  <summary>
+    <span class="eyebrow">Scenario 1</span>
+    <h2>Close the month with evidence</h2>
+    <span class="summary-hint">3 labs / select to expand or collapse</span>
+  </summary>
+  <div class="scenario-body">
+    <dl class="story">
+      <div><dt>Context</dt><dd>The fictional September close has six expense lines but no reviewed variance commentary. Establish a reliable baseline before drafting explanations.</dd></div>
+      <div><dt>Stakeholder</dt><dd>Zava controller and close reviewer</dd></div>
+      <div><dt>Time pressure</dt><dd>The practice close review begins in 30 minutes.</dd></div>
+      <div><dt>Source material</dt><dd>Six invented September expense rows supplied in the first lab; all amounts are fictional USD and expenses use positive signs.</dd></div>
+      <div><dt>Deliverable</dt><dd>A reconciled CloseData table, checked variance columns, and a department-level movement summary.</dd></div>
+    </dl>
+<details class="lab anchor" id="build-close-table" open>
+  <summary>
+    <span class="lab-meta">10 min / Basic</span>
+    <h3>1. Build a trustworthy close table</h3>
+    <span class="summary-hint">Start from a small source you can check without trusting an AI answer.</span>
+  </summary>
+  <div class="lab-body">
+    <p class="source"><strong>Source:</strong> The fictional six-row TSV included in this exercise.</p>
+    <p>Open a blank practice workbook. If Copilot cannot create a table directly in your version, paste the TSV rows yourself, format them as a table, and name it CloseData before continuing.</p>
+    <section class="exercise" aria-labelledby="build-close-table--exercise-1">
+      <h4 id="build-close-table--exercise-1">Exercise 1</h4>
+      <p>Create the source table and ask Copilot to identify what it can and cannot conclude from it.</p>
+      <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="build-close-table--prompt-1" aria-label="Copy prompt: 1. Build a trustworthy close table, exercise 1">Copy prompt</button>
+  </div>
+  <pre id="build-close-table--prompt-1" tabindex="0"><code>We are practicing with wholly fictional Zava Supply Co. data. Create an Excel table named CloseData from the tab-separated rows below on a worksheet named SeptemberClose. Keep the original data unchanged. Amounts are fictional USD expenses, with positive signs. If you cannot create the table, give me exact manual steps instead of claiming you did.
+
+Period	Department	Account	Actual	Budget
+2026-09	Procurement	Materials	12000	11000
+2026-09	Logistics	Shipping	18000	16000
+2026-09	CustomerOps	Support	9000	10000
+2026-09	Logistics	Freight	6000	5500
+2026-09	Procurement	Software	4000	4000
+2026-09	CustomerOps	Training	1000	1500
+
+Check for six rows, blank fields, repeated Department-plus-Account keys, nonnumeric amounts, and inconsistent periods. Show SUM formulas for Actual and Budget and identify the cells or table columns used. Do not invent transaction details, causes, or additional rows. End with a short list of limitations of this tiny dataset.</code></pre>
+</div>
+
+      <p class="expected"><strong>Expected outcome:</strong> Six preserved source rows; independently checked Actual total 50,000 and Budget total 48,000; no invented causes.</p>
+    </section>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong>
+      <p>Verify all six rows and both totals manually before continuing. A convincing summary can still use the wrong range.</p>
+    </aside>
+    <aside class="callout callout-tip" aria-label="Tip">
+      <strong>Tip</strong>
+      <p>Keep source columns unchanged. Put calculations in new columns so a reviewer can trace every result.</p>
+    </aside>
+    <section class="self-check" aria-labelledby="build-close-table--check">
+      <h4 id="build-close-table--check">Before you move on</h4>
+      <ul>
+        <li><label><input type="checkbox"> <span>Does CloseData contain exactly six rows for 2026-09?</span></label></li>
+        <li><label><input type="checkbox"> <span>Do independent SUM formulas show Actual 50,000 and Budget 48,000?</span></label></li>
+        <li><label><input type="checkbox"> <span>Did Copilot distinguish missing evidence from actual data problems?</span></label></li>
+      </ul>
+    </section>
+  </div>
+</details>
+<details class="lab anchor" id="calculate-variances">
+  <summary>
+    <span class="lab-meta">10 min / Intermediate</span>
+    <h3>2. Calculate and verify expense variances</h3>
+    <span class="summary-hint">Make the sign convention and denominator explicit.</span>
+  </summary>
+  <div class="lab-body">
+    <p class="source"><strong>Source:</strong> CloseData from lab one.</p>
+    <p>For this workshop only, a positive Actual-minus-Budget expense variance is unfavorable. A zero budget needs an explicit not-applicable result, not a division error.</p>
+    <section class="exercise" aria-labelledby="calculate-variances--exercise-1">
+      <h4 id="calculate-variances--exercise-1">Exercise 1</h4>
+      <p>Add transparent formulas, then check one unfavorable and one favorable line yourself.</p>
+      <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="calculate-variances--prompt-1" aria-label="Copy prompt: 2. Calculate and verify expense variances, exercise 1">Copy prompt</button>
+  </div>
+  <pre id="calculate-variances--prompt-1" tabindex="0"><code>Using only the fictional CloseData table, propose and add two calculated columns: VarianceUSD = Actual minus Budget, and VariancePct = VarianceUSD divided by Budget. Use structured references and return &#34;N/A&#34; when Budget is zero. Explain that positive expense variances are unfavorable in this exercise. Show the exact formulas before applying them; if editing is unavailable, give the formulas for me to insert. Sort a separate review view by absolute VarianceUSD without changing source row values. Verify Shipping, Support, and the overall variance using source numbers. Do not sum row percentages to calculate the overall percentage: derive it from total Actual and total Budget. Return a compact check table with the formula, source, result, and sign interpretation. No causal explanations yet.</code></pre>
+</div>
+
+      <p class="expected"><strong>Expected outcome:</strong> Traceable formulas; Shipping +2,000 unfavorable, Support -1,000 favorable, and aggregate +2,000 on 48,000 budget (about 4.17%).</p>
+    </section>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong>
+      <p>A total percentage must use total variance divided by total budget. Summing percentages produces a misleading result.</p>
+    </aside>
+    <aside class="callout callout-note" aria-label="Note">
+      <strong>Note</strong>
+      <p>The sign convention is specific to this fictional expense exercise; do not generalize it to revenue without checking.</p>
+    </aside>
+    <section class="self-check" aria-labelledby="calculate-variances--check">
+      <h4 id="calculate-variances--check">Before you move on</h4>
+      <ul>
+        <li><label><input type="checkbox"> <span>Do Shipping and Support have opposite, correctly interpreted signs?</span></label></li>
+        <li><label><input type="checkbox"> <span>Is the overall percentage calculated from totals rather than added percentages?</span></label></li>
+        <li><label><input type="checkbox"> <span>Does the formula handle a zero budget explicitly?</span></label></li>
+      </ul>
+    </section>
+  </div>
+</details>
+<details class="lab anchor" id="review-department-movement">
+  <summary>
+    <span class="lab-meta">10 min / Intermediate</span>
+    <h3>3. Build the close review</h3>
+    <span class="summary-hint">Separate measured movements from questions needing evidence.</span>
+  </summary>
+  <div class="lab-body">
+    <p class="source"><strong>Source:</strong> CloseData plus the checked variance columns.</p>
+    <p>The close reviewer wants a department-level explanation, but this source contains no invoices, staffing data, or operational evidence.</p>
+    <section class="exercise" aria-labelledby="review-department-movement--exercise-1">
+      <h4 id="review-department-movement--exercise-1">Exercise 1</h4>
+      <p>Create a department summary and a concise evidence-versus-hypothesis commentary.</p>
+      <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="review-department-movement--prompt-1" aria-label="Copy prompt: 3. Build the close review, exercise 1">Copy prompt</button>
+  </div>
+  <pre id="review-department-movement--prompt-1" tabindex="0"><code>From the fictional CloseData table, build a PivotTable or formula-based summary by Department with sums of Actual, Budget, and VarianceUSD. Include a grand total that reconciles to the source. Report Procurement, Logistics, and CustomerOps separately. Then write three short review bullets, each with: observed movement, supporting source cells or table references, and a question the fictional reviewer should investigate. Label every proposed cause as an unverified hypothesis. Do not claim that staffing, supplier prices, or invoice timing caused anything; those details are not present. Flag offsetting movements instead of describing the net variance as the whole story. Finish with one reconciliation check that a human can repeat.</code></pre>
+</div>
+
+      <p class="expected"><strong>Expected outcome:</strong> Department variances of +1,000, +2,500, and -1,500 respectively; net +2,000; review questions without unsupported causal claims.</p>
+    </section>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong>
+      <p>A department trend does not prove a cause. Keep unsupported explanations out of the close sign-off.</p>
+    </aside>
+    <aside class="callout callout-instructor" aria-label="Instructor">
+      <strong>Instructor</strong>
+      <p>Ask a learner to reconcile the department summary to the source before discussing the written commentary.</p>
+    </aside>
+    <section class="self-check" aria-labelledby="review-department-movement--check">
+      <h4 id="review-department-movement--check">Before you move on</h4>
+      <ul>
+        <li><label><input type="checkbox"> <span>Do the department variances reconcile to +2,000?</span></label></li>
+        <li><label><input type="checkbox"> <span>Are observed facts separated from hypotheses and open questions?</span></label></li>
+      </ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+<details class="scenario card anchor" id="cfo-summary">
+  <summary>
+    <span class="eyebrow">Scenario 2</span>
+    <h2>Turn the close into a CFO conversation</h2>
+    <span class="summary-hint">3 labs / select to expand or collapse</span>
+  </summary>
+  <div class="scenario-body">
+    <dl class="story">
+      <div><dt>Context</dt><dd>The close is reconciled. The fictional CFO now needs a compact story and a clearly separated planning scenario, not an unexplained pile of charts.</dd></div>
+      <div><dt>Stakeholder</dt><dd>Zava CFO and planning reviewer</dd></div>
+      <div><dt>Time pressure</dt><dd>The practice briefing is due at the end of the next 30 minutes.</dd></div>
+      <div><dt>Source material</dt><dd>Checked September results plus explicitly hypothetical October assumptions supplied in lab four.</dd></div>
+      <div><dt>Deliverable</dt><dd>A labeled forecast bridge, a readable variance chart, and an evidence-linked CFO summary for human review.</dd></div>
+    </dl>
+<details class="lab anchor" id="model-forecast-bridge" open>
+  <summary>
+    <span class="lab-meta">10 min / Intermediate</span>
+    <h3>4. Model an explicit forecast assumption</h3>
+    <span class="summary-hint">Keep closed actuals and hypothetical planning inputs separate.</span>
+  </summary>
+  <div class="lab-body">
+    <p class="source"><strong>Source:</strong> September CloseData and the invented October assumptions in this prompt.</p>
+    <p>This is a planning exercise, not a prediction. No assumption should overwrite or be presented as a September actual.</p>
+    <section class="exercise" aria-labelledby="model-forecast-bridge--exercise-1">
+      <h4 id="model-forecast-bridge--exercise-1">Exercise 1</h4>
+      <p>Build an assumption bridge on a new sheet and label its status unmistakably.</p>
+      <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="model-forecast-bridge--prompt-1" aria-label="Copy prompt: 4. Model an explicit forecast assumption, exercise 1">Copy prompt</button>
+  </div>
+  <pre id="model-forecast-bridge--prompt-1" tabindex="0"><code>Create a separate worksheet named OctoberScenario for wholly fictional Zava Supply Co. planning. Do not modify SeptemberClose or CloseData. Use these explicit hypothetical inputs only: prior October expense forecast 50,000 USD; logistics disruption assumption +2,000 USD; software renewal assumption +1,000 USD. Build a three-step bridge to the revised forecast with visible formulas and a check that the changes reconcile. Label every input as a hypothetical assumption, not a measured September driver. Compare the revised forecast with September actual expenses only as a cross-period reference, not a like-for-like variance. List two pieces of evidence a reviewer would need before adopting these assumptions. Do not invent a probability, confidence interval, supplier, or contract.</code></pre>
+</div>
+
+      <p class="expected"><strong>Expected outcome:</strong> A clearly labeled hypothetical 53,000 forecast, a +3,000 assumption bridge, and visible separation from September actuals.</p>
+    </section>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong>
+      <p>The October assumptions are invented for learning. They are not approved plans, measured causes, or evidence of any contract.</p>
+    </aside>
+    <aside class="callout callout-real-world" aria-label="Real World">
+      <strong>Real World</strong>
+      <p>In an approved real workflow, a planning reviewer would require authorized supporting evidence. Do not introduce that real evidence into this fictional lab.</p>
+    </aside>
+    <section class="self-check" aria-labelledby="model-forecast-bridge--check">
+      <h4 id="model-forecast-bridge--check">Before you move on</h4>
+      <ul>
+        <li><label><input type="checkbox"> <span>Does the bridge reconcile 50,000 + 2,000 + 1,000 to 53,000?</span></label></li>
+        <li><label><input type="checkbox"> <span>Are all October inputs marked hypothetical and kept off the September source sheet?</span></label></li>
+      </ul>
+    </section>
+  </div>
+</details>
+<details class="lab anchor" id="chart-close-variance">
+  <summary>
+    <span class="lab-meta">10 min / Basic</span>
+    <h3>5. Make the movement readable</h3>
+    <span class="summary-hint">Use a simple visual without hiding favorable offsets.</span>
+  </summary>
+  <div class="lab-body">
+    <p class="source"><strong>Source:</strong> The reconciled department summary from lab three.</p>
+    <p>The CFO needs to see both unfavorable expense movement and favorable offsets. Use labels as well as color.</p>
+    <section class="exercise" aria-labelledby="chart-close-variance--exercise-1">
+      <h4 id="chart-close-variance--exercise-1">Exercise 1</h4>
+      <p>Create a readable variance chart and check every plotted value against the review table.</p>
+      <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="chart-close-variance--prompt-1" aria-label="Copy prompt: 5. Make the movement readable, exercise 1">Copy prompt</button>
+  </div>
+  <pre id="chart-close-variance--prompt-1" tabindex="0"><code>Using only the checked September department summary for fictional Zava Supply Co., create a horizontal bar chart of VarianceUSD by Department. Use a zero baseline, show both positive and negative values, and label the axis &#34;Expense variance USD: Actual minus Budget&#34;. Title it &#34;Fictional September 2026 expense variance&#34;. Keep CustomerOps&#39; favorable offset visible. Add numeric data labels so the meaning is not conveyed by color alone. Verify every bar against the source summary and explain the chart&#39;s scope in two sentences. Exclude October forecast assumptions; those belong to a different period and evidence category. If you cannot create the chart, provide exact Excel steps and do not claim the chart exists.</code></pre>
+</div>
+
+      <p class="expected"><strong>Expected outcome:</strong> Three labeled bars with a zero baseline, correct signs, and no October assumptions mixed into the September chart.</p>
+    </section>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong>
+      <p>Check the chart&#39;s selected range, signs, and period. Chart polish does not establish accuracy.</p>
+    </aside>
+    <aside class="callout callout-stretch" aria-label="Stretch">
+      <strong>Stretch</strong>
+      <p>Explain why a chart showing only absolute values would conceal the favorable CustomerOps offset.</p>
+    </aside>
+    <section class="self-check" aria-labelledby="chart-close-variance--check">
+      <h4 id="chart-close-variance--check">Before you move on</h4>
+      <ul>
+        <li><label><input type="checkbox"> <span>Can a reader identify both the unfavorable Logistics movement and favorable CustomerOps offset?</span></label></li>
+        <li><label><input type="checkbox"> <span>Do labels and chart values match the checked source without relying on color?</span></label></li>
+      </ul>
+    </section>
+  </div>
+</details>
+<details class="lab anchor" id="draft-cfo-brief">
+  <summary>
+    <span class="lab-meta">10 min / Advanced</span>
+    <h3>6. Draft a review-ready CFO summary</h3>
+    <span class="summary-hint">Make a concise, sourced briefing with a clear human decision.</span>
+  </summary>
+  <div class="lab-body">
+    <p class="source"><strong>Source:</strong> Checked CloseData totals, department review, chart, and OctoberScenario assumptions.</p>
+    <p>Use the final minutes for the capstone below. The briefing is a draft for review, not a close approval or a sent message.</p>
+    <section class="exercise" aria-labelledby="draft-cfo-brief--exercise-1">
+      <h4 id="draft-cfo-brief--exercise-1">Exercise 1</h4>
+      <p>Draft the briefing, then challenge every financial claim against the workbook.</p>
+      <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="draft-cfo-brief--prompt-1" aria-label="Copy prompt: 6. Draft a review-ready CFO summary, exercise 1">Copy prompt</button>
+  </div>
+  <pre id="draft-cfo-brief--prompt-1" tabindex="0"><code>Draft a CFO briefing of at most 180 words for fictional Zava Supply Co., using only the verified workbook outputs. Use four labeled sections: September facts, What remains unknown, Hypothetical October scenario, and Decision requested. State September Actual 50,000 USD, Budget 48,000 USD, and expense variance +2,000 USD only after checking source references. Explain the Logistics movement and CustomerOps offset without inventing causes. Keep the hypothetical October forecast of 53,000 and its +3,000 assumption bridge separate from actuals. Cite table columns or worksheet cells next to numeric claims. Request a human review of assumptions rather than approval of unsupported conclusions. End with a reminder that all data is fictional. Do not send, publish, or claim sign-off.</code></pre>
+</div>
+
+      <p class="expected"><strong>Expected outcome:</strong> A concise draft with source-linked facts, explicit uncertainties, separate assumptions, and a specific review request.</p>
+    </section>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong>
+      <p>Verify every number and reference yourself. A model-generated citation is not proof that the cited cell supports the statement.</p>
+    </aside>
+    <aside class="callout callout-tip" aria-label="Tip">
+      <strong>Tip</strong>
+      <p>If the draft is too long, shorten prose rather than removing limitations or source references.</p>
+    </aside>
+    <section class="self-check" aria-labelledby="draft-cfo-brief--check">
+      <h4 id="draft-cfo-brief--check">Before you move on</h4>
+      <ul>
+        <li><label><input type="checkbox"> <span>Does each financial claim have a checked supporting source?</span></label></li>
+        <li><label><input type="checkbox"> <span>Are hypothetical assumptions separated from closed-period facts?</span></label></li>
+        <li><label><input type="checkbox"> <span>Does the draft request review without claiming approval or sending anything?</span></label></li>
+      </ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+      <section id="capstone" class="card anchor" aria-labelledby="capstone--title">
+        <p class="eyebrow">Bring it together</p>
+        <h2 id="capstone--title">Capstone</h2>
+        <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="capstone--prompt" aria-label="Copy prompt: Capstone">Copy prompt</button>
+  </div>
+  <pre id="capstone--prompt" tabindex="0"><code>Review the fictional Zava CFO briefing as a skeptical finance reviewer. Using only CloseData and OctoberScenario, list any unsupported claim, incorrect sign, missing reference, or mixed-period comparison. For each issue, quote the draft phrase, identify the available evidence or its absence, and propose a correction. If a number cannot be verified from the workbook, mark it unverified rather than filling the gap. Return a short checklist and a revised decision request. Do not approve the close or send the briefing.</code></pre>
+</div>
+
+        <p><strong>Deliverable:</strong> A checked CFO draft plus a short review checklist, completed within the final lab&#39;s 10 minutes.</p>
+        <h3>Debrief</h3>
+        <ul><li>Which output looked plausible until you checked the source?</li><li>Where did you separate a measured movement from an assumption?</li><li>What would a human reviewer need before accepting the planning scenario?</li></ul>
+      </section>
+      <footer class="page-footer">
+        <p>Practice with fictional data only. Review every output before using it.</p>
+        <p>This guide works offline. Linked resources and Copilot itself may require internet access.</p>
+      </footer>
+    </main>
+  </div>
+  <p id="studio--copy-status" class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
+  <script>
+(() => {
+  "use strict";
+  document.body.classList.add("js-ready");
+  const nav = document.getElementById("studio--navigation");
+  const navToggle = document.getElementById("studio--nav-toggle");
+  const links = Array.from(nav.querySelectorAll(".nav-link"));
+  const sections = links.map(link => document.getElementById(link.hash.slice(1)));
+  const details = Array.from(document.querySelectorAll("main details"));
+  const status = document.getElementById("studio--copy-status");
+  let batchToggle = false;
+  let printState = null;
+  let statusTimer;
+
+  function setActive(id) {
+    links.forEach(link => {
+      const active = link.hash === "#" + id;
+      link.classList.toggle("active", active);
+      if (active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+  }
+  function isVisible(section) {
+    let parent = section.parentElement;
+    while (parent) {
+      if (parent.tagName === "DETAILS" && !parent.open) return false;
+      parent = parent.parentElement;
+    }
+    return true;
+  }
+  function updateActive() {
+    const visible = sections.filter(isVisible);
+    const passed = visible.filter(section => section.getBoundingClientRect().top <= innerHeight * 0.3);
+    const current = passed.length ? passed[passed.length - 1] : visible[0];
+    if (current) setActive(current.id);
+  }
+  const observer = new IntersectionObserver(updateActive, {
+    rootMargin: "-5% 0px -65% 0px", threshold: [0, 0.25, 1]
+  });
+  sections.forEach(section => observer.observe(section));
+  let scrollPending = false;
+  addEventListener("scroll", () => {
+    if (!scrollPending) requestAnimationFrame(() => { updateActive(); scrollPending = false; });
+    scrollPending = true;
+  }, { passive: true });
+
+  function reveal(target) {
+    let current = target;
+    while (current) {
+      if (current.tagName === "DETAILS") current.open = true;
+      current = current.parentElement;
+    }
+    target.scrollIntoView({ block: "start" });
+    setActive(target.id);
+  }
+  links.forEach(link => link.addEventListener("click", event => {
+    event.preventDefault();
+    const target = document.getElementById(link.hash.slice(1));
+    nav.classList.remove("is-open");
+    navToggle.setAttribute("aria-expanded", "false");
+    history.replaceState(null, "", link.hash);
+    reveal(target);
+  }));
+  function followHash() {
+    const target = sections.find(section => "#" + section.id === location.hash);
+    if (target) reveal(target);
+  }
+  addEventListener("hashchange", followHash);
+  followHash();
+  details.forEach(detail => detail.addEventListener("toggle", () => {
+    if (!batchToggle && isVisible(detail)) setActive(detail.id);
+  }));
+  navToggle.addEventListener("click", () => {
+    const open = nav.classList.toggle("is-open");
+    navToggle.setAttribute("aria-expanded", String(open));
+  });
+  function toggleAll(open) {
+    batchToggle = true;
+    details.forEach(detail => { detail.open = open; });
+    setTimeout(() => { batchToggle = false; updateActive(); }, 0);
+  }
+  document.getElementById("studio--expand").addEventListener("click", () => toggleAll(true));
+  document.getElementById("studio--collapse").addEventListener("click", () => toggleAll(false));
+  document.getElementById("studio--print").addEventListener("click", () => print());
+  addEventListener("beforeprint", () => {
+    printState = details.map(detail => detail.open);
+    toggleAll(true);
+  });
+  addEventListener("afterprint", () => {
+    if (printState) details.forEach((detail, index) => { detail.open = printState[index]; });
+    printState = null;
+    updateActive();
+  });
+
+  function legacyCopy(text) {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    try {
+      field.select();
+      if (!document.execCommand("copy")) throw new Error("Clipboard unavailable");
+    } finally {
+      field.remove();
+    }
+  }
+  document.querySelectorAll(".copy-button").forEach(button => {
+    button.addEventListener("click", async () => {
+      const prompt = document.getElementById(button.dataset.copyTarget);
+      const text = prompt.textContent;
+      try {
+        if (navigator.clipboard && isSecureContext) {
+          try { await navigator.clipboard.writeText(text); }
+          catch { legacyCopy(text); }
+        } else {
+          legacyCopy(text);
+        }
+        button.textContent = "Copied";
+        status.textContent = "Copied prompt to clipboard.";
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(prompt);
+        const selection = getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        button.textContent = "Select and copy";
+        status.textContent = "Clipboard unavailable. Prompt selected; press Ctrl+C or Command+C.";
+      } finally {
+        button.focus({ preventScroll: true });
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(() => { status.textContent = ""; }, 6000);
+        setTimeout(() => { button.textContent = "Copy prompt"; }, 2500);
+      }
+    });
+  });
+})();
+  </script>
+</body>
+</html>

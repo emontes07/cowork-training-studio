@@ -1,0 +1,136 @@
+(() => {
+  "use strict";
+  document.body.classList.add("js-ready");
+  const nav = document.getElementById("studio--navigation");
+  const navToggle = document.getElementById("studio--nav-toggle");
+  const links = Array.from(nav.querySelectorAll(".nav-link"));
+  const sections = links.map(link => document.getElementById(link.hash.slice(1)));
+  const details = Array.from(document.querySelectorAll("main details"));
+  const status = document.getElementById("studio--copy-status");
+  let batchToggle = false;
+  let printState = null;
+  let statusTimer;
+
+  function setActive(id) {
+    links.forEach(link => {
+      const active = link.hash === "#" + id;
+      link.classList.toggle("active", active);
+      if (active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+  }
+  function isVisible(section) {
+    let parent = section.parentElement;
+    while (parent) {
+      if (parent.tagName === "DETAILS" && !parent.open) return false;
+      parent = parent.parentElement;
+    }
+    return true;
+  }
+  function updateActive() {
+    const visible = sections.filter(isVisible);
+    const passed = visible.filter(section => section.getBoundingClientRect().top <= innerHeight * 0.3);
+    const current = passed.length ? passed[passed.length - 1] : visible[0];
+    if (current) setActive(current.id);
+  }
+  const observer = new IntersectionObserver(updateActive, {
+    rootMargin: "-5% 0px -65% 0px", threshold: [0, 0.25, 1]
+  });
+  sections.forEach(section => observer.observe(section));
+  let scrollPending = false;
+  addEventListener("scroll", () => {
+    if (!scrollPending) requestAnimationFrame(() => { updateActive(); scrollPending = false; });
+    scrollPending = true;
+  }, { passive: true });
+
+  function reveal(target) {
+    let current = target;
+    while (current) {
+      if (current.tagName === "DETAILS") current.open = true;
+      current = current.parentElement;
+    }
+    target.scrollIntoView({ block: "start" });
+    setActive(target.id);
+  }
+  links.forEach(link => link.addEventListener("click", event => {
+    event.preventDefault();
+    const target = document.getElementById(link.hash.slice(1));
+    nav.classList.remove("is-open");
+    navToggle.setAttribute("aria-expanded", "false");
+    history.replaceState(null, "", link.hash);
+    reveal(target);
+  }));
+  function followHash() {
+    const target = sections.find(section => "#" + section.id === location.hash);
+    if (target) reveal(target);
+  }
+  addEventListener("hashchange", followHash);
+  followHash();
+  details.forEach(detail => detail.addEventListener("toggle", () => {
+    if (!batchToggle && isVisible(detail)) setActive(detail.id);
+  }));
+  navToggle.addEventListener("click", () => {
+    const open = nav.classList.toggle("is-open");
+    navToggle.setAttribute("aria-expanded", String(open));
+  });
+  function toggleAll(open) {
+    batchToggle = true;
+    details.forEach(detail => { detail.open = open; });
+    setTimeout(() => { batchToggle = false; updateActive(); }, 0);
+  }
+  document.getElementById("studio--expand").addEventListener("click", () => toggleAll(true));
+  document.getElementById("studio--collapse").addEventListener("click", () => toggleAll(false));
+  document.getElementById("studio--print").addEventListener("click", () => print());
+  addEventListener("beforeprint", () => {
+    printState = details.map(detail => detail.open);
+    toggleAll(true);
+  });
+  addEventListener("afterprint", () => {
+    if (printState) details.forEach((detail, index) => { detail.open = printState[index]; });
+    printState = null;
+    updateActive();
+  });
+
+  function legacyCopy(text) {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    try {
+      field.select();
+      if (!document.execCommand("copy")) throw new Error("Clipboard unavailable");
+    } finally {
+      field.remove();
+    }
+  }
+  document.querySelectorAll(".copy-button").forEach(button => {
+    button.addEventListener("click", async () => {
+      const prompt = document.getElementById(button.dataset.copyTarget);
+      const text = prompt.textContent;
+      try {
+        if (navigator.clipboard && isSecureContext) {
+          try { await navigator.clipboard.writeText(text); }
+          catch { legacyCopy(text); }
+        } else {
+          legacyCopy(text);
+        }
+        button.textContent = "Copied";
+        status.textContent = "Copied prompt to clipboard.";
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(prompt);
+        const selection = getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        button.textContent = "Select and copy";
+        status.textContent = "Clipboard unavailable. Prompt selected; press Ctrl+C or Command+C.";
+      } finally {
+        button.focus({ preventScroll: true });
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(() => { status.textContent = ""; }, 6000);
+        setTimeout(() => { button.textContent = "Copy prompt"; }, 2500);
+      }
+    });
+  });
+})();

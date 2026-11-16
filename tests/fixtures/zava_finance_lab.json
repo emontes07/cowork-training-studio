@@ -1,0 +1,230 @@
+{
+  "title": "Zava Finance: From Close to CFO Summary",
+  "subtitle": "Turn a fictional month-end workbook into a checked variance story and a decision-ready briefing with Copilot in Excel.",
+  "audience": "Finance controllers",
+  "duration_minutes": 60,
+  "skill_level": "intermediate",
+  "products": ["Copilot in Excel", "Microsoft 365 Copilot"],
+  "functional_area": "Finance",
+  "company": {
+    "name": "Zava Supply Co.",
+    "is_fictional": true,
+    "description": "Zava Supply Co. is a wholly fictional distributor preparing its September 2026 close. You are the practice controller: establish the evidence, explain the movement, and hand the fictional CFO a concise summary with visible limitations."
+  },
+  "theme_id": "microsoft",
+  "objectives": [
+    "Create and reconcile an Excel table from a small fictional close dataset.",
+    "Calculate expense variances and distinguish observed movements from unverified causes.",
+    "Build a department-level view and a readable variance chart.",
+    "Compare an explicitly hypothetical forecast with the closed period without mixing assumptions and actuals.",
+    "Draft a CFO summary that cites checked cells, flags uncertainty, and requests a clear decision."
+  ],
+  "prerequisites": [
+    "Access to Excel and Copilot in Excel in an approved practice environment; availability depends on your license and configuration.",
+    "A blank workbook reserved for fictional practice data. The first lab supplies every source row.",
+    "Basic familiarity with Excel tables, formulas, and worksheet navigation.",
+    "Budget 10 minutes per lab. Use the capstone as the final self-check within lab six rather than extra session time."
+  ],
+  "resources": [
+    {
+      "label": "Fictional close dataset",
+      "url": null,
+      "note": "The first prompt contains a six-row tab-separated dataset. No external workbook download or real tenant content is needed."
+    },
+    {
+      "label": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/",
+      "note": "Optional product reference; requires internet. This page itself has no external assets."
+    }
+  ],
+  "ground_rules": [
+    "Use only the supplied fictional Zava data. Do not upload customer workbooks, real employee details, or tenant content.",
+    "Copilot drafts are not accounting evidence: verify formulas, source ranges, totals, signs, and period labels yourself.",
+    "Do not infer business causes from expense movements. Label a cause as a hypothesis until evidence supports it.",
+    "Nothing in this lab is posted, approved, saved, or sent by the Training Studio server. Review any action proposed by Copilot."
+  ],
+  "scenarios": [
+    {
+      "id": "month-end-close",
+      "title": "Close the month with evidence",
+      "story": {
+        "context": "The fictional September close has six expense lines but no reviewed variance commentary. Establish a reliable baseline before drafting explanations.",
+        "stakeholder": "Zava controller and close reviewer",
+        "time_pressure": "The practice close review begins in 30 minutes.",
+        "source_material": "Six invented September expense rows supplied in the first lab; all amounts are fictional USD and expenses use positive signs.",
+        "deliverable": "A reconciled CloseData table, checked variance columns, and a department-level movement summary."
+      },
+      "labs": [
+        {
+          "id": "build-close-table",
+          "title": "1. Build a trustworthy close table",
+          "goal": "Start from a small source you can check without trusting an AI answer.",
+          "minutes": 10,
+          "difficulty": "basic",
+          "source": "The fictional six-row TSV included in this exercise.",
+          "context": "Open a blank practice workbook. If Copilot cannot create a table directly in your version, paste the TSV rows yourself, format them as a table, and name it CloseData before continuing.",
+          "exercises": [
+            {
+              "instruction": "Create the source table and ask Copilot to identify what it can and cannot conclude from it.",
+              "prompt": "We are practicing with wholly fictional Zava Supply Co. data. Create an Excel table named CloseData from the tab-separated rows below on a worksheet named SeptemberClose. Keep the original data unchanged. Amounts are fictional USD expenses, with positive signs. If you cannot create the table, give me exact manual steps instead of claiming you did.\n\nPeriod\tDepartment\tAccount\tActual\tBudget\n2026-09\tProcurement\tMaterials\t12000\t11000\n2026-09\tLogistics\tShipping\t18000\t16000\n2026-09\tCustomerOps\tSupport\t9000\t10000\n2026-09\tLogistics\tFreight\t6000\t5500\n2026-09\tProcurement\tSoftware\t4000\t4000\n2026-09\tCustomerOps\tTraining\t1000\t1500\n\nCheck for six rows, blank fields, repeated Department-plus-Account keys, nonnumeric amounts, and inconsistent periods. Show SUM formulas for Actual and Budget and identify the cells or table columns used. Do not invent transaction details, causes, or additional rows. End with a short list of limitations of this tiny dataset.",
+              "expected_outcome": "Six preserved source rows; independently checked Actual total 50,000 and Budget total 48,000; no invented causes."
+            }
+          ],
+          "callouts": [
+            {"type": "warning", "text": "Verify all six rows and both totals manually before continuing. A convincing summary can still use the wrong range."},
+            {"type": "tip", "text": "Keep source columns unchanged. Put calculations in new columns so a reviewer can trace every result."}
+          ],
+          "self_check": [
+            "Does CloseData contain exactly six rows for 2026-09?",
+            "Do independent SUM formulas show Actual 50,000 and Budget 48,000?",
+            "Did Copilot distinguish missing evidence from actual data problems?"
+          ]
+        },
+        {
+          "id": "calculate-variances",
+          "title": "2. Calculate and verify expense variances",
+          "goal": "Make the sign convention and denominator explicit.",
+          "minutes": 10,
+          "difficulty": "intermediate",
+          "source": "CloseData from lab one.",
+          "context": "For this workshop only, a positive Actual-minus-Budget expense variance is unfavorable. A zero budget needs an explicit not-applicable result, not a division error.",
+          "exercises": [
+            {
+              "instruction": "Add transparent formulas, then check one unfavorable and one favorable line yourself.",
+              "prompt": "Using only the fictional CloseData table, propose and add two calculated columns: VarianceUSD = Actual minus Budget, and VariancePct = VarianceUSD divided by Budget. Use structured references and return \"N/A\" when Budget is zero. Explain that positive expense variances are unfavorable in this exercise. Show the exact formulas before applying them; if editing is unavailable, give the formulas for me to insert. Sort a separate review view by absolute VarianceUSD without changing source row values. Verify Shipping, Support, and the overall variance using source numbers. Do not sum row percentages to calculate the overall percentage: derive it from total Actual and total Budget. Return a compact check table with the formula, source, result, and sign interpretation. No causal explanations yet.",
+              "expected_outcome": "Traceable formulas; Shipping +2,000 unfavorable, Support -1,000 favorable, and aggregate +2,000 on 48,000 budget (about 4.17%)."
+            }
+          ],
+          "callouts": [
+            {"type": "important", "text": "A total percentage must use total variance divided by total budget. Summing percentages produces a misleading result."},
+            {"type": "note", "text": "The sign convention is specific to this fictional expense exercise; do not generalize it to revenue without checking."}
+          ],
+          "self_check": [
+            "Do Shipping and Support have opposite, correctly interpreted signs?",
+            "Is the overall percentage calculated from totals rather than added percentages?",
+            "Does the formula handle a zero budget explicitly?"
+          ]
+        },
+        {
+          "id": "review-department-movement",
+          "title": "3. Build the close review",
+          "goal": "Separate measured movements from questions needing evidence.",
+          "minutes": 10,
+          "difficulty": "intermediate",
+          "source": "CloseData plus the checked variance columns.",
+          "context": "The close reviewer wants a department-level explanation, but this source contains no invoices, staffing data, or operational evidence.",
+          "exercises": [
+            {
+              "instruction": "Create a department summary and a concise evidence-versus-hypothesis commentary.",
+              "prompt": "From the fictional CloseData table, build a PivotTable or formula-based summary by Department with sums of Actual, Budget, and VarianceUSD. Include a grand total that reconciles to the source. Report Procurement, Logistics, and CustomerOps separately. Then write three short review bullets, each with: observed movement, supporting source cells or table references, and a question the fictional reviewer should investigate. Label every proposed cause as an unverified hypothesis. Do not claim that staffing, supplier prices, or invoice timing caused anything; those details are not present. Flag offsetting movements instead of describing the net variance as the whole story. Finish with one reconciliation check that a human can repeat.",
+              "expected_outcome": "Department variances of +1,000, +2,500, and -1,500 respectively; net +2,000; review questions without unsupported causal claims."
+            }
+          ],
+          "callouts": [
+            {"type": "warning", "text": "A department trend does not prove a cause. Keep unsupported explanations out of the close sign-off."},
+            {"type": "instructor", "text": "Ask a learner to reconcile the department summary to the source before discussing the written commentary."}
+          ],
+          "self_check": [
+            "Do the department variances reconcile to +2,000?",
+            "Are observed facts separated from hypotheses and open questions?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfo-summary",
+      "title": "Turn the close into a CFO conversation",
+      "story": {
+        "context": "The close is reconciled. The fictional CFO now needs a compact story and a clearly separated planning scenario, not an unexplained pile of charts.",
+        "stakeholder": "Zava CFO and planning reviewer",
+        "time_pressure": "The practice briefing is due at the end of the next 30 minutes.",
+        "source_material": "Checked September results plus explicitly hypothetical October assumptions supplied in lab four.",
+        "deliverable": "A labeled forecast bridge, a readable variance chart, and an evidence-linked CFO summary for human review."
+      },
+      "labs": [
+        {
+          "id": "model-forecast-bridge",
+          "title": "4. Model an explicit forecast assumption",
+          "goal": "Keep closed actuals and hypothetical planning inputs separate.",
+          "minutes": 10,
+          "difficulty": "intermediate",
+          "source": "September CloseData and the invented October assumptions in this prompt.",
+          "context": "This is a planning exercise, not a prediction. No assumption should overwrite or be presented as a September actual.",
+          "exercises": [
+            {
+              "instruction": "Build an assumption bridge on a new sheet and label its status unmistakably.",
+              "prompt": "Create a separate worksheet named OctoberScenario for wholly fictional Zava Supply Co. planning. Do not modify SeptemberClose or CloseData. Use these explicit hypothetical inputs only: prior October expense forecast 50,000 USD; logistics disruption assumption +2,000 USD; software renewal assumption +1,000 USD. Build a three-step bridge to the revised forecast with visible formulas and a check that the changes reconcile. Label every input as a hypothetical assumption, not a measured September driver. Compare the revised forecast with September actual expenses only as a cross-period reference, not a like-for-like variance. List two pieces of evidence a reviewer would need before adopting these assumptions. Do not invent a probability, confidence interval, supplier, or contract.",
+              "expected_outcome": "A clearly labeled hypothetical 53,000 forecast, a +3,000 assumption bridge, and visible separation from September actuals."
+            }
+          ],
+          "callouts": [
+            {"type": "important", "text": "The October assumptions are invented for learning. They are not approved plans, measured causes, or evidence of any contract."},
+            {"type": "real_world", "text": "In an approved real workflow, a planning reviewer would require authorized supporting evidence. Do not introduce that real evidence into this fictional lab."}
+          ],
+          "self_check": [
+            "Does the bridge reconcile 50,000 + 2,000 + 1,000 to 53,000?",
+            "Are all October inputs marked hypothetical and kept off the September source sheet?"
+          ]
+        },
+        {
+          "id": "chart-close-variance",
+          "title": "5. Make the movement readable",
+          "goal": "Use a simple visual without hiding favorable offsets.",
+          "minutes": 10,
+          "difficulty": "basic",
+          "source": "The reconciled department summary from lab three.",
+          "context": "The CFO needs to see both unfavorable expense movement and favorable offsets. Use labels as well as color.",
+          "exercises": [
+            {
+              "instruction": "Create a readable variance chart and check every plotted value against the review table.",
+              "prompt": "Using only the checked September department summary for fictional Zava Supply Co., create a horizontal bar chart of VarianceUSD by Department. Use a zero baseline, show both positive and negative values, and label the axis \"Expense variance USD: Actual minus Budget\". Title it \"Fictional September 2026 expense variance\". Keep CustomerOps' favorable offset visible. Add numeric data labels so the meaning is not conveyed by color alone. Verify every bar against the source summary and explain the chart's scope in two sentences. Exclude October forecast assumptions; those belong to a different period and evidence category. If you cannot create the chart, provide exact Excel steps and do not claim the chart exists.",
+              "expected_outcome": "Three labeled bars with a zero baseline, correct signs, and no October assumptions mixed into the September chart."
+            }
+          ],
+          "callouts": [
+            {"type": "warning", "text": "Check the chart's selected range, signs, and period. Chart polish does not establish accuracy."},
+            {"type": "stretch", "text": "Explain why a chart showing only absolute values would conceal the favorable CustomerOps offset."}
+          ],
+          "self_check": [
+            "Can a reader identify both the unfavorable Logistics movement and favorable CustomerOps offset?",
+            "Do labels and chart values match the checked source without relying on color?"
+          ]
+        },
+        {
+          "id": "draft-cfo-brief",
+          "title": "6. Draft a review-ready CFO summary",
+          "goal": "Make a concise, sourced briefing with a clear human decision.",
+          "minutes": 10,
+          "difficulty": "advanced",
+          "source": "Checked CloseData totals, department review, chart, and OctoberScenario assumptions.",
+          "context": "Use the final minutes for the capstone below. The briefing is a draft for review, not a close approval or a sent message.",
+          "exercises": [
+            {
+              "instruction": "Draft the briefing, then challenge every financial claim against the workbook.",
+              "prompt": "Draft a CFO briefing of at most 180 words for fictional Zava Supply Co., using only the verified workbook outputs. Use four labeled sections: September facts, What remains unknown, Hypothetical October scenario, and Decision requested. State September Actual 50,000 USD, Budget 48,000 USD, and expense variance +2,000 USD only after checking source references. Explain the Logistics movement and CustomerOps offset without inventing causes. Keep the hypothetical October forecast of 53,000 and its +3,000 assumption bridge separate from actuals. Cite table columns or worksheet cells next to numeric claims. Request a human review of assumptions rather than approval of unsupported conclusions. End with a reminder that all data is fictional. Do not send, publish, or claim sign-off.",
+              "expected_outcome": "A concise draft with source-linked facts, explicit uncertainties, separate assumptions, and a specific review request."
+            }
+          ],
+          "callouts": [
+            {"type": "important", "text": "Verify every number and reference yourself. A model-generated citation is not proof that the cited cell supports the statement."},
+            {"type": "tip", "text": "If the draft is too long, shorten prose rather than removing limitations or source references."}
+          ],
+          "self_check": [
+            "Does each financial claim have a checked supporting source?",
+            "Are hypothetical assumptions separated from closed-period facts?",
+            "Does the draft request review without claiming approval or sending anything?"
+          ]
+        }
+      ]
+    }
+  ],
+  "capstone": {
+    "prompt": "Review the fictional Zava CFO briefing as a skeptical finance reviewer. Using only CloseData and OctoberScenario, list any unsupported claim, incorrect sign, missing reference, or mixed-period comparison. For each issue, quote the draft phrase, identify the available evidence or its absence, and propose a correction. If a number cannot be verified from the workbook, mark it unverified rather than filling the gap. Return a short checklist and a revised decision request. Do not approve the close or send the briefing.",
+    "deliverable": "A checked CFO draft plus a short review checklist, completed within the final lab's 10 minutes.",
+    "debrief_questions": [
+      "Which output looked plausible until you checked the source?",
+      "Where did you separate a measured movement from an assumption?",
+      "What would a human reviewer need before accepting the planning scenario?"
+    ]
+  }
+}

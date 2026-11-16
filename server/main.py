@@ -4,6 +4,7 @@ import fastmcp
 from fastmcp import FastMCP
 
 from studio.tools.formats import list_session_formats
+from studio.tools.rendering import render_lab_page
 from studio.tools.validation import get_lab_spec_schema, validate_lab_spec
 
 # Disable queued work and keep framework bookkeeping in-process, never external.
@@ -13,7 +14,8 @@ mcp = FastMCP(
     auth=None,
     tasks=False,
     instructions=(
-        "Provide consistent training formats for Cowork skills. "
+        "Provide consistent training formats and a spec-first lab pipeline for Cowork skills. "
+        "Call get_lab_spec_schema, draft a LabSpec, validate_lab_spec, then render_lab_page. "
         "Use fictional Zava-style scenarios only; never submit tenant data, "
         "real customer or person names, credentials, or secrets. "
         "Skills write content; Cowork built-ins save and send it."
@@ -22,6 +24,7 @@ mcp = FastMCP(
 mcp.tool(list_session_formats, task=False)
 mcp.tool(get_lab_spec_schema, task=False)
 mcp.tool(validate_lab_spec, task=False)
+mcp.tool(render_lab_page, task=False)
 
 
 def main() -> None:

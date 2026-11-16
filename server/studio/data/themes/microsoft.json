@@ -1,0 +1,17 @@
+{
+  "--brand-primary": "#1f3864",
+  "--brand-secondary": "#2e75b6",
+  "--brand-accent": "#7c3aed",
+  "--surface": "#ffffff",
+  "--bg": "#f4f6fb",
+  "--text": "#17243b",
+  "--muted": "#52627a",
+  "--border": "#d7dfec",
+  "--callout-tip-bg": "#edf8f1",
+  "--callout-warning-bg": "#fff5df",
+  "--callout-important-bg": "#fff0f2",
+  "--callout-note-bg": "#eef5ff",
+  "--callout-instructor-bg": "#f2edff",
+  "--callout-real-world-bg": "#e9f8f6",
+  "--callout-stretch-bg": "#faf0ff"
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ spec.subtitle }}">
+  <title>{{ spec.title }}</title>
+  <style>
+{% include "styles.css.j2" %}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#studio--content">Skip to content</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">{{ spec.company.name }} / {{ spec.functional_area }}</p>
+      <h1>{{ spec.title }}</h1>
+      <p class="subtitle">{{ spec.subtitle }}</p>
+      <ul class="tags" aria-label="Session details">
+        {% for product in spec.products %}<li>{{ product }}</li>{% endfor %}
+        <li>{{ spec.audience }}</li>
+        <li>{{ spec.skill_level | capitalize }}</li>
+        <li>{{ spec.duration_minutes }} minutes</li>
+        <li>{{ stats.lab_count }} hands-on labs</li>
+      </ul>
+    </div>
+  </header>
+  <div class="layout">
+    {% include "navigation.html.j2" %}
+    <main id="studio--content" tabindex="-1">
+      <div class="toolbar" aria-label="Lab controls">
+        <span>{{ stats.scenario_count }} scenarios / {{ stats.prompt_count }} prompts</span>
+        <div>
+          <button type="button" id="studio--expand">Expand all</button>
+          <button type="button" id="studio--collapse">Collapse all</button>
+          <button type="button" id="studio--print">Print guide</button>
+        </div>
+      </div>
+      {% include "overview.html.j2" %}
+      {% for scenario in spec.scenarios %}
+      {% set scenario_number = loop.index %}
+      {% set scenario_open = loop.first %}
+      {% include "scenario.html.j2" %}
+      {% endfor %}
+      {% if spec.capstone %}
+      <section id="capstone" class="card anchor" aria-labelledby="capstone--title">
+        <p class="eyebrow">Bring it together</p>
+        <h2 id="capstone--title">Capstone</h2>
+        {% from "prompt.html.j2" import prompt_block %}
+        {{ prompt_block(spec.capstone.prompt, "capstone--prompt", "Capstone") }}
+        <p><strong>Deliverable:</strong> {{ spec.capstone.deliverable }}</p>
+        <h3>Debrief</h3>
+        <ul>{% for question in spec.capstone.debrief_questions %}<li>{{ question }}</li>{% endfor %}</ul>
+      </section>
+      {% endif %}
+      <footer class="page-footer">
+        <p>Practice with fictional data only. Review every output before using it.</p>
+        <p>This guide works offline. Linked resources and Copilot itself may require internet access.</p>
+      </footer>
+    </main>
+  </div>
+  <p id="studio--copy-status" class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
+  <script>
+{% include "behavior.js.j2" %}
+  </script>
+</body>
+</html>
