@@ -4,6 +4,7 @@ import fastmcp
 from fastmcp import FastMCP
 
 from studio.tools.formats import list_session_formats
+from studio.tools.validation import get_lab_spec_schema, validate_lab_spec
 
 # Disable queued work and keep framework bookkeeping in-process, never external.
 fastmcp.settings.docket.url = "memory://"
@@ -19,6 +20,8 @@ mcp = FastMCP(
     ),
 )
 mcp.tool(list_session_formats, task=False)
+mcp.tool(get_lab_spec_schema, task=False)
+mcp.tool(validate_lab_spec, task=False)
 
 
 def main() -> None:
