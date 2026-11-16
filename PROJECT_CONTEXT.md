@@ -1,0 +1,98 @@
+# Cowork Training Studio
+
+## Purpose
+
+A remote-capable MCP server that helps Microsoft 365 Copilot Cowork users build
+customer training content: HTML lab pages, Word guides, and demo packs. Customer
+training describes the audience, not permission to ingest customer data.
+
+**Skills own judgment, MCP owns consistency.**
+
+Cowork skills write and refine content. The MCP server returns reusable
+templates, schemas, validation results, and rendered HTML as capabilities are
+added. Cowork's own tools save files and send messages; this server never does.
+
+## Current checkpoint: M1
+
+The implemented tool is `list_session_formats`, backed by a bundled JSON catalog:
+`html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
+It returns a JSON list, optionally filtered by an exact ID, and raises an error
+for an unknown ID. The catalog contains skill routing names, not skill packages.
+There is no content generation, validation, rendering, plugin packaging, or
+Azure deployment yet.
+
+The reference implementation is
+[inventory-mcp-copilot](https://github.com/emontes07/inventory-mcp-copilot).
+Its `server/requirements.txt` specifies `fastmcp>=2.0.0`, without an exact pin.
+This scaffold uses Python 3.13 locally and in its container. Authentication is
+explicitly disabled rather than inherited from FastMCP environment settings.
+
+## Runtime decision
+
+Runtime decision: FastMCP 2.14.7, tasks disabled, memory backend; revisit when a
+worker-free FastMCP release supports the fixed MCP SDK.
+
+Both `fastmcp==2.14.7` and `mcp==1.30.0` are pinned. The SDK includes the
+stateless-transport stream-cleanup fix absent from the SDK allowed by FastMCP
+2.13.3. FastMCP 2.14.7 still starts an internal worker, but background tasks
+are explicitly forbidden and its backend is forced to `memory://` in code.
+Normal tool calls are not queued or stored as task results.
+
+"Stateless/no-storage" means no customer or tenant data persisted, no runtime
+disk/database/external storage, and no request data surviving a restart.
+Ephemeral in-process memory, including framework bookkeeping, is acceptable.
+Streamable HTTP uses stateless mode with no persistent MCP session ID, so
+requests can reach different Azure Container Apps replicas without sticky
+sessions. The bundled catalog is static application content, not runtime storage.
+
+## Spec-first design
+
+The M2 workflow will be:
+
+1. A model, guided by a skill, writes **LabSpec JSON** using fictional data.
+2. The server validates the spec and returns actionable validation results.
+3. The skill corrects the spec until it passes.
+4. The server renders deterministic, self-contained HTML from that valid spec.
+5. Cowork uses its built-in tools to save or share the result.
+
+The server is not an autonomous author and does not make editorial or business
+judgments. Validation and rendering must remain separate, testable operations.
+
+## Non-negotiable boundaries
+
+- Stateless: no runtime disk/database/external storage, durable user/session
+  records, generated file storage, or persisted request content. Ephemeral
+  in-process memory is allowed; nothing from requests survives a restart.
+  The packaged format catalog is read-only application data, not customer storage.
+- No tenant data: never submit real documents, mail, calendar content, customer
+  names, person names, credentials, or secrets.
+- Fictional data only: use invented Zava-style brands and generic role labels.
+  Do not disguise real customer or personal data as a fictional scenario.
+- No Microsoft Graph calls, outbound business-service calls, secrets, telemetry,
+  or application authentication.
+- No saving, sending, mailbox/calendar mutation, or tenant access. Cowork owns
+  those actions and their permission boundary.
+- Keep tool functions pure and importable; register them separately in the
+  FastMCP entrypoint. Load static data once, and do not expose mutable shared data.
+- M1 is for local/trusted testing. Public deployment needs an explicit platform
+  access/exposure decision; no production security is implied by this scaffold.
+
+## Roadmap
+
+| Milestone | Scope |
+| --- | --- |
+| M1 | Scaffold, format catalog, `list_session_formats`, tests, container, and documentation. |
+| M2 | LabSpec schema, validation, and `render_lab_page`. |
+| M3 | Themes, blueprints, and a prompt library. |
+| M4 | ThreadScript schema and Azure Container Apps deployment. |
+| M5 | Cowork plugin packaging with [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
+
+## Layout
+
+- [server/](server/): FastMCP entrypoint, pure tools, and packaged static data.
+- [tests/](tests/): direct tool-function tests, without a running server.
+- [infra/](infra/): Azure deployment placeholder and reserved resource names.
+- [docs/architecture.md](docs/architecture.md): boundaries and planned flow.
+- [docs/prompts/](docs/prompts/): reserved for future development prompts.
+
+See [README.md](README.md) for running, inspection, and validation commands.

@@ -1,0 +1,143 @@
+[
+  {
+    "id": "html_lab",
+    "name": "HTML training lab",
+    "description": "A self-contained, GitHub Pages-ready HTML lab guide with a story arc, left navigation, collapsible labs, copyable prompts, and self-checks.",
+    "best_for": [
+      "Hands-on workshops",
+      "Self-paced practice",
+      "Browser-based training with no hosting dependencies"
+    ],
+    "required_inputs": [
+      {
+        "name": "title",
+        "description": "The title of the training session.",
+        "example": "Zava launch planning with Cowork"
+      },
+      {
+        "name": "audience",
+        "description": "Learner roles and starting skill level, without personal details.",
+        "example": "Fictional Zava project coordinators who are new to Cowork"
+      },
+      {
+        "name": "learning_objectives",
+        "description": "Observable tasks learners should be able to complete.",
+        "example": "Draft a launch brief, compare options, and check the draft against requirements"
+      },
+      {
+        "name": "scenario",
+        "description": "A wholly fictional Zava-style business story; never use tenant data.",
+        "example": "Zava is preparing a fictional product launch using invented source documents"
+      },
+      {
+        "name": "duration_minutes",
+        "description": "Total time available for the workshop.",
+        "example": "60"
+      }
+    ],
+    "default_duration_minutes": 60,
+    "produced_by_skill": "html-training-lab"
+  },
+  {
+    "id": "word_guide",
+    "name": "Word training guide",
+    "description": "A .docx training guide plus a one-page quick reference, written by a skill and saved using Cowork's own tools.",
+    "best_for": [
+      "Instructor-led training",
+      "Printable learner handouts",
+      "Reusable step-by-step reference material"
+    ],
+    "required_inputs": [
+      {
+        "name": "topic",
+        "description": "The workflow or capability the guide teaches.",
+        "example": "Turn a fictional Zava project brief into a review-ready plan"
+      },
+      {
+        "name": "audience",
+        "description": "Learner roles and starting skill level, without personal details.",
+        "example": "Fictional Zava operations teams with basic Copilot experience"
+      },
+      {
+        "name": "learning_objectives",
+        "description": "Observable tasks covered by the guide and quick reference.",
+        "example": "Prepare a prompt, review the result, and refine a plan"
+      },
+      {
+        "name": "duration_minutes",
+        "description": "Expected time to work through the guide.",
+        "example": "45"
+      }
+    ],
+    "default_duration_minutes": 45,
+    "produced_by_skill": "training-guide"
+  },
+  {
+    "id": "demo_pack",
+    "name": "Cowork demo pack",
+    "description": "Fictional source documents, seeded email content, and calendar event drafts for a Cowork demo; this server never creates mailbox or calendar items.",
+    "best_for": [
+      "Repeatable product demonstrations",
+      "Scenario-based walkthroughs",
+      "Practice with fictional business context"
+    ],
+    "required_inputs": [
+      {
+        "name": "scenario",
+        "description": "A wholly fictional Zava-style business situation.",
+        "example": "Zava needs to resolve an invented launch-readiness scheduling conflict"
+      },
+      {
+        "name": "demo_goals",
+        "description": "Capabilities the demonstration should make visible.",
+        "example": "Synthesize fictional source documents and draft a follow-up plan"
+      },
+      {
+        "name": "fictional_roles",
+        "description": "Role labels for invented participants; do not provide real person names.",
+        "example": "Zava launch coordinator, Zava reviewer, Zava facilitator"
+      },
+      {
+        "name": "duration_minutes",
+        "description": "Target length of the demonstration.",
+        "example": "20"
+      }
+    ],
+    "default_duration_minutes": 20,
+    "produced_by_skill": "cowork-demo-pack"
+  },
+  {
+    "id": "prompt_a_thon",
+    "name": "Prompt-a-thon",
+    "description": "A facilitated prompt challenge session with timed rounds, fictional scenarios, peer review, and a shared reflection.",
+    "best_for": [
+      "Collaborative prompt practice",
+      "Team learning sessions",
+      "Facilitated comparison of prompting approaches"
+    ],
+    "required_inputs": [
+      {
+        "name": "audience",
+        "description": "Participant roles and experience level, without personal details.",
+        "example": "Fictional Zava teams with mixed Copilot experience"
+      },
+      {
+        "name": "challenge_theme",
+        "description": "A fictional Zava-style workflow to explore in challenge rounds.",
+        "example": "Improve an invented Zava workshop plan"
+      },
+      {
+        "name": "success_criteria",
+        "description": "How participants should evaluate and discuss prompt results.",
+        "example": "Clear instructions, grounded fictional details, and actionable next steps"
+      },
+      {
+        "name": "duration_minutes",
+        "description": "Total session time, including the final reflection.",
+        "example": "90"
+      }
+    ],
+    "default_duration_minutes": 90,
+    "produced_by_skill": null
+  }
+]
