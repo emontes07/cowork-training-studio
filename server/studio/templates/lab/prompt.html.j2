@@ -1,0 +1,9 @@
+{% macro prompt_block(text, identifier, label) %}
+<div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Paste-ready prompt</span>
+    <button class="copy-button" type="button" data-copy-target="{{ identifier }}" aria-label="Copy prompt: {{ label }}">Copy prompt</button>
+  </div>
+  <pre id="{{ identifier }}" tabindex="0"><code>{{ text }}</code></pre>
+</div>
+{% endmacro %}

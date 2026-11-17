@@ -1,0 +1,17 @@
+<aside class="sidebar">
+  <button type="button" id="studio--nav-toggle" aria-expanded="false" aria-controls="studio--navigation">
+    Session navigation
+  </button>
+  <nav id="studio--navigation" aria-label="Session navigation">
+    <p class="nav-title">Your lab journey</p>
+    <a class="nav-link active" aria-current="location" href="#overview">Overview</a>
+    <a class="nav-link" href="#setup">Setup</a>
+    {% for scenario in spec.scenarios %}
+    <a class="nav-link scenario-link" href="#{{ scenario.id }}">{{ loop.index }}. {{ scenario.title }}</a>
+    {% for lab in scenario.labs %}
+    <a class="nav-link lab-link" href="#{{ lab.id }}">{{ lab.title }} <span>{{ lab.minutes }}m</span></a>
+    {% endfor %}
+    {% endfor %}
+    {% if spec.capstone %}<a class="nav-link" href="#capstone">Capstone</a>{% endif %}
+  </nav>
+</aside>
