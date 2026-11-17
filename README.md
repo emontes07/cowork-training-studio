@@ -152,6 +152,21 @@ more than 25% away from session duration. Short prompts, missing risk callouts,
 and the real-brand denylist remain quality warnings. Numeric rules also detect
 digits. These heuristics do not detect or anonymize customer data.
 
+The nonblocking `learner_voice` warning flags system wording using the single
+`_LEARNER_VOICE_TERMS` constant in [validation.py](server/studio/tools/validation.py):
+`MCP server`, `consume ` (with a trailing space), `tenant path`, `do not claim`,
+`if supplied`, `JSON`, and `schema`. Matching is literal and case-insensitive,
+with one warning per field/term; each warning reports the field path and term,
+not the full input text.
+Checks cover narrative and through-line text, setup instructions and mode
+descriptions, chapter titles/story fields, step titles/goals/uses/intros,
+prompt labels/text, challenges, expected results, fallbacks, carry-forward
+notes, self-checks, and callout text. File filenames and purposes are checked
+once at their source paths, including when reused in checkpoint callouts;
+chapter titles also appear in the Files table. IDs, URL targets, troubleshooting
+and glossary entries are not scanned. Put technical facilitator guidance in
+troubleshooting rather than learner prompts.
+
 ### Files are metadata, not generated assets
 
 Each file has a globally unique ID, a relative `filename`, kind, purpose, and
@@ -189,14 +204,18 @@ Open [the rendered Zava story lab](examples/zava-story-lab.html) in a browser.
 It is generated from [the fictional fixture](tests/fixtures/zava_story_lab.json):
 Zava Outdoor's Summit Packs QBR, five chapters, ten steps, twenty prompts, one
 prompt-free challenge, and 90 minutes. Every step after chapter one explicitly
-consumes an earlier output. The QBR Story sheet carries evidence into PowerPoint,
-then into a saved prompt, a reusable skill draft, and a prior-quarter replay.
+uses an earlier output. The QBR Story sheet carries evidence into PowerPoint,
+then into a saved prompt, the personal Cowork skill `summit-qbr-review`, and a
+prior-quarter replay. M3b shortens the prompts into learner voice while retaining
+the original fictional data, named inputs, checkpoints and numerical checks.
 
 All ten file entries omit `href`: workbook/checkpoint/answer-key assets are
 **not bundled**. The first prompt contains the complete fictional source TSV
 for manual setup; a facilitator or Cowork skill must provide checkpoint states.
-The final chapter includes manual replay checks without claiming an automated
-skill run or installation.
+In the final chapter, learners review the skill draft, approve saving it in
+Cowork, invoke it by name on FY28-Q1, and compare the results with the key facts.
+If personal skill creation is unavailable, they save and reuse the prompt
+manually instead. This is a learner activity, not a skill installed by the server.
 
 The golden-page regression test enforces **400 KB = 400,000 UTF-8 bytes** and
 prints the measured size even under `pytest -q`. It also records the size in

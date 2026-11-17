@@ -12,7 +12,7 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M3a
+## Current checkpoint: M3b
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
@@ -25,6 +25,9 @@ mode-labeled prompts, hidden challenges, and reference sections. Version 1
 is intentionally unsupported. Pydantic v2 provides strict contracts; validation
 is deterministic and Jinja templates autoescape all spec text.
 Rendering returns a single offline-capable HTML page, never a saved file.
+M3b adds warning-only learner-voice lint, correct summary plurals, and a shorter,
+learner-facing golden sample ending in a personal Cowork skill creation/reuse
+activity. Skill creation stays in Cowork, with a saved-prompt fallback.
 There is no autonomous content generation, plugin packaging, or Azure deployment.
 
 The reference implementation is
@@ -95,7 +98,9 @@ judgments. Validation and rendering must remain separate, testable operations.
 - The original golden story is a 90-minute Zava Outdoor / Summit Packs QBR:
   five chapters, ten steps, twenty prompts, one challenge, and three checkpoint
   entries. Every later step consumes an earlier output. The final chapter saves
-  a prompt, drafts reusable skill instructions, and tests a prior-quarter replay.
+  a prompt, asks Cowork to create the personal `summit-qbr-review` skill, approves
+  saving it after review, and invokes it on a prior quarter. If skill creation
+  is unavailable, the learner reuses the saved prompt manually.
 - The rendered sample is developer-generated, never saved by the MCP server.
   The HTML budget is 400,000 UTF-8 bytes; the regression test prints the actual
   measurement. M3a deliberately does not optimize the page size.
@@ -128,6 +133,7 @@ judgments. Validation and rendering must remain separate, testable operations.
 | M1 | Scaffold, format catalog, `list_session_formats`, tests, container, and documentation. |
 | M2 | Implemented: LabSpec schema, validation, `render_lab_page`, and fictional golden sample. |
 | M3a | Implemented: LabSpec 2.0 story model, narrative renderer, and original connected QBR sample. |
+| M3b | Implemented: learner-voice sample, personal Cowork skill activity, voice lint, and summary plurals. |
 | M3 remaining | Themes, blueprints, and a prompt library. |
 | M4 | ThreadScript schema and Azure Container Apps deployment. |
 | M5 | Cowork plugin packaging with [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |

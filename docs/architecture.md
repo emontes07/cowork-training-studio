@@ -76,7 +76,12 @@ Stats contain `chapter_count`, `step_count`, `prompt_count`, `challenge_count`,
 warnings use a strict greater-than-25% threshold. Other warnings cover thin or
 isolated chapters, absent carry-forward steps, numerical prompts without expected
 key facts, missing late-session checkpoints, unused checkpoint/answer-key entries,
-short prompts, risk callouts, and the brand denylist. Quality rules are authoring
+short prompts, risk callouts, the brand denylist, and learner-facing system
+vocabulary. The voice lint reports a field path and matched term without
+blocking rendering; it includes file names/purposes used in the Files table
+and checkpoint callouts. Its scope and literal case-insensitive vocabulary
+are documented in [README.md](../README.md#spec-first-lab-pipeline).
+Quality rules are authoring
 aids, not proof that a spec is safe or contains no tenant data.
 
 [Rendering](../server/studio/tools/rendering.py) validates first, selects a bundled
@@ -104,11 +109,14 @@ telemetry is used.
 The public
 [finance guide](https://emontes07.github.io/Learning/Instructions/Demos/29-Zava%20Finance.html)
 and [close-to-deck guide](https://emontes07.github.io/Learning/Instructions/Demos/31-Zava%20Finance.html)
-were structural references only: chapter continuity, a running artifact,
-checkpoints, mode labels, challenge answers, and reference tables.
+were structure and tone references only: chapter continuity, a running artifact,
+checkpoints, mode labels, challenge answers, reference tables, and learner voice.
 Templates, fictional figures, and fixture content are original, not copied from
 those guides. The M3a golden example contains no workbook assets; Cowork skills
 or a facilitator must create and provide them separately.
+M3b's final activity asks learners to review and save a personal Cowork skill,
+then invoke it by name; the server does not create, install, or execute that
+skill. A saved-prompt fallback covers environments without skill creation.
 
 ## Runtime
 
