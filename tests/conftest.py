@@ -9,53 +9,53 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "server"))
 @pytest.fixture
 def minimal_spec():
     return {
-        "title": "Zava practice lab",
-        "subtitle": "A fictional planning workshop",
+        "schema_version": "2.0",
+        "title": "Zava practice story",
+        "subtitle": "A connected fictional planning workshop",
         "audience": "Zava facilitators",
         "duration_minutes": 40,
         "skill_level": "basic",
         "products": ["Copilot"],
         "functional_area": "Planning",
-        "company": {
-            "name": "Zava", "is_fictional": True,
-            "description": "An invented training organization",
+        "company": {"name": "Zava", "is_fictional": True, "description": "An invented training organization"},
+        "narrative": {
+            "role": "Workshop facilitator", "situation": "An unfinished workshop plan",
+            "trigger": "A practice review request", "deadline": "Before the next practice session",
+            "leave_with": ["A draft plan", "A review checklist", "A reusable prompt"],
         },
-        "objectives": ["Draft a plan", "Review the evidence", "Refine the result"],
-        "prerequisites": [],
-        "resources": [],
-        "ground_rules": ["Use only fictional content."],
-        "scenarios": [
+        "through_line": {"name": "Story sheet", "location": "Practice workbook", "description": "A running decision record"},
+        "files": [],
+        "setup": {
+            "steps": ["Open a blank practice workbook."],
+            "ground_rules": ["Use only fictional content."],
+            "modes": [{"name": "Chat", "description": "Discuss and review the draft."}],
+        },
+        "chapters": [
             {
-                "id": f"scenario-{scenario}",
-                "title": f"Scenario {scenario}",
-                "story": {
-                    "context": "Zava needs a workshop plan.",
-                    "stakeholder": "Zava facilitator",
-                    "time_pressure": "Before the next practice session",
-                    "source_material": "An invented workshop brief",
-                    "deliverable": "A draft agenda",
-                },
-                "labs": [
+                "id": f"chapter-{chapter}", "title": f"Chapter {chapter}", "minutes": 20,
+                "format": "guided", "story_so_far": "The fictional workshop plan needs a review.",
+                "builds_on": [] if chapter == 1 else ["chapter-1"],
+                "you_will_add": "A checked planning decision",
+                "steps": [
                     {
-                        "id": f"lab-{scenario}-{lab}",
-                        "title": f"Practice {lab}",
-                        "goal": "Create a reviewable draft.",
-                        "minutes": 10,
-                        "difficulty": "basic",
-                        "source": "Fictional workshop brief",
-                        "context": "Work in a new draft, without real organization data.",
-                        "exercises": [{
-                            "instruction": "Draft the agenda.",
-                            "prompt": "Using the fictional Zava brief, draft a workshop agenda with three stages and one review question per stage. Do not invent missing facts.",
-                            "expected_outcome": "A three-stage agenda with review questions.",
+                        "id": f"step-{chapter}-{step}", "title": f"Practice step {step}",
+                        "minutes": 10, "goal": "Create a reviewable draft.",
+                        "uses": "The current Story sheet", "level": "basic",
+                        "intro": "Build on the earlier draft using only fictional content.",
+                        "prompts": [{
+                            "label": "Refine the draft", "mode": "chat",
+                            "text": "Using the fictional Zava brief and the current Story sheet, refine the workshop agenda and explain your changes. Do not invent missing facts.",
                         }],
-                        "callouts": [],
-                        "self_check": ["Are the three stages present?", "Can each question be answered?"],
+                        "expected": {"summary": "A traceable agenda revision", "key_facts": []},
+                        "carries_forward": "Add the checked decision to the Story sheet.",
+                        "callouts": [], "self_check": ["Is the revision grounded?", "Can a reviewer follow it?"],
                     }
-                    for lab in range(1, 3)
+                    for step in range(1, 3)
                 ],
             }
-            for scenario in range(1, 3)
+            for chapter in range(1, 3)
         ],
-        "capstone": None,
+        "troubleshooting": [{"problem": "Editing is unavailable", "fix": "Paste the reviewed content manually."}],
+        "glossary": [{"term": "Through-line", "definition": "The artifact carried across chapters."}],
+        "disclaimer": "Fictional practice only. Review every output.",
     }
