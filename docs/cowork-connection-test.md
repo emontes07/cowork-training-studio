@@ -40,7 +40,7 @@ Do not share login output or access tokens.
 
 ## Endpoint and remote smoke
 
-Connect Cowork using the Streamable HTTP endpoint:
+The plugin connector uses the Streamable HTTP endpoint
 `https://<tunnel-host>/mcp/`. The preserved headers keep redirects on the public
 host instead of `localhost`. No `ALLOWED_HOSTS` change was needed in this test;
 server host/origin settings remain unchanged.
@@ -53,6 +53,30 @@ Pass: initialize has no session ID, all four tools are available, the golden
 spec has zero errors/warnings, and rendered HTML matches the committed example
 byte-for-byte. The client prints render round-trip time and actual downloaded
 HTTP-body bytes (MCP/SSE included; headers/TLS excluded), not a JSON-size estimate.
+
+## Plugin package
+
+Cowork connects through an uploaded plugin package, not a manual MCP connection.
+In the existing server virtual environment, install the separate, pinned
+[build-only requirements](../requirements-build.txt), then build:
+
+```sh
+.venv/bin/python -m pip install -r requirements-build.txt
+.venv/bin/python -m scripts.build_plugin --mcp-url 'https://<tunnel-host>/mcp/'
+```
+
+The ZIP lands at `dist/cowork-training-studio-0.1.0.zip`; `--out <directory>`
+changes the output directory. The script prints its SHA-256 and root-level file
+list, exports the live server's four tool descriptions/schemas, and generates
+the original TS icons with Pillow. No tool catalog is hand-written.
+The source template uses a fixed app ID and contains only a URL placeholder.
+`dist/` is ignored; keep custom output directories out of Git too.
+
+Upload in Cowork plugin settings. **Rebuild when the server URL changes**;
+packages built with an expired tunnel will not connect. Package validation does
+not prove tenant upload permission or successful Cowork execution.
+The manifest uses `/mcp/`; the current server redirects it to `/mcp`, which the
+build client follows. No server routing change is made.
 
 ## Cowork checklist
 
