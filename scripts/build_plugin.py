@@ -2,13 +2,14 @@
 
 import argparse
 import asyncio
+from copy import deepcopy
 import hashlib
 import io
 import json
 from pathlib import Path, PurePosixPath
 import re
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 from fastmcp import Client
@@ -23,6 +24,90 @@ ROOT = Path(__file__).resolve().parents[1]
 PLACEHOLDER = "{{MCP_SERVER_URL}}"
 TOOL_FIELDS = {"name", "description", "inputSchema", "outputSchema", "annotations"}
 EXPECTED_TOOLS = {"list_session_formats", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
+# Only schema locations are traversed; property names and literal values stay intact.
+SCHEMA_MAP_KEYS = {"properties", "patternProperties", "dependentSchemas"}
+SCHEMA_LIST_KEYS = {"allOf", "anyOf", "oneOf", "prefixItems"}
+SCHEMA_CHILD_KEYS = {
+    "items", "additionalItems", "additionalProperties", "contains", "propertyNames",
+    "not", "if", "then", "else", "unevaluatedItems", "unevaluatedProperties", "contentSchema",
+}
+SCHEMA_VALUE_KEYS = {
+    "type", "enum", "const", "description", "default", "examples", "format",
+    "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
+    "minLength", "maxLength", "pattern", "minItems", "maxItems", "uniqueItems",
+    "minContains", "maxContains", "minProperties", "maxProperties", "required",
+    "dependentRequired", "readOnly", "writeOnly", "deprecated", "contentEncoding", "contentMediaType",
+}
+
+
+def sanitize_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    """Inline local JSON pointers and retain standard, non-title schema keywords."""
+    validator_for(schema).check_schema(schema)
+
+    def walk(node: Any, references: tuple[str, ...] = ()) -> Any:
+        if isinstance(node, bool):
+            return node
+        if not isinstance(node, dict):
+            raise ValueError("A schema reference must resolve to an object or boolean.")
+        if "$ref" in node:
+            reference = node["$ref"]
+            if not isinstance(reference, str) or not reference.startswith("#/"):
+                raise ValueError(f"Only local JSON pointer references are supported: {reference!r}")
+            if reference in references:
+                raise ValueError(f"Cyclic schema reference: {reference}")
+            target: Any = schema
+            for part in unquote(reference[2:]).split("/"):
+                key = part.replace("~1", "/").replace("~0", "~")
+                if isinstance(target, dict) and key in target:
+                    target = target[key]
+                elif isinstance(target, list) and key.isdecimal() and int(key) < len(target):
+                    target = target[int(key)]
+                else:
+                    raise ValueError(f"Unresolved schema reference: {reference}")
+            resolved = walk(target, (*references, reference))
+            siblings = walk({key: value for key, value in node.items() if key != "$ref"}, references)
+            return {"allOf": [resolved, siblings]} if siblings else resolved
+        result = {}
+        for key, value in node.items():
+            if key in SCHEMA_MAP_KEYS:
+                result[key] = {name: walk(child, references) for name, child in value.items()}
+            elif key in SCHEMA_LIST_KEYS:
+                result[key] = [walk(child, references) for child in value]
+            elif key in SCHEMA_CHILD_KEYS:
+                result[key] = (
+                    [walk(child, references) for child in value]
+                    if isinstance(value, list) else walk(value, references)
+                )
+            elif key == "dependencies":
+                result[key] = {
+                    name: deepcopy(child) if isinstance(child, list) else walk(child, references)
+                    for name, child in value.items()
+                }
+            elif key in SCHEMA_VALUE_KEYS:
+                result[key] = deepcopy(value)
+        return result
+
+    result = walk(schema)
+    if not isinstance(result, dict):
+        raise ValueError("A tool schema must resolve to an object.")
+    validator_for(result).check_schema(result)
+    return result
+
+
+def sanitize_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    result = deepcopy(tools)
+    for tool in result:
+        tool["inputSchema"] = sanitize_schema(tool["inputSchema"])
+        tool["outputSchema"] = {"type": "object", "additionalProperties": True}
+        if tool["name"] in {"validate_lab_spec", "render_lab_page"}:
+            properties = tool["inputSchema"].get("properties", {})
+            if "spec" not in properties:
+                raise ValueError(f"{tool['name']} is missing its spec parameter.")
+            properties["spec"] = {
+                "type": "object", "additionalProperties": True,
+                "description": "Call get_lab_spec_schema first and follow it",
+            }
+    return result
 
 
 def normalize_mcp_url(value: str) -> str:
@@ -39,7 +124,7 @@ def normalize_mcp_url(value: str) -> str:
     path = parts.path.rstrip("/")
     if not path.endswith("/mcp"):
         path += "/mcp"
-    result = urlunsplit((parts.scheme, parts.netloc, path + "/", "", ""))
+    result = urlunsplit((parts.scheme, parts.netloc, path, "", ""))
     if len(result) > 2048:
         raise ValueError("MCP URL exceeds the Teams 2048-character limit.")
     return result
@@ -119,7 +204,7 @@ def validate_package(files: dict[str, bytes]) -> dict[str, Any]:
         bounded_text(connector.get(field), f"agentConnectors.{field}", limit)
     remote = connector["toolSource"]["remoteMcpServer"]
     if normalize_mcp_url(remote["mcpServerUrl"]) != remote["mcpServerUrl"]:
-        raise ValueError("Manifest MCP URL must end in /mcp/.")
+        raise ValueError("Manifest MCP URL must end in /mcp without a trailing slash.")
     if remote["authorization"] != {"type": "None"}:
         raise ValueError("This demo connector uses authorization None.")
     if remote["mcpToolDescription"] != {"file": "mcp-tools.json"}:
@@ -193,10 +278,13 @@ async def fetch_tools(url: str) -> list[dict[str, Any]]:
     ]
 
 
-async def build_plugin(mcp_url: str, out: Path, source: Path = ROOT / "plugin") -> Path:
+async def build_plugin(
+    mcp_url: str, out: Path, source: Path = ROOT / "plugin", *, raw_schemas: bool = False,
+) -> Path:
     url = normalize_mcp_url(mcp_url)
     manifest = fill_manifest((source / "manifest.template.json").read_text(encoding="utf-8"), url)
-    catalog = {"tools": await fetch_tools(url)}
+    tools = await fetch_tools(url)
+    catalog = {"tools": tools if raw_schemas else sanitize_tools(tools)}
     files = {
         "manifest.json": (json.dumps(manifest, indent=2) + "\n").encode("utf-8"),
         "mcp-tools.json": (json.dumps(catalog, indent=2) + "\n").encode("utf-8"),
@@ -231,8 +319,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mcp-url", required=True, help="HTTPS MCP endpoint or server base URL")
     parser.add_argument("--out", type=Path, default=Path("dist"), help="Output directory (default: dist/)")
+    parser.add_argument(
+        "--raw-schemas", action="store_true",
+        help="Keep the live schemas unchanged for comparison (use a separate --out directory)",
+    )
     args = parser.parse_args()
-    archive = asyncio.run(build_plugin(args.mcp_url, args.out))
+    archive = asyncio.run(build_plugin(args.mcp_url, args.out, raw_schemas=args.raw_schemas))
     print(f"ZIP: {archive.resolve()}")
     print(f"Bytes: {archive.stat().st_size:,}")
     print(f"SHA-256: {hashlib.sha256(archive.read_bytes()).hexdigest()}")

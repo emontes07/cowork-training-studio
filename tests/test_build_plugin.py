@@ -6,6 +6,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 from mcp.types import Tool
+from jsonschema import Draft202012Validator
 from PIL import Image
 import pytest
 
@@ -19,7 +20,11 @@ SKILL = "skills/build-training-lab/SKILL.md"
 def tools():
     return [{
         "name": name, "description": f"Fictional test description for {name}.",
-        "inputSchema": {"type": "object"}, "outputSchema": {"type": "object"},
+        "inputSchema": {
+            "type": "object",
+            "properties": {"spec": {"type": "object"}} if name in {"validate_lab_spec", "render_lab_page"} else {},
+        },
+        "outputSchema": {"type": "object", "x-test": True},
         "annotations": {"readOnlyHint": True},
     } for name in sorted(builder.EXPECTED_TOOLS)]
 
@@ -37,11 +42,11 @@ def package_files(tools):
 
 
 @pytest.mark.parametrize(("url", "expected"), [
-    ("https://mcp.example.test", "https://mcp.example.test/mcp/"),
-    ("https://mcp.example.test/", "https://mcp.example.test/mcp/"),
-    ("https://mcp.example.test/mcp", "https://mcp.example.test/mcp/"),
-    ("https://mcp.example.test/mcp/", "https://mcp.example.test/mcp/"),
-    ("https://mcp.example.test:8443/api", "https://mcp.example.test:8443/api/mcp/"),
+    ("https://mcp.example.test", "https://mcp.example.test/mcp"),
+    ("https://mcp.example.test/", "https://mcp.example.test/mcp"),
+    ("https://mcp.example.test/mcp", "https://mcp.example.test/mcp"),
+    ("https://mcp.example.test/mcp/", "https://mcp.example.test/mcp"),
+    ("https://mcp.example.test:8443/api", "https://mcp.example.test:8443/api/mcp"),
 ])
 def test_normalize_mcp_url(url, expected):
     assert builder.normalize_mcp_url(url) == expected
@@ -62,7 +67,7 @@ def test_template_fill_preserves_source_and_fixed_id():
     template = (SOURCE / "manifest.template.json").read_text(encoding="utf-8")
     result = builder.fill_manifest(template, "https://mcp.example.test")
     remote = result["agentConnectors"][0]["toolSource"]["remoteMcpServer"]
-    assert remote["mcpServerUrl"] == "https://mcp.example.test/mcp/"
+    assert remote["mcpServerUrl"] == "https://mcp.example.test/mcp"
     assert remote["authorization"] == {"type": "None"}
     assert result["id"] == json.loads(template)["id"]
     assert builder.PLACEHOLDER in (SOURCE / "manifest.template.json").read_text(encoding="utf-8")
@@ -169,7 +174,8 @@ def test_live_tool_projection_uses_response_metadata(monkeypatch, tools):
     assert asyncio.run(builder.fetch_tools("https://mcp.example.test/mcp/")) == tools
 
 
-def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools):
+@pytest.mark.parametrize("raw_schemas", [False, True])
+def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools, raw_schemas):
     calls = []
 
     async def fetch(url):
@@ -178,15 +184,87 @@ def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools):
 
     monkeypatch.setattr(builder, "fetch_tools", fetch)
     out = tmp_path / "dist"
-    archive_path = asyncio.run(builder.build_plugin("https://mcp.example.test", out))
+    archive_path = asyncio.run(builder.build_plugin("https://mcp.example.test", out, raw_schemas=raw_schemas))
     with ZipFile(archive_path) as archive:
         assert set(archive.namelist()) == {"manifest.json", "mcp-tools.json", "color.png", "outline.png", SKILL}
-        assert json.loads(archive.read("mcp-tools.json")) == {"tools": tools}
+        assert json.loads(archive.read("mcp-tools.json")) == {
+            "tools": tools if raw_schemas else builder.sanitize_tools(tools),
+        }
         files = {name: archive.read(name) for name in archive.namelist()}
         assert all(content == (out / name).read_bytes() for name, content in files.items())
         builder.validate_package(files)
-    assert calls == ["https://mcp.example.test/mcp/"]
-    assert archive_path.name == "cowork-training-studio-0.1.0.zip"
+    assert calls == ["https://mcp.example.test/mcp"]
+    assert archive_path.name == "cowork-training-studio-0.1.1.zip"
+
+
+def test_sanitizer_resolves_nested_refs_and_preserves_constraints():
+    schema = {
+        "$defs": {
+            "a/b": {"type": "string", "minLength": 2, "title": "Noise", "x-extra": True},
+            "entry": {"$ref": "#/$defs/a~1b", "maxLength": 4},
+        },
+        "type": "object", "title": "Noise", "invented": True,
+        "properties": {
+            "value": {"$ref": "#/$defs/entry"},
+            "values": {"type": "array", "items": {"$ref": "#/$defs/a~1b"}},
+        },
+        "required": ["value"],
+    }
+    original = deepcopy(schema)
+    cleaned = builder.sanitize_schema(schema)
+    Draft202012Validator.check_schema(cleaned)
+    encoded = json.dumps(cleaned)
+    for term in ('"$ref"', '"$defs"', '"title"', '"x-', '"invented"'):
+        assert term not in encoded
+    validator = Draft202012Validator(cleaned)
+    assert validator.is_valid({"value": "abc", "values": ["ok"]})
+    for invalid in ({}, {"value": "x"}, {"value": "abcde"}, {"value": "ok", "values": ["x"]}):
+        assert not validator.is_valid(invalid)
+    assert schema == original
+
+
+def test_sanitizer_keeps_property_names_and_literal_objects():
+    schema = {
+        "type": "object",
+        "properties": {
+            "title": {"type": "string", "title": "Noise"},
+            "x-label": {"enum": [{"title": "literal", "x-data": True}]},
+        },
+        "additionalProperties": False,
+    }
+    result = builder.sanitize_schema(schema)
+    assert result["properties"]["title"] == {"type": "string"}
+    assert result["properties"]["x-label"] == schema["properties"]["x-label"]
+    assert result["additionalProperties"] is False
+
+
+@pytest.mark.parametrize(("reference", "definitions", "message"), [
+    ("https://example.test/schema", {}, "Only local"),
+    ("#/$defs/missing", {}, "Unresolved"),
+    ("#/$defs/loop", {"loop": {"$ref": "#/$defs/loop"}}, "Cyclic"),
+])
+def test_sanitizer_rejects_unresolvable_references(reference, definitions, message):
+    with pytest.raises(ValueError, match=message):
+        builder.sanitize_schema({"$defs": definitions, "$ref": reference})
+
+
+def test_tool_sanitizer_keeps_metadata_and_simplifies_spec_and_outputs(tools):
+    original = deepcopy(tools)
+    result = builder.sanitize_tools(tools)
+    assert len(result) == 4
+    assert tools == original
+    for before, after in zip(tools, result):
+        for field in ("name", "description", "annotations"):
+            assert after[field] == before[field]
+        assert after["outputSchema"] == {"type": "object", "additionalProperties": True}
+        for field in ("inputSchema", "outputSchema"):
+            Draft202012Validator.check_schema(after[field])
+            assert not any(term in json.dumps(after[field]) for term in ('"$ref"', '"$defs"', '"x-'))
+        if after["name"] in {"validate_lab_spec", "render_lab_page"}:
+            assert after["inputSchema"]["properties"]["spec"] == {
+                "type": "object", "additionalProperties": True,
+                "description": "Call get_lab_spec_schema first and follow it",
+            }
 
 
 def test_failed_discovery_does_not_create_package(monkeypatch, tmp_path):
