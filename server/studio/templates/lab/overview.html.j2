@@ -1,32 +1,34 @@
 <section id="overview" class="card anchor" aria-labelledby="overview--title">
-  <p class="eyebrow">Start here</p>
+  <p class="eyebrow">Step into the story</p>
   <h2 id="overview--title">Overview</h2>
   <p>{{ spec.company.description }}</p>
   {% if spec.company.is_fictional %}<p class="fictional-badge">Fictional practice company</p>{% endif %}
-  <h3>What you will learn</h3>
-  <ol class="objectives">{% for objective in spec.objectives %}<li>{{ objective }}</li>{% endfor %}</ol>
-  <p class="muted">Open a lab, follow its exercises, copy the prompts, and use the self-checks before moving on.</p>
+  <dl class="story">
+    <div><dt>Your role</dt><dd>{{ spec.narrative.role }}</dd></div>
+    <div><dt>Situation</dt><dd>{{ spec.narrative.situation }}</dd></div>
+    <div><dt>Trigger</dt><dd>{{ spec.narrative.trigger }}</dd></div>
+    <div><dt>Deadline</dt><dd>{{ spec.narrative.deadline }}</dd></div>
+  </dl>
+  {% if spec.through_line %}
+  <aside class="callout callout-note through-line">
+    <strong>Keep your work together: {{ spec.through_line.name }}</strong>
+    <p><b>Where:</b> {{ spec.through_line.location }}</p>
+    <p>{{ spec.through_line.description }}</p>
+  </aside>
+  {% endif %}
 </section>
 <section id="setup" class="card anchor" aria-labelledby="setup--title">
   <p class="eyebrow">Prepare your workspace</p>
   <h2 id="setup--title">Setup</h2>
-  {% if spec.prerequisites %}
-  <h3>Prerequisites</h3>
-  <ul>{% for prerequisite in spec.prerequisites %}<li>{{ prerequisite }}</li>{% endfor %}</ul>
+  <ol>{% for step in spec.setup.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+  {% if spec.setup.modes %}
+  <h3>Choose the right mode</h3>
+  <dl class="story">
+    {% for mode in spec.setup.modes %}<div><dt>{{ mode.name }}</dt><dd>{{ mode.description }}</dd></div>{% endfor %}
+  </dl>
   {% endif %}
-  {% if spec.resources %}
-  <h3>Resources</h3>
-  <ul class="resources">
-    {% for resource in spec.resources %}
-    <li>
-      {% if resource.url %}<a href="{{ resource.url }}">{{ resource.label }}</a>{% else %}<strong>{{ resource.label }}</strong>{% endif %}
-      {% if resource.note %}<p>{{ resource.note }}</p>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  {% if spec.ground_rules %}
+  {% if spec.setup.ground_rules %}
   <h3>Ground rules</h3>
-  <ul>{% for rule in spec.ground_rules %}<li>{{ rule }}</li>{% endfor %}</ul>
+  <ul>{% for rule in spec.setup.ground_rules %}<li>{{ rule }}</li>{% endfor %}</ul>
   {% endif %}
 </section>

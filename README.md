@@ -4,11 +4,11 @@ A stateless MCP server for Microsoft 365 Copilot Cowork training workflows.
 **Skills own judgment, MCP owns consistency.** Skills write content; Cowork's
 own tools save and send it.
 
-M2 implements a spec-first lab pipeline alongside the M1 format catalog:
+M3a implements a LabSpec **2.0** story pipeline alongside the M1 format catalog:
 `get_lab_spec_schema` -> `validate_lab_spec` -> `render_lab_page`.
 The result is one self-contained HTML page, returned to Cowork rather than
 saved by the server. Azure deployment and Cowork plugin packaging remain future
-milestones.
+milestones. Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
 
 No authentication, secrets, Microsoft Graph calls, telemetry integration,
 tenant-data access, or generated-content storage. Use fictional Zava-style
@@ -93,7 +93,7 @@ npx @modelcontextprotocol/inspector
 Open the displayed local Inspector URL, choose **Streamable HTTP**, and connect
 to `http://127.0.0.1:8000/mcp`. Keep Inspector's local security defaults; its
 local proxy token is not server authentication. Use **List Tools**, then call
-`list_session_formats` with `{}` or `{"id":"html_lab"}`. M2 adds
+`list_session_formats` with `{}` or `{"id":"html_lab"}`. The story pipeline exposes
 `get_lab_spec_schema` (no arguments), `validate_lab_spec` (`{"spec": ...}`),
 and `render_lab_page` (`{"spec": ..., "theme_id": "microsoft"}`).
 
@@ -119,27 +119,68 @@ uses `structured_content` rather than SDK-generated Python model objects.
 
 ## Spec-first lab pipeline
 
-1. Call `get_lab_spec_schema` and draft a LabSpec using fictional content only.
+1. Call `get_lab_spec_schema` and draft a LabSpec with `schema_version: "2.0"` using fictional content only.
 2. Call `validate_lab_spec`. Fix errors; review nonblocking quality warnings.
 3. Call `render_lab_page`. Cowork saves the returned `html` using `filename`.
 
 Validation returns `{valid, errors, warnings, stats}`. Issues have `code`, `path`,
-and `message`. Schema failures return zero stats; otherwise stats count
-scenarios, labs, prompts (including the capstone), and total lab minutes.
-Errors include malformed structure, blank prompts, unsafe resource URLs, and
-IDs duplicated across scenarios/labs. IDs `overview`, `setup`, and `capstone`
-are reserved for navigation. Unknown fields and type coercion are rejected.
+and `message`. Schema failures return zero stats. Otherwise stats contain
+`chapter_count`, `step_count`, `prompt_count`, `challenge_count`,
+`checkpoint_count` (declared checkpoint files), `files_by_kind`, and
+`total_minutes` (sum of chapter budgets, not step budgets).
 
-The scenario `story` object is required; each of its five strings may be
-omitted or blank. Every missing/blank field produces its own warning naming the
-scenario and field, and is omitted from the rendered story. Other warnings flag
-short prompts (under 60 characters), missing risk callouts, a fictional company
-matching the small real-brand denylist, and lab duration more than 25% away from
-session duration. These heuristics do not detect or anonymize customer data.
+The v2 contract describes a narrative, optional through-line artifact, file
+metadata, setup, 2-10 chapters with 1-6 steps each, troubleshooting, glossary,
+and disclaimer. Steps have 0-4 mode-labeled prompts and/or a challenge, expected
+results with key facts, fallbacks, carry-forward instructions, callouts, and
+self-checks. `uses`, `fallback`, and `carries_forward` are plain text.
 
-Resource URLs accept `https`, `http`, `mailto`, and relative paths; executable
-schemes, embedded credentials, controls, and protocol-relative network paths
-are rejected. Links are inert until clicked; no remote assets are embedded.
+Errors include malformed structure, blank prompts, globally duplicate file/
+chapter/step IDs, duplicate filenames (case-insensitive), invalid chapter
+references, same/later `builds_on` references, and invalid checkpoint references.
+A step needs a prompt or a challenge; a challenge needs a nonblank answer.
+Unknown fields and type coercion are rejected. Reserved IDs are `overview`,
+`setup`, `capstone`, `agenda`, `files`, `story-map`, `troubleshooting`, `glossary`,
+and `disclaimer`; generated controls use a double-hyphen namespace outside
+the accepted slug grammar.
+
+Warnings flag isolated chapters, missing carry-forward steps when a through-line
+is declared, chapters with fewer than two steps, numerical prompts without
+expected key facts, missing checkpoints from chapter three onward in sessions
+of at least 90 minutes, unused checkpoint/answer-key files, and chapter budgets
+more than 25% away from session duration. Short prompts, missing risk callouts,
+and the real-brand denylist remain quality warnings. Numeric rules also detect
+digits. These heuristics do not detect or anonymize customer data.
+
+The nonblocking `learner_voice` warning flags system wording using the single
+`_LEARNER_VOICE_TERMS` constant in [validation.py](server/studio/tools/validation.py):
+`MCP server`, `consume ` (with a trailing space), `tenant path`, `do not claim`,
+`if supplied`, `JSON`, and `schema`. Matching is literal and case-insensitive,
+with one warning per field/term; each warning reports the field path and term,
+not the full input text.
+Checks cover narrative and through-line text, setup instructions and mode
+descriptions, chapter titles/story fields, step titles/goals/uses/intros,
+prompt labels/text, challenges, expected results, fallbacks, carry-forward
+notes, self-checks, and callout text. File filenames and purposes are checked
+once at their source paths, including when reused in checkpoint callouts;
+chapter titles also appear in the Files table. IDs, URL targets, troubleshooting
+and glossary entries are not scanned. Put technical facilitator guidance in
+troubleshooting rather than learner prompts.
+
+### Files are metadata, not generated assets
+
+Each file has a globally unique ID, a relative `filename`, kind, purpose, and
+`used_in` chapter IDs. Usage is declared through `used_in` or a chapter's
+`checkpoint_file_id`; it is not inferred from prose. Omitted checkpoint IDs are
+allowed; supplied IDs must reference a file of kind `checkpoint`.
+
+An optional `href` accepts `https`, `http`, `mailto`, and relative paths;
+executable schemes, embedded credentials, controls, and protocol-relative
+network paths are rejected. If supplied, it becomes a download link (browser
+download behavior depends on URL/origin). Without it, the filename is plain text
+labeled **Provided separately**. No link is fabricated from `filename`.
+Files and checkpoint states are produced later by the learner or Cowork skills,
+not by this server. Links are inert until clicked; no remote assets are embedded.
 
 Rendering success returns `{html, filename, stats, warnings}`. Failure returns
 `{errors, stats, warnings}` with **no HTML or filename**. Only the `microsoft`
@@ -148,19 +189,37 @@ themes fail explicitly. All spec text is escaped, including prompts and link
 labels. Filenames are ASCII title slugs, falling back to `training-lab.html`
 when the title has no ASCII letters or digits.
 
-The page has native collapsible scenarios/labs, active section navigation,
-copy buttons, all seven callout types, expand/collapse controls, mobile
-navigation, and print styling. It requires no CDN, font downloads, or network
-requests. Clipboard failures select the prompt and show manual copy guidance.
+The page has a leave-with hero, computed agenda, grouped files table, chapter
+story headers, rejoin checkpoints, collapsible steps, mode badges, copy buttons,
+expected key facts, hidden challenge answers, fallback tips, and a story-map
+table. Expand all opens chapters/steps without revealing challenge answers.
+Printing includes answers and restores the original open/closed state afterward.
+Active navigation, mobile layout, and all seven callout styles remain offline.
+Clipboard failures select the prompt and show manual copy guidance.
 Self-check selections are transient; no browser storage is used.
 
 ### Golden sample
 
-Open [the rendered Zava finance lab](examples/zava-finance-lab.html) in a browser.
-It is generated from [the fictional fixture](tests/fixtures/zava_finance_lab.json):
-two scenarios, six labs, seven prompts, and 60 minutes. The capstone is completed
-within the final lab. Its original prompts contain all fictional source rows;
-no external workbook download is required.
+Open [the rendered Zava story lab](examples/zava-story-lab.html) in a browser.
+It is generated from [the fictional fixture](tests/fixtures/zava_story_lab.json):
+Zava Outdoor's Summit Packs QBR, five chapters, ten steps, twenty prompts, one
+prompt-free challenge, and 90 minutes. Every step after chapter one explicitly
+uses an earlier output. The QBR Story sheet carries evidence into PowerPoint,
+then into a saved prompt, the personal Cowork skill `summit-qbr-review`, and a
+prior-quarter replay. M3b shortens the prompts into learner voice while retaining
+the original fictional data, named inputs, checkpoints and numerical checks.
+
+All ten file entries omit `href`: workbook/checkpoint/answer-key assets are
+**not bundled**. The first prompt contains the complete fictional source TSV
+for manual setup; a facilitator or Cowork skill must provide checkpoint states.
+In the final chapter, learners review the skill draft, approve saving it in
+Cowork, invoke it by name on FY28-Q1, and compare the results with the key facts.
+If personal skill creation is unavailable, they save and reuse the prompt
+manually instead. This is a learner activity, not a skill installed by the server.
+
+The golden-page regression test enforces **400 KB = 400,000 UTF-8 bytes** and
+prints the measured size even under `pytest -q`. It also records the size in
+pytest's test properties. No size optimization is applied in M3a.
 
 Regenerate the checked-in sample from the repository root (a developer action,
 not a server capability):
@@ -171,10 +230,10 @@ import json
 from pathlib import Path
 from studio.tools.rendering import render_lab_page
 
-spec = json.loads(Path("tests/fixtures/zava_finance_lab.json").read_text())
+spec = json.loads(Path("tests/fixtures/zava_story_lab.json").read_text())
 result = render_lab_page(spec)
 assert "html" in result, result
-Path("examples/zava-finance-lab.html").write_text(result["html"], encoding="utf-8")
+Path("examples/zava-story-lab.html").write_text(result["html"], encoding="utf-8")
 PY
 ```
 
@@ -194,7 +253,7 @@ With the HTTP server running in another terminal:
 python scripts/smoke_client.py
 ```
 
-This lists the four tools, retrieves the schema, validates/renders the golden
+This lists and calls all four tools, retrieves the v2 schema, validates/renders the golden
 spec, and verifies invalid input returns no HTML. It never saves the response.
 
 Docker must be installed with a running engine for the build. To run the image:

@@ -1,0 +1,22 @@
+{% from "file_link.html.j2" import file_link %}
+<section id="files" class="card anchor" aria-labelledby="files--title">
+  <h2 id="files--title">Files for the story</h2>
+  <p>Gather these files before you start. Ask your facilitator for any marked "Provided separately", or create them with Cowork using the chapter instructions.</p>
+  {% for label, files in file_groups %}
+  {% if files %}
+  <h3>{{ label }}</h3>
+  <div class="table-scroll" role="region" aria-label="{{ label }}" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Purpose</th><th scope="col">Used in</th></tr></thead>
+      <tbody>
+        {% for file in files %}
+        <tr id="{{ file.id }}"><th scope="row">{{ file_link(file) }}</th><td>{{ file.purpose }}</td><td>
+          {% for chapter_id in file.used_in %}<a href="#{{ chapter_id }}">{{ chapters_by_id[chapter_id].title }}</a>{% if not loop.last %}<br>{% endif %}{% endfor %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% endfor %}
+</section>

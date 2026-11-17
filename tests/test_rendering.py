@@ -3,18 +3,13 @@ import builtins
 from copy import deepcopy
 from html.parser import HTMLParser
 import io
-import json
 import os
-from pathlib import Path
 import tempfile
 
 import pytest
 
-from studio.schemas.lab_spec import LabSpec
 from studio.tools.rendering import render_lab_page
 from studio.tools.validation import get_lab_spec_schema, validate_lab_spec
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 class PageParser(HTMLParser):
@@ -25,6 +20,8 @@ class PageParser(HTMLParser):
         self.copies = []
         self.pre_text = []
         self.in_pre = False
+        self.details_stack = []
+        self.answer_parents = []
 
     def handle_starttag(self, tag, attrs):
         attributes = dict(attrs)
@@ -36,19 +33,20 @@ class PageParser(HTMLParser):
         if tag == "pre":
             self.in_pre = True
             self.pre_text.append("")
+        if tag == "details":
+            self.details_stack.append(attributes)
+        if "challenge-answer" in attributes.get("class", "").split():
+            self.answer_parents.append(list(self.details_stack))
 
     def handle_endtag(self, tag):
         if tag == "pre":
             self.in_pre = False
+        if tag == "details":
+            self.details_stack.pop()
 
     def handle_data(self, data):
         if self.in_pre:
             self.pre_text[-1] += data
-
-
-@pytest.fixture
-def golden_spec():
-    return json.loads((ROOT / "tests" / "fixtures" / "zava_finance_lab.json").read_text())
 
 
 def parse(html):
@@ -58,47 +56,60 @@ def parse(html):
     return parser
 
 
-def test_golden_schema_stats_and_rendered_shape(golden_spec):
-    assert LabSpec.model_validate(golden_spec).company.name == "Zava Supply Co."
-    validation = validate_lab_spec(golden_spec)
-    assert validation["valid"] and not validation["warnings"]
-    result = render_lab_page(golden_spec)
+def test_rendered_shape_and_anchors(minimal_spec):
+    result = render_lab_page(minimal_spec)
     assert "html" in result
-    assert result["stats"] == {
-        "scenario_count": 2, "lab_count": 6, "prompt_count": 7, "total_minutes": 60,
-    }
-    assert result["filename"] == "zava-finance-from-close-to-cfo-summary.html"
     page = parse(result["html"])
     assert sum(tag == "html" for tag, _ in page.tags) == 1
     assert len(page.ids) == len(set(page.ids))
-    for scenario in golden_spec["scenarios"]:
-        assert scenario["id"] in page.ids
-        assert all(lab["id"] in page.ids for lab in scenario["labs"])
+    for chapter in minimal_spec["chapters"]:
+        assert chapter["id"] in page.ids
+        assert all(step["id"] in page.ids for step in chapter["steps"])
     assert len(page.copies) == result["stats"]["prompt_count"]
     assert all(button["aria-label"] and button["data-copy-target"] in page.ids for button in page.copies)
+    assert sum("data-mode" in attrs for _, attrs in page.tags) == result["stats"]["prompt_count"]
     assert all(
         attrs["href"][1:] in page.ids
         for tag, attrs in page.tags if tag == "a" and attrs.get("href", "").startswith("#")
     )
     assert not any(
-        attrs.get("src") or attrs.get("href") for tag, attrs in page.tags if tag in {"script", "link"}
+        attrs.get("src") or attrs.get("href") for tag, attrs in page.tags if tag in {"script", "link", "img", "iframe"}
     )
     assert sum(tag == "script" for tag, _ in page.tags) == 1
-    assert {attrs["class"] for tag, attrs in page.tags if tag == "aside" and "callout-" in attrs.get("class", "")} == {
-        f"callout callout-{kind}" for kind in ("tip", "warning", "important", "note", "instructor", "real-world", "stretch")
-    }
+    chapters = [attrs for tag, attrs in page.tags if tag == "details" and "chapter" in attrs.get("class", "").split()]
+    assert "open" in chapters[0] and "open" not in chapters[1]
 
 
-def test_all_prompts_preserve_exact_text_and_escape_markup(minimal_spec):
+def test_summary_counters_pluralize_singular_and_zero(minimal_spec):
+    html = render_lab_page(minimal_spec)["html"]
+    assert "4 steps / 4 prompts / 0 challenges" in html
+    assert "2 steps / select to expand or collapse" in html
+    for chapter in minimal_spec["chapters"]:
+        chapter["steps"] = chapter["steps"][:1]
+    minimal_spec["chapters"][0]["steps"][0].update(prompts=[], challenge={
+        "task": "Check the evidence.", "hint": "", "answer": "Keep checked facts.",
+    })
+    html = render_lab_page(minimal_spec)["html"]
+    assert "2 steps / 1 prompt / 1 challenge" in html
+    assert html.count("1 step / select to expand or collapse") == 2
+    assert "1 steps" not in html and "1 prompts" not in html and "1 challenges" not in html
+
+
+def test_all_prompt_text_and_story_content_are_escaped(minimal_spec):
     injected = '  <script>alert("fictional")</script>\n& <b>Not HTML</b> </pre>  '
-    minimal_spec["scenarios"][0]["labs"][0]["exercises"][0]["prompt"] = injected
+    step = minimal_spec["chapters"][0]["steps"][0]
+    step["prompts"][0]["text"] = injected
+    step["prompts"][0]["label"] = "<img src=x onerror=alert(1)>"
+    step["expected"]["key_facts"] = ["<script>fact</script>"]
+    step["fallback"] = "<script>fallback</script>"
+    step["carries_forward"] = "<script>artifact</script>"
+    step["callouts"] = [{"type": "note", "text": "<script>callout</script>"}]
     minimal_spec["title"] = '<img src=x onerror="alert(1)">'
     minimal_spec["subtitle"] = '" onload="alert(1)'
-    minimal_spec["company"]["description"] = "<script>company</script>"
-    minimal_spec["scenarios"][0]["story"]["stakeholder"] = "<script>story</script>"
-    minimal_spec["scenarios"][0]["labs"][0]["callouts"] = [
-        {"type": "note", "text": "<script>callout</script>"}
-    ]
+    minimal_spec["narrative"]["role"] = "<script>role</script>"
+    minimal_spec["through_line"]["name"] = "<script>sheet</script>"
+    minimal_spec["chapters"][0]["story_so_far"] = "<script>story</script>"
+    minimal_spec["disclaimer"] = "<script>disclaimer</script>"
     result = render_lab_page(minimal_spec)
     assert "html" in result
     assert "&lt;script&gt;" in result["html"]
@@ -108,28 +119,73 @@ def test_all_prompts_preserve_exact_text_and_escape_markup(minimal_spec):
     assert not any(tag == "img" or "onload" in attrs or "onerror" in attrs for tag, attrs in page.tags)
 
 
-def test_blank_stakeholder_renders_with_warning_and_no_empty_row(minimal_spec):
-    minimal_spec["scenarios"][0]["story"]["stakeholder"] = " "
+def test_hidden_challenge_answer_does_not_create_copy_button(minimal_spec):
+    step = minimal_spec["chapters"][0]["steps"][0]
+    step.update(prompts=[], level="challenge", challenge={
+        "task": "Check the evidence independently.", "hint": "Review the source.",
+        "answer": "<script>Only an escaped answer</script>",
+    })
+    result = render_lab_page(minimal_spec)
+    page = parse(result["html"])
+    assert len(page.copies) == result["stats"]["prompt_count"] == 3
+    assert len(page.answer_parents) == 1
+    assert page.answer_parents[0][-1]["class"] == "answer"
+    assert "open" not in page.answer_parents[0][-1]
+    assert len(page.answer_parents[0]) == 3
+    assert "&lt;script&gt;Only an escaped answer&lt;/script&gt;" in result["html"]
+    assert "Show answer" in result["html"]
+
+
+@pytest.mark.parametrize("href", [None, "./checkpoint.xlsx", "https://example.test/checkpoint.xlsx"])
+def test_file_links_and_checkpoint_callouts(minimal_spec, href):
+    minimal_spec["files"] = [{
+        "id": "entry-file", "filename": "checkpoint.xlsx", "kind": "checkpoint",
+        "purpose": "A checked starting state", "used_in": ["chapter-2"],
+    }]
+    if href is not None:
+        minimal_spec["files"][0]["href"] = href
+    minimal_spec["chapters"][1]["checkpoint_file_id"] = "entry-file"
     result = render_lab_page(minimal_spec)
     assert "html" in result
+    assert result["html"].count("Behind? Jump in here") == 1
+    page = parse(result["html"])
+    downloads = [attrs for tag, attrs in page.tags if tag == "a" and "download" in attrs]
+    if href is None:
+        assert downloads == []
+        assert sum(
+            "provided-separately" in attrs.get("class", "").split() for _, attrs in page.tags
+        ) == 2
+    else:
+        assert len(downloads) == 2
+        assert all(link["href"] == href and link["download"] == "checkpoint.xlsx" for link in downloads)
+        assert not any("provided-separately" in attrs.get("class", "").split() for _, attrs in page.tags)
+    assert "Only if you fall behind" in result["html"]
+
+
+def test_agenda_uses_chapter_minutes_and_missing_optionals_omit_cleanly(minimal_spec):
+    minimal_spec["chapters"][0]["minutes"] = 11
+    minimal_spec["chapters"][1]["minutes"] = 17
+    minimal_spec["through_line"] = None
+    result = render_lab_page(minimal_spec)
+    assert "html" in result
+    assert "<td>0-11</td>" in result["html"] and "<td>11-28</td>" in result["html"]
     assert "None" not in result["html"]
-    assert result["html"].count("<dt>Stakeholder</dt>") == 1
-    assert any(
-        warning["code"] == "missing_story_field"
-        and "scenario-1" in warning["message"]
-        and "stakeholder" in warning["message"]
-        for warning in result["warnings"]
-    )
+    for label in ("What you leave with", "One story, 2 chapters", "The story so far", "Builds on", "You will add",
+                  "Wording varies; the substance should match", "The story in one table", "Troubleshooting", "Glossary"):
+        assert label in result["html"]
 
 
 @pytest.mark.parametrize("invalid", ["schema", "duplicate", "url", "theme"])
 def test_invalid_specs_never_return_html(minimal_spec, invalid):
     if invalid == "schema":
-        del minimal_spec["scenarios"]
+        del minimal_spec["chapters"]
     elif invalid == "duplicate":
-        minimal_spec["scenarios"][1]["id"] = minimal_spec["scenarios"][0]["id"]
+        minimal_spec["chapters"][1]["id"] = minimal_spec["chapters"][0]["id"]
     elif invalid == "url":
-        minimal_spec["resources"] = [{"label": "Unsafe", "url": "javascript:alert(1)", "note": ""}]
+        minimal_spec["files"] = [{
+            "id": "unsafe-file", "filename": "unsafe.xlsx", "kind": "source",
+            "purpose": "Unsafe link", "used_in": [], "href": "javascript:alert(1)",
+        }]
     else:
         minimal_spec["theme_id"] = "unknown"
     result = render_lab_page(minimal_spec)
@@ -144,21 +200,10 @@ def test_theme_override_and_no_path_loading(minimal_spec):
     assert "html" not in render_lab_page(minimal_spec, "")
 
 
-def test_golden_output_is_deterministic_and_current(golden_spec):
-    original = deepcopy(golden_spec)
-    result = render_lab_page(golden_spec)
-    assert result == render_lab_page(golden_spec)
-    assert golden_spec == original
-    assert result["html"] == (ROOT / "examples" / "zava-finance-lab.html").read_text()
-
-
-def test_golden_page_within_size_budget(golden_spec):
-    result = render_lab_page(golden_spec)
-    assert "html" in result
-    size_bytes = len(result["html"].encode("utf-8"))
-    assert size_bytes <= 120_000, (
-        f"Rendered golden page is {size_bytes:,} bytes; exceeds 120 KB (120,000 bytes)."
-    )
+def test_rendering_is_deterministic_without_mutating_spec(minimal_spec):
+    original = deepcopy(minimal_spec)
+    assert render_lab_page(minimal_spec) == render_lab_page(minimal_spec)
+    assert minimal_spec == original
 
 
 def test_pipeline_writes_no_files(monkeypatch, tmp_path, minimal_spec):

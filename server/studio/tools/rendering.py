@@ -35,23 +35,24 @@ _TEMPLATES = Environment(
     lstrip_blocks=True,
     keep_trailing_newline=True,
 )
-_STORY_LABELS = {
-    "context": "Context",
-    "stakeholder": "Stakeholder",
-    "time_pressure": "Time pressure",
-    "source_material": "Source material",
-    "deliverable": "Deliverable",
+_FILE_LABELS = {
+    "source": "Source files",
+    "checkpoint": "Checkpoints - Only if you fall behind",
+    "answer_key": "Answer keys",
+    "worksheet": "Worksheets",
+    "extra": "Extra references",
 }
 
 
 def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> RenderSuccess | RenderFailure:
-    """Validate fictional LabSpec JSON and return one self-contained HTML page.
+    """Validate fictional LabSpec 2.0 and return one self-contained story lab page.
 
     Success returns html, filename, stats, and quality warnings. Invalid specs
     or unsupported themes return errors, stats, and warnings with NO html.
-    theme_id overrides spec.theme_id; only microsoft is supported in M2.
+    theme_id overrides spec.theme_id; only microsoft is supported.
     All spec text is escaped, prompts stay paste-ready, and CSS/JS are inline.
-    Nothing is saved or sent; Cowork must save the returned HTML itself.
+    File hrefs become links; absent hrefs are labeled Provided separately.
+    No files are created or saved; Cowork must save the returned HTML itself.
     """
     result = validate_lab_spec(spec)
     if not result["valid"]:
@@ -65,17 +66,28 @@ def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> Render
         return {
             "errors": [{
                 "code": "unknown_theme", "path": "theme_id",
-                "message": "Unsupported theme; M2 supports only 'microsoft'.",
+                "message": "Unsupported theme; only 'microsoft' is available.",
             }],
             "stats": result["stats"], "warnings": result["warnings"],
         }
     title_ascii = unicodedata.normalize("NFKD", lab_spec.title).encode("ascii", "ignore").decode()
     slug = re.sub(r"[^a-z0-9]+", "-", title_ascii.lower()).strip("-") or "training-lab"
+    elapsed = 0
+    time_ranges: dict[str, tuple[int, int]] = {}
+    for chapter in lab_spec.chapters:
+        time_ranges[chapter.id] = (elapsed, elapsed + chapter.minutes)
+        elapsed += chapter.minutes
     html = _TEMPLATES.get_template("base.html.j2").render(
         spec=lab_spec,
         theme=_THEMES[chosen_theme],
-        story_labels=_STORY_LABELS,
         stats=result["stats"],
+        time_ranges=time_ranges,
+        chapters_by_id={chapter.id: chapter for chapter in lab_spec.chapters},
+        files_by_id={file.id: file for file in lab_spec.files},
+        file_groups=[
+            (label, [file for file in lab_spec.files if file.kind == kind])
+            for kind, label in _FILE_LABELS.items()
+        ],
     )
     return {
         "html": html, "filename": f"{slug}.html",
