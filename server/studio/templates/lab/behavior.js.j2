@@ -6,12 +6,14 @@
   const links = Array.from(nav.querySelectorAll(".nav-link"));
   const sections = links.map(link => document.getElementById(link.hash.slice(1)));
   const details = Array.from(document.querySelectorAll("main details"));
+  const sectionDetails = details.filter(detail => detail.matches(".chapter, .step"));
   const status = document.getElementById("studio--copy-status");
   let batchToggle = false;
   let printState = null;
   let statusTimer;
 
   function setActive(id) {
+    if (!links.some(link => link.hash === "#" + id)) return;
     links.forEach(link => {
       const active = link.hash === "#" + id;
       link.classList.toggle("active", active);
@@ -50,23 +52,26 @@
       current = current.parentElement;
     }
     target.scrollIntoView({ block: "start" });
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
     setActive(target.id);
   }
-  links.forEach(link => link.addEventListener("click", event => {
-    event.preventDefault();
+  document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener("click", event => {
     const target = document.getElementById(link.hash.slice(1));
+    if (!target) return;
+    event.preventDefault();
     nav.classList.remove("is-open");
     navToggle.setAttribute("aria-expanded", "false");
     history.replaceState(null, "", link.hash);
     reveal(target);
   }));
   function followHash() {
-    const target = sections.find(section => "#" + section.id === location.hash);
+    const target = document.getElementById(location.hash.slice(1));
     if (target) reveal(target);
   }
   addEventListener("hashchange", followHash);
   followHash();
-  details.forEach(detail => detail.addEventListener("toggle", () => {
+  sectionDetails.forEach(detail => detail.addEventListener("toggle", () => {
     if (!batchToggle && isVisible(detail)) setActive(detail.id);
   }));
   navToggle.addEventListener("click", () => {
@@ -75,7 +80,7 @@
   });
   function toggleAll(open) {
     batchToggle = true;
-    details.forEach(detail => { detail.open = open; });
+    sectionDetails.forEach(detail => { detail.open = open; });
     setTimeout(() => { batchToggle = false; updateActive(); }, 0);
   }
   document.getElementById("studio--expand").addEventListener("click", () => toggleAll(true));
@@ -83,6 +88,7 @@
   document.getElementById("studio--print").addEventListener("click", () => print());
   addEventListener("beforeprint", () => {
     printState = details.map(detail => detail.open);
+    details.forEach(detail => { detail.open = true; });
     toggleAll(true);
   });
   addEventListener("afterprint", () => {

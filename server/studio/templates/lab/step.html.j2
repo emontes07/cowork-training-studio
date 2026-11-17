@@ -1,0 +1,48 @@
+{% from "prompt.html.j2" import prompt_block %}
+<details class="step anchor" id="{{ step.id }}"{% if step_open %} open{% endif %}>
+  <summary>
+    <span class="step-meta">{{ step.minutes }} min / {{ step.level | capitalize }}</span>
+    <h3>{{ step.title }}</h3>
+    <span class="summary-hint">{{ step.goal }}</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> {{ step.uses }}</p>
+    <p>{{ step.intro }}</p>
+    {% for prompt in step.prompts %}
+    {{ prompt_block(prompt, step.id ~ "--prompt-" ~ loop.index) }}
+    {% endfor %}
+    {% if step.challenge %}
+    <section class="challenge" aria-labelledby="{{ step.id }}--challenge">
+      <h4 id="{{ step.id }}--challenge">Your challenge - try without a prompt</h4>
+      <p>{{ step.challenge.task }}</p>
+      {% if step.challenge.hint %}<p><strong>Hint:</strong> {{ step.challenge.hint }}</p>{% endif %}
+      <details class="answer" id="{{ step.id }}--answer">
+        <summary>Show answer</summary>
+        <p class="challenge-answer">{{ step.challenge.answer }}</p>
+      </details>
+    </section>
+    {% endif %}
+    {% if step.expected %}
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>{{ step.expected.summary }}</p>
+      {% if step.expected.key_facts %}<ul>{% for fact in step.expected.key_facts %}<li>{{ fact }}</li>{% endfor %}</ul>{% endif %}
+    </section>
+    {% endif %}
+    {% if step.fallback %}
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>{{ step.fallback }}</p></aside>
+    {% endif %}
+    {% for callout in step.callouts %}
+    <aside class="callout callout-{{ callout.type | replace('_', '-') }}" aria-label="{{ callout.type | replace('_', ' ') | title }}">
+      <strong>{{ callout.type | replace('_', ' ') | title }}</strong><p>{{ callout.text }}</p>
+    </aside>
+    {% endfor %}
+    {% if step.carries_forward %}<p class="carry-forward"><strong>Carry forward:</strong> {{ step.carries_forward }}</p>{% endif %}
+    {% if step.self_check %}
+    <section class="self-check" aria-labelledby="{{ step.id }}--check">
+      <h4 id="{{ step.id }}--check">Before you move on</h4>
+      <ul>{% for check in step.self_check %}<li><label><input type="checkbox"> <span>{{ check }}</span></label></li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+  </div>
+</details>

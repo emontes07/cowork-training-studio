@@ -3,15 +3,19 @@
     Session navigation
   </button>
   <nav id="studio--navigation" aria-label="Session navigation">
-    <p class="nav-title">Your lab journey</p>
+    <p class="nav-title">Your story journey</p>
     <a class="nav-link active" aria-current="location" href="#overview">Overview</a>
     <a class="nav-link" href="#setup">Setup</a>
-    {% for scenario in spec.scenarios %}
-    <a class="nav-link scenario-link" href="#{{ scenario.id }}">{{ loop.index }}. {{ scenario.title }}</a>
-    {% for lab in scenario.labs %}
-    <a class="nav-link lab-link" href="#{{ lab.id }}">{{ lab.title }} <span>{{ lab.minutes }}m</span></a>
+    <a class="nav-link" href="#agenda">Agenda</a>
+    <a class="nav-link" href="#files">Files</a>
+    {% for chapter in spec.chapters %}
+    <a class="nav-link chapter-link" href="#{{ chapter.id }}">{{ loop.index }}. {{ chapter.title }}</a>
+    {% for step in chapter.steps %}
+    <a class="nav-link step-link" href="#{{ step.id }}">{{ step.title }} <span>{{ step.minutes }}m</span></a>
     {% endfor %}
     {% endfor %}
-    {% if spec.capstone %}<a class="nav-link" href="#capstone">Capstone</a>{% endif %}
+    <a class="nav-link" href="#story-map">The story in one table</a>
+    <a class="nav-link" href="#troubleshooting">Troubleshooting</a>
+    <a class="nav-link" href="#glossary">Glossary</a>
   </nav>
 </aside>

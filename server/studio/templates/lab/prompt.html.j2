@@ -1,9 +1,9 @@
-{% macro prompt_block(text, identifier, label) %}
+{% macro prompt_block(prompt, identifier) %}
 <div class="prompt-block">
   <div class="prompt-heading">
-    <span>Paste-ready prompt</span>
-    <button class="copy-button" type="button" data-copy-target="{{ identifier }}" aria-label="Copy prompt: {{ label }}">Copy prompt</button>
+    <span>{{ prompt.label }} <span class="mode-badge" data-mode="{{ prompt.mode }}">{{ prompt.mode | capitalize }}</span></span>
+    <button class="copy-button" type="button" data-copy-target="{{ identifier }}" aria-label="Copy prompt: {{ prompt.label }}">Copy prompt</button>
   </div>
-  <pre id="{{ identifier }}" tabindex="0"><code>{{ text }}</code></pre>
+  <pre id="{{ identifier }}" tabindex="0"><code>{{ prompt.text }}</code></pre>
 </div>
 {% endmacro %}

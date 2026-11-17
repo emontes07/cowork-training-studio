@@ -1,0 +1,30 @@
+{% from "file_link.html.j2" import file_link %}
+<details class="chapter card anchor" id="{{ chapter.id }}"{% if chapter_open %} open{% endif %}>
+  <summary>
+    <span class="eyebrow">Chapter {{ chapter_number }} / {{ chapter.minutes }} minutes / {{ chapter.format | capitalize }}</span>
+    <h2>{{ chapter.title }}</h2>
+    <span class="summary-hint">{{ chapter.steps | length }} steps / select to expand or collapse</span>
+  </summary>
+  <div class="chapter-body">
+    <dl class="story">
+      <div><dt>The story so far</dt><dd>{{ chapter.story_so_far }}</dd></div>
+      <div><dt>Builds on</dt><dd>
+        {% for chapter_id in chapter.builds_on %}<a href="#{{ chapter_id }}">{{ chapters_by_id[chapter_id].title }}</a>{% if not loop.last %}; {% endif %}{% else %}{{ "Start of the story" if chapter_number == 1 else "No earlier chapter declared" }}{% endfor %}
+      </dd></div>
+      <div><dt>You will add</dt><dd>{{ chapter.you_will_add }}</dd></div>
+    </dl>
+    {% if chapter.checkpoint_file_id %}
+    <aside class="callout callout-note checkpoint">
+      <strong>Behind? Jump in here</strong>
+      {% set checkpoint = files_by_id[chapter.checkpoint_file_id] %}
+      <p>{{ file_link(checkpoint) }}</p>
+      <p>{{ checkpoint.purpose }}</p>
+      <p>Only if you fall behind: use this starting state instead of repeating earlier chapters.</p>
+    </aside>
+    {% endif %}
+    {% for step in chapter.steps %}
+    {% set step_open = loop.first %}
+    {% include "step.html.j2" %}
+    {% endfor %}
+  </div>
+</details>

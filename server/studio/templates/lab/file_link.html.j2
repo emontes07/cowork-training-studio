@@ -1,0 +1,3 @@
+{% macro file_link(file) %}
+{% if file.href %}<a class="file-download" href="{{ file.href }}" download="{{ file.filename }}">{{ file.filename }}</a>{% else %}<span class="file-name">{{ file.filename }}</span> <span class="provided-separately">Provided separately</span>{% endif %}
+{% endmacro %}

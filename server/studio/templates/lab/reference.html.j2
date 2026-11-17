@@ -1,0 +1,26 @@
+<section id="story-map" class="card anchor" aria-labelledby="story-map--title">
+  <h2 id="story-map--title">The story in one table</h2>
+  <div class="table-scroll" role="region" aria-label="Story map" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">Chapter</th><th scope="col">Where</th><th scope="col">Mode</th><th scope="col">Lands in</th></tr></thead>
+      <tbody>
+        {% for chapter in spec.chapters %}
+        {% set number = loop.index %}
+        {% for step in chapter.steps %}
+        <tr><th scope="row"><a href="#{{ step.id }}">{{ number }}. {{ chapter.title }} / {{ step.title }}</a></th><td>{{ step.uses }}</td><td>
+          {% for mode in step.prompts | map(attribute="mode") | unique %}<span class="mode-badge">{{ mode | capitalize }}</span>{% else %}Independent challenge{% endfor %}
+        </td><td>{{ step.carries_forward or "No carry-forward declared" }}</td></tr>
+        {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section id="troubleshooting" class="card anchor" aria-labelledby="troubleshooting--title">
+  <h2 id="troubleshooting--title">Troubleshooting</h2>
+  <dl class="reference-list">{% for item in spec.troubleshooting %}<dt>{{ item.problem }}</dt><dd>{{ item.fix }}</dd>{% endfor %}</dl>
+</section>
+<section id="glossary" class="card anchor" aria-labelledby="glossary--title">
+  <h2 id="glossary--title">Glossary</h2>
+  <dl class="reference-list">{% for item in spec.glossary %}<dt>{{ item.term }}</dt><dd>{{ item.definition }}</dd>{% endfor %}</dl>
+</section>
