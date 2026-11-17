@@ -1,19 +1,26 @@
-# Azure infrastructure (planned)
+# Azure infrastructure
 
-Infrastructure-as-code and deployment are deferred to M4.
+M3e uses Azure CLI cloud build for a temporary anonymous demonstration.
+Infrastructure-as-code remains deferred. Follow the
+[deployment, redeployment and cleanup commands](../docs/cowork-connection-test.md#deploy-to-azure).
 
-Reserved Azure names:
+Demo resource names:
 
 | Resource | Name |
 | --- | --- |
-| Container App | `ca-training-studio-mcp` |
+| Container App | `cowork-training-studio-mcp` |
 | Resource group | `rg-training-studio-mcp` |
+| Container Apps environment | `cae-training-studio-mcp` |
 
 The container listens on `0.0.0.0:8000` by default with
-`MCP_TRANSPORT=streamable-http` and the MCP endpoint at `/mcp`.
-There is no database, storage account, managed secret, or Microsoft Graph
-dependency in M1. No Azure resources are provisioned by this scaffold.
+`MCP_TRANSPORT=streamable-http`; `/mcp` and `/mcp/` both serve without redirects.
+The build context is `server/`, with a restrictive `.dockerignore`.
+Basic ACR holds the cloud-built image; a scoped managed identity pulls it
+without registry passwords. There is no database, storage account, stored app
+secret, application telemetry or Microsoft Graph dependency.
 
-M1 has no authentication and is for local/trusted testing, not public production
-ingress. Deployment must explicitly address network exposure and platform-level
-access controls without adding tenant-data access to the MCP server.
+The westus3 Consumption app has 0.25 vCPU/0.5 GiB and min 1/max 2 replicas for
+testing. Environment log collection is disabled. This anonymous public endpoint
+is fictional-data-only and **not production ready**. Delete the app and unused
+dedicated infrastructure when testing ends; Basic ACR continues billing after
+the app is deleted.
