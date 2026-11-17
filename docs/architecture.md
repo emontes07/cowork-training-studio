@@ -12,7 +12,7 @@
 +--------------------------------+  +-----------------------------+
 | Training Studio MCP            |  | Microsoft Learn MCP         |
 | M1: session format metadata    |  | Planned second connection   |
-| M2: schemas, validation, HTML  |  | Official documentation      |
+| M3a: story contract and HTML   |  | Official documentation      |
 | No tenant data or persistence  |  | learn.microsoft.com/api/mcp |
 +--------------------------------+  +-----------------------------+
 
@@ -35,7 +35,7 @@ file creation, saving, sharing, and sending with the user's permissions. The
 server does not call either Microsoft Graph or Microsoft Learn MCP. The future
 plugin connects independently to both MCP servers.
 
-M2 is spec-first: a skill writes LabSpec JSON, calls the validator, fixes reported
+The pipeline is spec-first: a skill writes LabSpec 2.0 JSON, calls the validator, fixes reported
 errors, reviews warnings, and then calls the HTML renderer. All three tools are
 implemented alongside the M1 format catalog.
 
@@ -44,9 +44,9 @@ implemented alongside the M1 format catalog.
 | Tool | Status | Input | Output / when to call |
 | --- | --- | --- | --- |
 | `list_session_formats` | M1, implemented | Optional exact `id` | JSON list of four formats, or one matching format; call before selecting a skill or gathering inputs. Unknown IDs raise an explicit error. |
-| `get_lab_spec_schema` | M2, implemented | None | JSON Schema for drafting fictional LabSpec JSON. |
-| `validate_lab_spec` | M2, implemented | `spec` object | `{valid, errors, warnings, stats}`; call before rendering. |
-| `render_lab_page` | M2, implemented | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
+| `get_lab_spec_schema` | M3a, v2 | None | JSON Schema for drafting fictional LabSpec 2.0; v1 is rejected. |
+| `validate_lab_spec` | M3a, v2 | `spec` object | `{valid, errors, warnings, stats}`; call before rendering. |
+| `render_lab_page` | M3a, v2 | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
 
 Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
 (each with `name`, `description`, and `example`), `default_duration_minutes`, and
@@ -56,35 +56,59 @@ Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
 ## Lab pipeline
 
 [The Pydantic contract](../server/studio/schemas/lab_spec.py) checks strict types,
-required structure, collection bounds, nonblank prompts, and safe resource URLs.
-[Validation](../server/studio/tools/validation.py) adds globally unique IDs and
-quality rules. Story fields may be blank or omitted, but their containing object
-is required. Each blank field warns individually; rendering omits it.
+required version/structure, collection bounds, nonblank prompts and challenge
+answers, relative filenames, and safe optional file hrefs. Narrative and chapter
+story fields are nonblank in v2. The optional through-line identifies the artifact
+that chapters extend; this is metadata, not runtime state.
+
+[Validation](../server/studio/tools/validation.py) adds globally unique file/
+chapter/step IDs, earlier-chapter dependency checks, declared file usage,
+checkpoint kind checks, duplicate filenames, and quality warnings. It does not
+try to infer artifact dependencies from prose. Empty `builds_on` after the first
+chapter is a warning; unknown/same/later chapter references are errors.
+No prompts and no challenge is an error. Challenge-level steps require an
+answered challenge, even when they also contain prompts.
 
 Errors and warnings contain `code`, `path`, and `message`, not copies of the input.
-Stats contain `scenario_count`, `lab_count`, `prompt_count` (including capstone),
-and `total_minutes` (labs only). Schema errors return zero stats. Duration warnings
-use a strict greater-than-25% threshold. Quality rules are authoring aids, not
-proof that a spec is safe or contains no tenant data.
+Stats contain `chapter_count`, `step_count`, `prompt_count`, `challenge_count`,
+`checkpoint_count` (declared checkpoint files), `files_by_kind`, and
+`total_minutes` (chapter budgets). Schema errors return zero stats. Duration
+warnings use a strict greater-than-25% threshold. Other warnings cover thin or
+isolated chapters, absent carry-forward steps, numerical prompts without expected
+key facts, missing late-session checkpoints, unused checkpoint/answer-key entries,
+short prompts, risk callouts, and the brand denylist. Quality rules are authoring
+aids, not proof that a spec is safe or contains no tenant data.
 
 [Rendering](../server/studio/tools/rendering.py) validates first, selects a bundled
 theme by exact ID, and renders local Jinja templates with autoescape enabled for
 every template, including `.html.j2` files. Spec content is never interpreted as
-HTML, JS, CSS, or a template path. Resource URL schemes are checked separately
+HTML, JS, CSS, or a template path. File href schemes are checked separately
 because escaping alone cannot make a `javascript:` link safe.
 
-The output contains inline CSS and vanilla JS only. IDs are stable from the
-spec; internal IDs use double hyphens, outside the accepted slug grammar.
-IntersectionObserver and native details toggles maintain active navigation.
-Copy uses prompt text content, not HTML; unavailable clipboard APIs produce
-visible manual-copy guidance. Mobile navigation, print expansion, and keyboard
-focus states are included. No browser storage or telemetry is used.
+The output contains inline CSS and vanilla JS only. Computed agenda ranges use
+chapter budgets. Tables group files by kind and map steps to inputs, modes, and
+carry-forward outputs. Checkpoint callouts reference the declared starting-state
+file. If a file has no href, the filename is plain text labeled "Provided
+separately"; no broken download is invented and no asset is fetched or created.
+
+IDs are stable from the spec; internal IDs use double hyphens, outside the
+accepted slug grammar. IntersectionObserver and native details toggles maintain
+active navigation. Agenda, file, and story-map links open their target chapters/
+steps. Hidden challenge answers do not steal the active nav state. Expand all
+opens chapters/steps without revealing answers; print expansion includes answers
+and restores the prior state. Copy uses prompt text content, not HTML;
+unavailable clipboard APIs produce visible manual-copy guidance. Mobile
+navigation and keyboard focus states are included. No browser storage or
+telemetry is used.
 
 The public
 [finance guide](https://emontes07.github.io/Learning/Instructions/Demos/29-Zava%20Finance.html)
 and [close-to-deck guide](https://emontes07.github.io/Learning/Instructions/Demos/31-Zava%20Finance.html)
-were visual references for the hero, tags, navigation, and card layout.
-Templates and fictional fixture content are original, not copied from those guides.
+were structural references only: chapter continuity, a running artifact,
+checkpoints, mode labels, challenge answers, and reference tables.
+Templates, fictional figures, and fixture content are original, not copied from
+those guides. The M3a golden example contains no workbook assets; Cowork skills
+or a facilitator must create and provide them separately.
 
 ## Runtime
 
@@ -117,7 +141,7 @@ to finish instead of FastMCP's zero-second grace default.
   is allowed; no request data survives a restart and no runtime disk, database,
   or external storage backend is used.
 - Do not submit tenant documents, real customer/person names, emails, calendars,
-  credentials, or other sensitive material. M2 accepts author-supplied fictional
+  credentials, or other sensitive material. The pipeline accepts author-supplied fictional
   specs; neither the schema nor the small brand denylist is a data-loss-prevention
   or anonymization service.
 - All examples and future demo material must be fictional and use Zava-style

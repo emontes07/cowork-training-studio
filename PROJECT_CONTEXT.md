@@ -12,14 +12,18 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M2
+## Current checkpoint: M3a
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
 It returns a JSON list, optionally filtered by an exact ID, and raises an error
 for an unknown ID. The catalog contains skill routing names, not skill packages.
-M2 adds `get_lab_spec_schema`, `validate_lab_spec`, and `render_lab_page`, with
-Pydantic v2 contracts, deterministic validation, and autoescaped Jinja templates.
+M2 added `get_lab_spec_schema`, `validate_lab_spec`, and `render_lab_page`.
+M3a replaces the v1 scenario/lab model with **LabSpec 2.0**: one narrative,
+an optional through-line artifact, linked chapters and steps, checkpoints,
+mode-labeled prompts, hidden challenges, and reference sections. Version 1
+is intentionally unsupported. Pydantic v2 provides strict contracts; validation
+is deterministic and Jinja templates autoescape all spec text.
 Rendering returns a single offline-capable HTML page, never a saved file.
 There is no autonomous content generation, plugin packaging, or Azure deployment.
 
@@ -49,7 +53,7 @@ sessions. The bundled catalog is static application content, not runtime storage
 
 ## Spec-first design
 
-The M2 workflow is:
+The spec-first workflow is:
 
 1. A model, guided by a skill, writes **LabSpec JSON** using fictional data.
 2. The server validates the spec and returns actionable validation results.
@@ -60,25 +64,41 @@ The M2 workflow is:
 The server is not an autonomous author and does not make editorial or business
 judgments. Validation and rendering must remain separate, testable operations.
 
-### M2 contract decisions
+### M3a contract decisions
 
-- Each scenario requires a `story` object. Its five fields are omittable strings
-  that may be blank; each missing/blank field generates one nonblocking warning
-  naming the scenario and field. Rendering omits blank fields.
-- Scenario/lab IDs are globally unique slugs; `overview`, `setup`, and `capstone`
-  are reserved for built-in navigation. Generated control IDs use a double
-  hyphen namespace that spec slugs cannot use.
-- Skill level and lab difficulty use `basic`, `intermediate`, or `advanced`.
-- Resource links allow only HTTP(S), mailto, or relative paths, never executable
-  schemes, credential-bearing URLs, or protocol-relative network paths.
-- Stats count all exercise prompts plus the optional capstone. Total minutes
-  sum labs only. Invalid schema results have zero stats; cross-field ID errors
-  retain computed stats.
-- Unknown themes fail explicitly; M2 ships only `microsoft`. All content stays
+- `schema_version` is required and must be `"2.0"`. Unknown fields and type
+  coercion are rejected; there is no v1 compatibility layer.
+- File, chapter, and step IDs are globally unique slugs. Reserved IDs include
+  M2's `overview`, `setup`, `capstone` plus `agenda`, `files`, `story-map`,
+  `troubleshooting`, `glossary`, and `disclaimer`. Generated control IDs use a
+  double-hyphen namespace that spec slugs cannot use.
+- `builds_on` may name only earlier chapters. An empty list after chapter one
+  is a nonblocking isolated-chapter warning, not a schema error.
+- Omitted `checkpoint_file_id` is allowed. A supplied reference must exist and
+  have kind `checkpoint`; long sessions warn when later chapters lack one.
+- File usage is declared via `used_in` or `checkpoint_file_id`, not guessed from
+  prose. Filenames are relative file paths, unique case-insensitively.
+- Optional file `href` preserves M2's safe URL rules: HTTP(S), mailto, or relative
+  paths only; no executable schemes, credentials, controls, or network paths.
+  Supplied hrefs render as links; absent hrefs render as plain text with
+  "Provided separately". No download link is invented.
+- The sample contains metadata only. Real workbooks, checkpoints, answer keys,
+  decks, and skill files are authored later by Cowork skills or the learner.
+- `uses`, `fallback`, and `carries_forward` are plain text. Steps need a prompt
+  or a challenge; challenge-level steps require a challenge with a nonblank
+  answer. Expected results may be null; numerical prompts without key facts warn.
+- Stats count chapters, steps, prompts, challenges, declared checkpoint files,
+  and files by kind. Total minutes sum chapter budgets. Schema failures return
+  zero stats; cross-field errors retain computed stats.
+- Unknown themes fail explicitly; only `microsoft` is bundled. All content stays
   plain text, HTML-escaped. The renderer never executes or includes spec HTML.
-- The golden sample has two scenarios, six labs, and seven prompts. Its 60-minute
-  schedule includes the capstone within the final lab. The checked-in HTML is
-  generated by a developer, not written by the MCP server.
+- The original golden story is a 90-minute Zava Outdoor / Summit Packs QBR:
+  five chapters, ten steps, twenty prompts, one challenge, and three checkpoint
+  entries. Every later step consumes an earlier output. The final chapter saves
+  a prompt, drafts reusable skill instructions, and tests a prior-quarter replay.
+- The rendered sample is developer-generated, never saved by the MCP server.
+  The HTML budget is 400,000 UTF-8 bytes; the regression test prints the actual
+  measurement. M3a deliberately does not optimize the page size.
 - The small real-brand denylist is a quality heuristic, not data-loss prevention.
   `is_fictional` is an author declaration, not proof that data is fictional.
 
@@ -107,7 +127,8 @@ judgments. Validation and rendering must remain separate, testable operations.
 | --- | --- |
 | M1 | Scaffold, format catalog, `list_session_formats`, tests, container, and documentation. |
 | M2 | Implemented: LabSpec schema, validation, `render_lab_page`, and fictional golden sample. |
-| M3 | Themes, blueprints, and a prompt library. |
+| M3a | Implemented: LabSpec 2.0 story model, narrative renderer, and original connected QBR sample. |
+| M3 remaining | Themes, blueprints, and a prompt library. |
 | M4 | ThreadScript schema and Azure Container Apps deployment. |
 | M5 | Cowork plugin packaging with [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
 
@@ -118,7 +139,7 @@ judgments. Validation and rendering must remain separate, testable operations.
 - [infra/](infra/): Azure deployment placeholder and reserved resource names.
 - [docs/architecture.md](docs/architecture.md): boundaries and planned flow.
 - [docs/prompts/](docs/prompts/): reserved for future development prompts.
-- [examples/zava-finance-lab.html](examples/zava-finance-lab.html): generated offline guide.
+- [examples/zava-story-lab.html](examples/zava-story-lab.html): generated offline story guide.
 - [scripts/smoke_client.py](scripts/smoke_client.py): live HTTP pipeline verification.
 
 See [README.md](README.md) for running, inspection, and validation commands.

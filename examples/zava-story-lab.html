@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Move from a checked Excel baseline to a PowerPoint decision brief, then replay the same workflow as a reusable skill.">
+  <title>Summit Packs: One QBR, One Evidence Trail</title>
+  <style>
+:root {
+  --brand-primary: #1f3864;
+  --brand-secondary: #2e75b6;
+  --brand-accent: #7c3aed;
+  --surface: #ffffff;
+  --bg: #f4f6fb;
+  --text: #17243b;
+  --muted: #52627a;
+  --border: #d7dfec;
+  --callout-tip-bg: #edf8f1;
+  --callout-warning-bg: #fff5df;
+  --callout-important-bg: #fff0f2;
+  --callout-note-bg: #eef5ff;
+  --callout-instructor-bg: #f2edff;
+  --callout-real-world-bg: #e9f8f6;
+  --callout-stretch-bg: #faf0ff;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 "Segoe UI", system-ui, sans-serif; }
+a { color: var(--brand-secondary); text-underline-offset: .2em; }
+button, input { font: inherit; }
+button { cursor: pointer; border: 1px solid var(--border); border-radius: .6rem; padding: .5rem .85rem; background: var(--surface); color: var(--brand-primary); font-weight: 600; }
+button:hover { border-color: var(--brand-secondary); background: var(--callout-note-bg); }
+:focus-visible { outline: 3px solid var(--brand-accent); outline-offset: 4px; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--brand-primary); overflow-wrap: anywhere; }
+h1 { margin: .6rem 0 1rem; font-size: clamp(2.2rem, 4vw, 3.6rem); letter-spacing: -.035em; }
+h2 { font-size: 1.8rem; margin: .4rem 0 1rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.05rem; }
+p { margin: .6rem 0 1rem; overflow-wrap: anywhere; }
+li { margin-block: .4rem; overflow-wrap: anywhere; }
+.hero { background: linear-gradient(115deg, var(--brand-primary), var(--brand-secondary) 70%, var(--brand-accent)); color: white; }
+.hero-inner { max-width: 1440px; margin: auto; padding: 3.5rem 2rem; }
+.hero h1 { color: white; max-width: 1000px; }
+.leave-with { margin-top: 1.5rem; max-width: 1000px; padding: 1rem 1.25rem; border: 1px solid #ffffff55; border-radius: .75rem; background: #ffffff10; }
+.leave-with h2 { font-size: 1.15rem; color: white; }
+.leave-with ul { columns: 2; column-gap: 2rem; padding-left: 1.2rem; font-size: .9rem; }
+.leave-with li { break-inside: avoid; }
+.story-strip { background: var(--brand-primary); color: white; padding: .8rem 1rem; border-radius: .6rem; margin-bottom: 1.25rem; }
+.eyebrow { text-transform: uppercase; font-weight: 700; font-size: .75rem; letter-spacing: .13em; }
+.subtitle { font-size: 1.2rem; max-width: 900px; opacity: .95; }
+.tags { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: 1.6rem 0 0; }
+.tags li { border: 1px solid #ffffff66; background: #ffffff19; border-radius: 2rem; padding: .3rem .9rem; font-size: .85rem; }
+.layout { max-width: 1440px; margin: auto; padding: 1.75rem 2rem; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 2rem; align-items: start; }
+.sidebar { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; padding: .8rem 0; }
+.nav-title { font-weight: 700; padding-inline: .75rem; color: var(--brand-primary); }
+.nav-link { display: block; padding: .5rem .75rem; margin: .15rem 0; border-left: 3px solid transparent; border-radius: 0 .4rem .4rem 0; font-size: .9rem; color: var(--muted); text-decoration: none; }
+.nav-link:hover, .nav-link.active { background: var(--callout-note-bg); color: var(--brand-primary); border-left-color: var(--brand-accent); }
+.chapter-link { font-weight: 700; margin-top: .75rem; }
+.step-link { padding-left: 1.3rem; display: flex; gap: .5rem; justify-content: space-between; }
+.step-link span { white-space: nowrap; font-size: .75rem; }
+#studio--nav-toggle { display: none; }
+main { min-width: 0; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem; font-size: .8rem; color: var(--muted); }
+.toolbar div { display: flex; gap: .5rem; flex-wrap: wrap; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; margin-bottom: 1.5rem; padding: 1.75rem; box-shadow: 0 4px 18px #1f386407; }
+.anchor { scroll-margin-top: 1.5rem; }
+.muted, .summary-hint, .source { color: var(--muted); }
+.fictional-badge { display: inline-block; font-size: .8rem; color: var(--brand-primary); background: var(--callout-tip-bg); padding: .25rem .7rem; border-radius: .4rem; }
+summary { cursor: pointer; list-style-position: outside; margin-left: 1rem; }
+summary::marker { color: var(--brand-secondary); }
+summary h2, summary h3 { display: inline; }
+summary .eyebrow, summary .step-meta, summary .summary-hint { display: block; }
+.summary-hint { font-size: .85rem; margin-top: .4rem; }
+.chapter-body { padding-top: 1.5rem; }
+.story { margin: 0 0 1.5rem; padding: 1rem; border-left: 4px solid var(--brand-accent); background: var(--bg); border-radius: .5rem; }
+.story:empty { display: none; }
+.story div { display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 1rem; margin: .5rem 0; }
+dt { font-size: .8rem; font-weight: 700; color: var(--brand-primary); }
+dd { margin: 0; font-size: .9rem; overflow-wrap: anywhere; }
+.step { border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; margin-top: 1rem; }
+.step[open] > summary { padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.step-meta { font-size: .8rem; font-weight: 700; color: var(--brand-secondary); margin-bottom: .35rem; }
+.step-body { padding-top: .75rem; }
+.prompt-block { border: 1px solid var(--border); border-radius: .65rem; overflow: hidden; margin: 1rem 0; }
+.prompt-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .6rem .85rem; background: var(--callout-note-bg); color: var(--brand-primary); font-size: .8rem; font-weight: 700; }
+.copy-button { font-size: .8rem; white-space: nowrap; }
+.mode-badge { display: inline-block; font-size: .7rem; border: 1px solid var(--brand-secondary); border-radius: 2rem; padding: .1rem .5rem; margin: .15rem; color: var(--brand-primary); background: var(--surface); }
+pre { margin: 0; padding: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; background: #fbfcff; font: .85rem/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; }
+code { font: inherit; }
+.expected { font-size: .9rem; padding: 1rem; background: var(--callout-note-bg); border-radius: .5rem; }
+.expected h4 { margin: 0 0 .75rem; }
+.challenge { border: 1px dashed var(--brand-accent); padding: 1rem; margin: 1rem 0; border-radius: .5rem; }
+.answer { padding: .75rem; background: var(--callout-stretch-bg); border-radius: .4rem; }
+.challenge-answer { white-space: pre-wrap; }
+.carry-forward { padding: .8rem; border-left: 4px solid var(--brand-accent); background: var(--bg); font-size: .9rem; }
+.table-scroll { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; text-align: left; font-size: .85rem; }
+th, td { padding: .7rem; vertical-align: top; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+thead { background: var(--callout-note-bg); color: var(--brand-primary); }
+th { font-weight: 600; }
+.file-name, .file-download { overflow-wrap: anywhere; }
+.provided-separately { display: inline-block; font-size: .7rem; padding: .1rem .4rem; color: var(--muted); border: 1px solid var(--border); border-radius: .3rem; }
+.reference-list dt { font-size: 1rem; margin-top: 1rem; }
+.reference-list dd { margin-top: .3rem; }
+.callout { padding: .9rem 1rem; margin: 1rem 0; border-left: 4px solid var(--brand-secondary); border-radius: .4rem; font-size: .9rem; }
+.callout strong { text-transform: uppercase; font-size: .75rem; letter-spacing: .07em; }
+.callout p { margin: .3rem 0 0; }
+.callout-tip { background: var(--callout-tip-bg); border-color: #26734d; }
+.callout-warning { background: var(--callout-warning-bg); border-color: #9b6700; }
+.callout-important { background: var(--callout-important-bg); border-color: #b2334d; }
+.callout-note { background: var(--callout-note-bg); }
+.callout-instructor { background: var(--callout-instructor-bg); border-color: var(--brand-accent); }
+.callout-real-world { background: var(--callout-real-world-bg); border-color: #14796f; }
+.callout-stretch { background: var(--callout-stretch-bg); border-color: #a53ab8; }
+.self-check { padding: 1rem; background: var(--bg); border-radius: .5rem; margin-top: 1.5rem; }
+.self-check h4 { margin: 0 0 .75rem; }
+.self-check ul { list-style: none; padding: 0; margin: 0; }
+.self-check label { display: flex; align-items: baseline; gap: .5rem; cursor: pointer; font-size: .9rem; }
+.self-check input { accent-color: var(--brand-accent); }
+.page-footer { color: var(--muted); font-size: .8rem; padding: .5rem 0 2rem; }
+.copy-status:not(:empty) { position: fixed; bottom: 1rem; right: 1rem; max-width: calc(100vw - 2rem); background: var(--brand-primary); color: white; padding: .75rem 1rem; border-radius: .5rem; box-shadow: 0 4px 18px #0003; z-index: 20; }
+.skip-link { position: fixed; left: 1rem; top: -10rem; z-index: 30; padding: .7rem; background: white; }
+.skip-link:focus { top: 1rem; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: .75rem; padding: 1rem; }
+  .hero-inner { padding: 2.5rem 1.25rem; }
+  .sidebar { position: static; max-height: none; padding: 0; }
+  #studio--nav-toggle { display: block; width: 100%; }
+  body.js-ready #studio--navigation { display: none; }
+  body.js-ready #studio--navigation.is-open { display: block; }
+  .card { padding: 1.25rem; }
+  .story div { grid-template-columns: 1fr; gap: .1rem; }
+  .step { padding: 1rem; }
+  .leave-with ul { columns: 1; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media print {
+  body { background: white; color: black; font-size: 10pt; }
+  .hero { background: white; color: black; border-bottom: 2px solid black; }
+  .hero h1 { color: black; font-size: 24pt; }
+  .hero-inner { padding: 0 0 1rem; }
+  .tags li { border-color: #888; }
+  .layout { display: block; padding: 0; }
+  .sidebar, .toolbar, .copy-button, .copy-status, .skip-link { display: none !important; }
+  .card, .step { box-shadow: none; padding: 1rem; }
+  .leave-with h2 { color: black; }
+  .story-strip { color: black; background: white; border: 1px solid #888; }
+  .table-scroll { overflow: visible; }
+  table { min-width: 0; }
+  details > :not(summary) { display: block !important; }
+  details::details-content { content-visibility: visible; display: block; }
+  .prompt-block, .callout, .self-check { break-inside: avoid; }
+  summary { list-style: none; margin-left: 0; }
+  h2, h3, h4 { break-after: avoid; }
+  a { color: black; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#studio--content">Skip to content</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Zava Outdoor / Regional operations and finance</p>
+      <h1>Summit Packs: One QBR, One Evidence Trail</h1>
+      <p class="subtitle">Move from a checked Excel baseline to a PowerPoint decision brief, then replay the same workflow as a reusable skill.</p>
+      <ul class="tags" aria-label="Session details">
+<li>Copilot in Excel</li><li>Copilot in PowerPoint</li><li>Copilot Cowork</li>        <li>Regional operations and finance analysts</li>
+        <li>Intermediate</li>
+        <li>90 minutes</li>
+        <li>5 connected chapters</li>
+      </ul>
+      <div class="leave-with">
+        <h2>What you leave with</h2>
+        <ul><li>A reconciled regional comparison with clearly defined denominators.</li><li>A QBR Story sheet linking claims, evidence, uncertainty, and next actions.</li><li>A corrected unsupported claim from an independent challenge.</li><li>A four-slide PowerPoint decision brief grounded in the Story sheet.</li><li>A saved prompt and reusable skill draft tested on a prior quarter.</li></ul>
+      </div>
+    </div>
+  </header>
+  <div class="layout">
+<aside class="sidebar">
+  <button type="button" id="studio--nav-toggle" aria-expanded="false" aria-controls="studio--navigation">
+    Session navigation
+  </button>
+  <nav id="studio--navigation" aria-label="Session navigation">
+    <p class="nav-title">Your story journey</p>
+    <a class="nav-link active" aria-current="location" href="#overview">Overview</a>
+    <a class="nav-link" href="#setup">Setup</a>
+    <a class="nav-link" href="#agenda">Agenda</a>
+    <a class="nav-link" href="#files">Files</a>
+    <a class="nav-link chapter-link" href="#establish-case">1. Establish the QBR case</a>
+    <a class="nav-link step-link" href="#check-quarter-source">Inspect, reconcile, then write <span>10m</span></a>
+    <a class="nav-link step-link" href="#start-story-log">Start the running Story sheet <span>8m</span></a>
+    <a class="nav-link chapter-link" href="#locate-pressure">2. Find the regional pressure point</a>
+    <a class="nav-link step-link" href="#derive-regional-driver">Build a movement view <span>12m</span></a>
+    <a class="nav-link step-link" href="#challenge-the-claim">Challenge a tempting headline <span>8m</span></a>
+    <a class="nav-link chapter-link" href="#frame-decision">3. Frame a defensible decision</a>
+    <a class="nav-link step-link" href="#compare-investigation-options">Compare next actions <span>10m</span></a>
+    <a class="nav-link step-link" href="#write-decision-request">Turn the options into a request <span>8m</span></a>
+    <a class="nav-link chapter-link" href="#build-brief">4. Carry the evidence into PowerPoint</a>
+    <a class="nav-link step-link" href="#draft-evidence-deck">Build a source-linked deck <span>10m</span></a>
+    <a class="nav-link step-link" href="#review-slide-evidence">Review the deck against its source <span>8m</span></a>
+    <a class="nav-link chapter-link" href="#make-repeatable">5. Make it repeatable</a>
+    <a class="nav-link step-link" href="#save-prompt-and-skill">Save the prompt, then generalize the workflow <span>8m</span></a>
+    <a class="nav-link step-link" href="#replay-prior-quarter">Test the skill on a prior quarter <span>8m</span></a>
+    <a class="nav-link" href="#story-map">The story in one table</a>
+    <a class="nav-link" href="#troubleshooting">Troubleshooting</a>
+    <a class="nav-link" href="#glossary">Glossary</a>
+  </nav>
+</aside>
+    <main id="studio--content" tabindex="-1">
+      <div class="toolbar" aria-label="Lab controls">
+        <span>10 steps / 20 prompts / 1 challenges</span>
+        <div>
+          <button type="button" id="studio--expand">Expand all</button>
+          <button type="button" id="studio--collapse">Collapse all</button>
+          <button type="button" id="studio--print">Print guide</button>
+        </div>
+      </div>
+      <div class="story-strip">One story, 5 chapters / <strong>QBR Story sheet</strong></div>
+<section id="overview" class="card anchor" aria-labelledby="overview--title">
+  <p class="eyebrow">Step into the story</p>
+  <h2 id="overview--title">Overview</h2>
+  <p>Zava Outdoor and its Summit Packs business unit are invented for this workshop. Aster, Brook, and Cinder are fictional operating regions. Every workbook row, reporting period, and business situation below is fabricated.</p>
+<p class="fictional-badge">Fictional practice company</p>  <dl class="story">
+    <div><dt>Your role</dt><dd>You are the regional operations/finance analyst responsible for the Summit Packs quarterly business review.</dd></div>
+    <div><dt>Situation</dt><dd>Sales have grown, but shipping costs and returns are drawing questions. The leadership team has fragments of analysis rather than a traceable decision story.</dd></div>
+    <div><dt>Trigger</dt><dd>The fictional regional sponsor asks for a review that distinguishes measured change from untested explanations before deciding what evidence to collect next.</dd></div>
+    <div><dt>Deadline</dt><dd>Your practice review begins in 90 minutes. Each chapter adds a reviewed row to one QBR Story sheet rather than restarting the analysis.</dd></div>
+  </dl>
+  <aside class="callout callout-note through-line">
+    <strong>Keep one running artifact: QBR Story sheet</strong>
+    <p><b>Where:</b> Summit-QBR.xlsx &gt; QBR Story</p>
+    <p>Keep one StoryLog table with RowID, Claim, Evidence, Limitation, NextAction, and ReviewStatus. Chapters append or revise named rows; later steps explicitly consume those rows. This is the source of the slide narrative and the replay test.</p>
+  </aside>
+</section>
+<section id="setup" class="card anchor" aria-labelledby="setup--title">
+  <p class="eyebrow">Prepare your workspace</p>
+  <h2 id="setup--title">Setup</h2>
+  <ol><li>Open a blank practice workbook and a blank PowerPoint deck. Use an approved environment with the relevant Copilot capabilities; names and availability vary.</li><li>Ask the facilitator or a Cowork content-writing skill for the listed assets if using checkpoints. This sample includes metadata only, not downloadable workbooks; every file is Provided separately.</li><li>If no source workbook is supplied, use the complete fictional TSV in the first step to create QuarterData manually. Do not substitute real tenant data.</li><li>Create a working copy named Summit-QBR.xlsx. Keep the original data unchanged and place calculations on separate sheets.</li><li>Follow the cumulative agenda. Use checkpoints only to rejoin; inspect their starting state before continuing.</li></ol>
+  <h3>Choose the right mode</h3>
+  <dl class="story">
+<div><dt>Chat</dt><dd>Inspect evidence, explain formulas, and critique claims without assuming a file was changed.</dd></div><div><dt>Plan</dt><dd>Agree on a sequence and output structure before making edits. If no separate Plan mode is available, ask Chat for a plan.</dd></div><div><dt>Edit</dt><dd>Request supported workbook or deck edits, then verify the actual artifact. Otherwise follow manual steps.</dd></div><div><dt>Cowork</dt><dd>Use the reviewed artifacts to draft and save reusable instructions with your own tools; no automatic installation or sending.</dd></div>  </dl>
+  <h3>Ground rules</h3>
+  <ul><li>All data is fictional. Never use customer workbooks, real employee details, tenant documents, credentials, or secrets.</li><li>A model&#39;s confidence is not evidence. Verify ranges, signs, denominators, and source references before carrying a claim forward.</li><li>Do not infer why shipping costs or returns changed from this small table alone.</li><li>Review proposed edits. If Edit cannot write, use the explicit fallback rather than pretending an action occurred.</li><li>The Training Studio server returns this page only. File creation, skill saving, and sending belong to the learner or Cowork tools with permission.</li></ul>
+</section>
+<section id="agenda" class="card anchor" aria-labelledby="agenda--title">
+  <h2 id="agenda--title">Agenda</h2>
+  <p class="muted">Elapsed minutes from the start. Chapter budgets include their activities and discussion.</p>
+  <div class="table-scroll" role="region" aria-label="Agenda table" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">Minutes</th><th scope="col">Chapter</th><th scope="col">Format</th><th scope="col">You will add</th></tr></thead>
+      <tbody>
+        <tr><td>0-18</td><th scope="row"><a href="#establish-case">1. Establish the QBR case</a></th><td>Guided</td><td>A checked QuarterSummary and the baseline row that starts the QBR Story sheet.</td></tr>
+        <tr><td>18-38</td><th scope="row"><a href="#locate-pressure">2. Find the regional pressure point</a></th><td>Interactive</td><td>A regional-driver row plus an independently checked correction to a misleading claim.</td></tr>
+        <tr><td>38-56</td><th scope="row"><a href="#frame-decision">3. Frame a defensible decision</a></th><td>Group</td><td>An options comparison and a bounded decision request in StoryLog.</td></tr>
+        <tr><td>56-74</td><th scope="row"><a href="#build-brief">4. Carry the evidence into PowerPoint</a></th><td>Guided</td><td>A four-slide decision brief, its evidence map, and a slide-review row.</td></tr>
+        <tr><td>74-90</td><th scope="row"><a href="#make-repeatable">5. Make it repeatable</a></th><td>Individual</td><td>A saved prompt, a reusable skill draft, and a prior-quarter replay record in the QBR Story sheet.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section id="files" class="card anchor" aria-labelledby="files--title">
+  <h2 id="files--title">Files for the story</h2>
+  <p>The server lists files but does not create them. A facilitator or Cowork skill provides the actual assets separately.</p>
+  <h3>Source files</h3>
+  <div class="table-scroll" role="region" aria-label="Source files" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Purpose</th><th scope="col">Used in</th></tr></thead>
+      <tbody>
+        <tr id="quarter-source"><th scope="row"><span class="file-name">sources/summit-quarterly.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Six fictional region-quarter rows for FY28-Q1 and FY28-Q2. The first prompt includes the complete TSV so the source can also be created manually.</td><td>
+<a href="#establish-case">Establish the QBR case</a><br><a href="#locate-pressure">Find the regional pressure point</a>        </td></tr>
+        <tr id="prior-quarter-source"><th scope="row"><span class="file-name">sources/summit-prior-quarter.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Only the three FY28-Q1 rows, copied from the original source for a clean replay. It contains no FY28-Q0 comparison.</td><td>
+<a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Checkpoints - Only if you fall behind</h3>
+  <div class="table-scroll" role="region" aria-label="Checkpoints - Only if you fall behind" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Purpose</th><th scope="col">Used in</th></tr></thead>
+      <tbody>
+        <tr id="checkpoint-decision"><th scope="row"><span class="file-name">checkpoints/start-decision.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Start chapter three with reconciled quarter summaries and StoryLog rows baseline, regional-driver, and claim-check already reviewed. No decision options have been drafted yet.</td><td>
+<a href="#frame-decision">Frame a defensible decision</a>        </td></tr>
+        <tr id="checkpoint-brief"><th scope="row"><span class="file-name">checkpoints/start-brief.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Start chapter four with all earlier evidence plus reviewed options and decision-request rows. It includes no completed slides.</td><td>
+<a href="#build-brief">Carry the evidence into PowerPoint</a>        </td></tr>
+        <tr id="checkpoint-repeat"><th scope="row"><span class="file-name">checkpoints/start-repeat.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Start chapter five with the StoryLog through slide-review, including the slide-to-evidence map and the final text of the draft brief. Rebuild slides from that text if needed.</td><td>
+<a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Answer keys</h3>
+  <div class="table-scroll" role="region" aria-label="Answer keys" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Purpose</th><th scope="col">Used in</th></tr></thead>
+      <tbody>
+        <tr id="prior-answer-key"><th scope="row"><span class="file-name">answers/prior-quarter-checks.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Independent FY28-Q1 checks: units 1,900; sales 171,000; shipping 11,790; returned units 93; shipping/sales about 6.8947%; returns/units about 4.8947%. No prior-period variance can be established.</td><td>
+<a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Worksheets</h3>
+  <div class="table-scroll" role="region" aria-label="Worksheets" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Purpose</th><th scope="col">Used in</th></tr></thead>
+      <tbody>
+        <tr id="story-workbook"><th scope="row"><span class="file-name">Summit-QBR.xlsx</span> <span class="provided-separately">Provided separately</span></th><td>Working workbook containing QuarterData, checked summaries, and the QBR Story sheet. Learners create it; it is not bundled with this page.</td><td>
+<a href="#establish-case">Establish the QBR case</a><br><a href="#locate-pressure">Find the regional pressure point</a><br><a href="#frame-decision">Frame a defensible decision</a><br><a href="#build-brief">Carry the evidence into PowerPoint</a><br><a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Extra references</h3>
+  <div class="table-scroll" role="region" aria-label="Extra references" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Purpose</th><th scope="col">Used in</th></tr></thead>
+      <tbody>
+        <tr id="decision-deck"><th scope="row"><span class="file-name">Summit-QBR-Brief.pptx</span> <span class="provided-separately">Provided separately</span></th><td>Learner-created four-slide brief. The HTML renderer does not create a PowerPoint file.</td><td>
+<a href="#build-brief">Carry the evidence into PowerPoint</a><br><a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+        <tr id="saved-review-prompt"><th scope="row"><span class="file-name">summit-review-prompt.txt</span> <span class="provided-separately">Provided separately</span></th><td>A reviewed, parameterized prompt saved by the learner or Cowork&#39;s own tools.</td><td>
+<a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+        <tr id="reusable-skill"><th scope="row"><span class="file-name">summit-qbr-skill.md</span> <span class="provided-separately">Provided separately</span></th><td>A user-created skill draft containing the workflow and checks; not an installed or packaged Cowork plugin.</td><td>
+<a href="#make-repeatable">Make it repeatable</a>        </td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<details class="chapter card anchor" id="establish-case" open>
+  <summary>
+    <span class="eyebrow">Chapter 1 / 18 minutes / Guided</span>
+    <h2>Establish the QBR case</h2>
+    <span class="summary-hint">2 steps / select to expand or collapse</span>
+  </summary>
+  <div class="chapter-body">
+    <dl class="story">
+      <div><dt>The story so far</dt><dd>The regional sponsor has requested a clear decision story, but you have only a small fictional source table. No claim has been approved.</dd></div>
+      <div><dt>Builds on</dt><dd>
+Start of the story      </dd></div>
+      <div><dt>You will add</dt><dd>A checked QuarterSummary and the baseline row that starts the QBR Story sheet.</dd></div>
+    </dl>
+<details class="step anchor" id="check-quarter-source" open>
+  <summary>
+    <span class="step-meta">10 min / Basic</span>
+    <h3>Inspect, reconcile, then write</h3>
+    <span class="summary-hint">Establish the source and verify weighted ratios before making a narrative claim.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel &gt; fictional quarterly source, then QuarterData and QuarterSummary</p>
+    <p>Work in a new practice workbook. Treat the TSV as the whole evidence base: it contains no shipment detail, customer mix, or cause codes.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Plan the source check <span class="mode-badge" data-mode="plan">Plan</span></span>
+    <button class="copy-button" type="button" data-copy-target="check-quarter-source--prompt-1" aria-label="Copy prompt: Plan the source check">Copy prompt</button>
+  </div>
+  <pre id="check-quarter-source--prompt-1" tabindex="0"><code>I am preparing a fictional Summit Packs QBR for Zava Outdoor. Plan a safe Excel workflow using only the TSV below. Preserve it as a table named QuarterData. Check duplicate Quarter-plus-Region keys, blank values, numeric types, and positive denominators before calculating anything. NetSales and ShipCost are fictional currency units; ReturnUnits is a subset of Units, not money. Do not invent missing rows or causes.
+
+Quarter	Region	Units	NetSales	ShipCost	ReturnUnits
+FY28-Q1	Aster	800	72000	4320	32
+FY28-Q1	Brook	600	54000	4320	36
+FY28-Q1	Cinder	500	45000	3150	25
+FY28-Q2	Aster	840	75600	5040	42
+FY28-Q2	Brook	620	55800	5580	62
+FY28-Q2	Cinder	540	48600	3780	27
+
+Return a short plan with the exact source checks, proposed output sheets, and a human review gate before edits.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Reconcile the baseline <span class="mode-badge" data-mode="chat">Chat</span></span>
+    <button class="copy-button" type="button" data-copy-target="check-quarter-source--prompt-2" aria-label="Copy prompt: Reconcile the baseline">Copy prompt</button>
+  </div>
+  <pre id="check-quarter-source--prompt-2" tabindex="0"><code>Using the supplied fictional QuarterData and the source-check plan, calculate quarter totals for Units, NetSales, ShipCost, and ReturnUnits. Define shipping burden as SUM(ShipCost)/SUM(NetSales) and return rate as SUM(ReturnUnits)/SUM(Units); never average regional percentages. Show the formula and source range for each result. Keep full precision in calculations and show four decimal places for percentages. Flag missing or zero denominators rather than fabricating a rate. Explain which business questions this table cannot answer.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Write only the checked summary <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="check-quarter-source--prompt-3" aria-label="Copy prompt: Write only the checked summary">Copy prompt</button>
+  </div>
+  <pre id="check-quarter-source--prompt-3" tabindex="0"><code>After I confirm the reconciliation, create a QuarterSummary sheet from QuarterData with separate rows for FY28-Q1 and FY28-Q2, visible formulas, and clearly labeled units. Keep the six source rows untouched. Add a check showing that the summary totals equal the original source totals. Mark the sheet Fictional practice and record that causes of change are unknown. If you cannot edit the workbook, return the exact formulas and cell layout for me to insert; do not claim the sheet exists.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A traceable two-quarter summary with weighted rates and no invented explanations.</p>
+<ul><li>FY28-Q2: units 2,000; net sales 180,000; shipping 14,400; returned units 131.</li><li>FY28-Q1: units 1,900; net sales 171,000; shipping 11,790; returned units 93.</li><li>FY28-Q2 shipping burden is 8%; return rate is 6.55%. Source totals, not averages of regional rates, supply the denominators.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If Edit cannot write it, paste the TSV into Excel, format it as QuarterData, and manually insert the reviewed summary formulas. Verify the resulting cells before moving on.</p></aside>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong><p>Verify all amounts and denominator choices yourself. ReturnUnits is a count; mixing it with currency creates a meaningless ratio.</p>
+    </aside>
+    <aside class="callout callout-tip" aria-label="Tip">
+      <strong>Tip</strong><p>Keep the original table unchanged so later claims can always be traced back to the same evidence.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> QuarterSummary is the checked input for the next step; its source and review limits will become StoryLog row baseline.</p>    <section class="self-check" aria-labelledby="check-quarter-source--check">
+      <h4 id="check-quarter-source--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Are there exactly six unique region-quarter rows?</span></label></li><li><label><input type="checkbox"> <span>Do the weighted quarter totals reconcile to the source?</span></label></li><li><label><input type="checkbox"> <span>Are the limitations written down?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+<details class="step anchor" id="start-story-log">
+  <summary>
+    <span class="step-meta">8 min / Intermediate</span>
+    <h3>Start the running Story sheet</h3>
+    <span class="summary-hint">Turn the verified baseline into a durable review trail, not an isolated answer.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel &gt; checked QuarterSummary from Inspect, reconcile, then write</p>
+    <p>The first step produced the evidence. Now create the artifact every later chapter must consume and update.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Draft the first Story row <span class="mode-badge" data-mode="chat">Chat</span></span>
+    <button class="copy-button" type="button" data-copy-target="start-story-log--prompt-1" aria-label="Copy prompt: Draft the first Story row">Copy prompt</button>
+  </div>
+  <pre id="start-story-log--prompt-1" tabindex="0"><code>Using only the checked QuarterSummary from the previous step, draft StoryLog row baseline for the QBR Story sheet. Use columns RowID, Claim, Evidence, Limitation, NextAction, and ReviewStatus. State the quarter totals and weighted rates with cell or table references, not unsupported business causes. The limitation must say that shipment detail and reasons for returns are absent. Set ReviewStatus to Draft until I verify each reference. Return one row plus a short explanation of how another analyst could reproduce it.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Create the shared narrative spine <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="start-story-log--prompt-2" aria-label="Copy prompt: Create the shared narrative spine">Copy prompt</button>
+  </div>
+  <pre id="start-story-log--prompt-2" tabindex="0"><code>Create a sheet named QBR Story and a table named StoryLog using the approved column layout and baseline row. Record my checked references and set ReviewStatus to Checked only for claims I have verified. Add a note that later rows must identify the earlier evidence they consume. Keep QuarterData and QuarterSummary unchanged. If editing is unavailable, return a tab-separated header and row for manual paste. Do not create additional conclusions or send the workbook.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>One reviewed baseline row in a clearly named StoryLog, ready to be consumed rather than rewritten.</p>
+<ul><li>The baseline row points to QuarterSummary.</li><li>The row separates a measured fact from a missing explanation.</li><li>ReviewStatus reflects human checking, not the model&#39;s confidence.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If the sheet cannot be created automatically, paste the approved row into a new sheet named QBR Story and format it as StoryLog.</p></aside>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong><p>A checked label means you checked the references. Do not let a generated status substitute for review.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> StoryLog row baseline is the source for chapter two&#39;s regional-driver analysis.</p>    <section class="self-check" aria-labelledby="start-story-log--check">
+      <h4 id="start-story-log--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Can the next analyst locate baseline without reading the chat history?</span></label></li><li><label><input type="checkbox"> <span>Does baseline retain the scope and uncertainty of the source?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+<details class="chapter card anchor" id="locate-pressure">
+  <summary>
+    <span class="eyebrow">Chapter 2 / 20 minutes / Interactive</span>
+    <h2>Find the regional pressure point</h2>
+    <span class="summary-hint">2 steps / select to expand or collapse</span>
+  </summary>
+  <div class="chapter-body">
+    <dl class="story">
+      <div><dt>The story so far</dt><dd>QuarterSummary reconciles and StoryLog baseline records the scope. The sponsor now wants to know where to look, not a fictional explanation of why costs changed.</dd></div>
+      <div><dt>Builds on</dt><dd>
+<a href="#establish-case">Establish the QBR case</a>      </dd></div>
+      <div><dt>You will add</dt><dd>A regional-driver row plus an independently checked correction to a misleading claim.</dd></div>
+    </dl>
+<details class="step anchor" id="derive-regional-driver" open>
+  <summary>
+    <span class="step-meta">12 min / Intermediate</span>
+    <h3>Build a movement view</h3>
+    <span class="summary-hint">Locate the largest shipping increase without confusing it with the sales-growth leader.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel &gt; StoryLog baseline, QuarterSummary, and preserved QuarterData</p>
+    <p>Consume the reviewed baseline. Create a separate region-level comparison whose totals reconcile before adding it to the story.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Explain the regional movement <span class="mode-badge" data-mode="chat">Chat</span></span>
+    <button class="copy-button" type="button" data-copy-target="derive-regional-driver--prompt-1" aria-label="Copy prompt: Explain the regional movement">Copy prompt</button>
+  </div>
+  <pre id="derive-regional-driver--prompt-1" tabindex="0"><code>Starting from StoryLog baseline and its verified QuarterSummary references, compare FY28-Q2 with FY28-Q1 by Region in QuarterData. Calculate changes in NetSales and ShipCost, plus each region&#39;s FY28-Q2 return rate. Reconcile regional changes to the quarter changes. Identify the largest shipping increase and show its share of the total increase. Do not infer a cause or call the largest shipping mover the largest sales-growth contributor. Return a table with formulas, source references, and a separate list of questions for investigation.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Append the evidence-backed driver <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="derive-regional-driver--prompt-2" aria-label="Copy prompt: Append the evidence-backed driver">Copy prompt</button>
+  </div>
+  <pre id="derive-regional-driver--prompt-2" tabindex="0"><code>After I verify the movement table, create RegionalDrivers and append StoryLog row regional-driver. Link it to baseline and the checked region cells. Describe Brook as a priority for evidence collection based on its shipping movement and return rate, not as a proven root cause. Keep the other regions and favorable context visible. Put the missing shipment-level evidence in Limitation and the proposed investigation in NextAction. Do not overwrite baseline or claim the analysis has been approved.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A reconciled regional movement view and one limited, source-linked investigation claim.</p>
+<ul><li>Net sales increase by 9,000: Aster +3,600, Brook +1,800, Cinder +3,600.</li><li>Shipping increases by 2,610: Aster +720, Brook +1,260, Cinder +630.</li><li>Brook accounts for about 48.28% of the shipping increase and has a FY28-Q2 return rate of 10%; neither fact proves a cause.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If Edit cannot write RegionalDrivers, build a PivotTable or formula-based comparison manually, then paste the reviewed StoryLog row.</p></aside>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong><p>A largest movement is a prioritization signal, not causal evidence. Retain all three regions in the reconciliation.</p>
+    </aside>
+    <aside class="callout callout-instructor" aria-label="Instructor">
+      <strong>Instructor</strong><p>Ask a learner to explain the difference between contribution to growth and a regional rate before opening the challenge answer.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> RegionalDrivers and StoryLog regional-driver supply the evidence for the next independent challenge.</p>    <section class="self-check" aria-labelledby="derive-regional-driver--check">
+      <h4 id="derive-regional-driver--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Do regional movements reconcile to the quarter changes?</span></label></li><li><label><input type="checkbox"> <span>Is Brook&#39;s return rate labeled as regional, not company-wide?</span></label></li><li><label><input type="checkbox"> <span>Are causes explicitly unproven?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+<details class="step anchor" id="challenge-the-claim">
+  <summary>
+    <span class="step-meta">8 min / Challenge</span>
+    <h3>Challenge a tempting headline</h3>
+    <span class="summary-hint">Correct the narrative independently before it reaches a slide.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel &gt; RegionalDrivers and StoryLog regional-driver from Build a movement view</p>
+    <p>Pause Copilot. Inspect the checked tables yourself, then add a correction to the same Story sheet.</p>
+    <section class="challenge" aria-labelledby="challenge-the-claim--challenge">
+      <h4 id="challenge-the-claim--challenge">Your challenge - try without a prompt</h4>
+      <p>A draft says: &#39;Brook generated all sales growth, and the unit&#39;s return rate is 10%, so returns caused the shipping increase.&#39; Identify each unsupported or incorrect statement. Write a corrected StoryLog row claim-check with references and an explicit uncertainty.</p>
+<p><strong>Hint:</strong> Compare contribution to the sales movement, the scope of the return-rate denominator, and what the source says about causality.</p>      <details class="answer" id="challenge-the-claim--answer">
+        <summary>Show answer</summary>
+        <p class="challenge-answer">Brook contributes 1,800 of the 9,000 sales increase, or 20%, not all of it. The unit-wide FY28-Q2 return rate is 131/2,000 = 6.55%; 10% applies only to Brook. The table contains no evidence that returns caused shipping costs to rise. A defensible correction prioritizes Brook for investigation while preserving the other regions and labeling the cause unknown.</p>
+      </details>
+    </section>
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A correction that separates contribution, rate scope, and unsupported causality.</p>
+    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If formulas are hard to inspect, use the reviewed RegionalDrivers output and the source table side by side; ask the facilitator for navigation help, not the answer.</p></aside>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong><p>Try the challenge before revealing the answer. Keep your corrected claim even if its wording differs from the answer.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> StoryLog claim-check becomes a required constraint on the decision options in chapter three.</p>    <section class="self-check" aria-labelledby="challenge-the-claim--check">
+      <h4 id="challenge-the-claim--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Did I correct all three claims?</span></label></li><li><label><input type="checkbox"> <span>Does claim-check cite the evidence and retain the uncertainty?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+<details class="chapter card anchor" id="frame-decision">
+  <summary>
+    <span class="eyebrow">Chapter 3 / 18 minutes / Group</span>
+    <h2>Frame a defensible decision</h2>
+    <span class="summary-hint">2 steps / select to expand or collapse</span>
+  </summary>
+  <div class="chapter-body">
+    <dl class="story">
+      <div><dt>The story so far</dt><dd>The regional movement is reconciled and a misleading headline has been corrected. You can now ask for evidence collection without pretending that the source proves a cause.</dd></div>
+      <div><dt>Builds on</dt><dd>
+<a href="#locate-pressure">Find the regional pressure point</a>      </dd></div>
+      <div><dt>You will add</dt><dd>An options comparison and a bounded decision request in StoryLog.</dd></div>
+    </dl>
+    <aside class="callout callout-note checkpoint">
+      <strong>Behind? Jump in here</strong>
+      <p><span class="file-name">checkpoints/start-decision.xlsx</span> <span class="provided-separately">Provided separately</span></p>
+      <p>Start chapter three with reconciled quarter summaries and StoryLog rows baseline, regional-driver, and claim-check already reviewed. No decision options have been drafted yet.</p>
+      <p>Only if you fall behind: use this starting state instead of repeating earlier chapters.</p>
+    </aside>
+<details class="step anchor" id="compare-investigation-options" open>
+  <summary>
+    <span class="step-meta">10 min / Intermediate</span>
+    <h3>Compare next actions</h3>
+    <span class="summary-hint">Use the corrected claim to separate a low-risk investigation from unsupported operational changes.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel &gt; StoryLog regional-driver and claim-check, produced in chapter two</p>
+    <p>The checkpoint, if supplied, contains the same reviewed starting rows. Do not bypass the uncertainty just because a slide deadline is approaching.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Plan evidence collection <span class="mode-badge" data-mode="plan">Plan</span></span>
+    <button class="copy-button" type="button" data-copy-target="compare-investigation-options--prompt-1" aria-label="Copy prompt: Plan evidence collection">Copy prompt</button>
+  </div>
+  <pre id="compare-investigation-options--prompt-1" tabindex="0"><code>Consume StoryLog regional-driver and claim-check. Compare two possible next actions for fictional Summit Packs: investigate Brook shipment and return records, or immediately change the regional service policy. For each, list the evidence currently available, the missing evidence, the reversibility of the action, and a human review gate. Do not invent savings, forecasts, contracts, probabilities, or customer impacts. Explain why the current table can prioritize investigation but cannot justify a causal claim.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Write the options row <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="compare-investigation-options--prompt-2" aria-label="Copy prompt: Write the options row">Copy prompt</button>
+  </div>
+  <pre id="compare-investigation-options--prompt-2" tabindex="0"><code>Append StoryLog row options using the reviewed comparison. Link its Evidence to regional-driver and claim-check. Recommend evidence collection as a proposal for human review, not an approved action. In Limitation, retain that shipment-level facts are absent. In NextAction, request a fictional reviewer to define the minimum evidence needed before any service change. Preserve all earlier rows and return a manual-paste version if you cannot edit.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>Two clearly distinguished options with an evidence-gathering proposal rather than an invented business case.</p>
+<ul><li>Neither the source nor the corrected headline establishes causality.</li><li>Options must reference regional-driver and claim-check.</li><li>No savings amount or approved policy change is asserted.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If Plan is unavailable, request the same comparison in Chat. If Edit is unavailable, paste only the reviewed options row.</p></aside>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong><p>Do not fill an evidence gap with plausible cost savings. A proposed next action is not authorization.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> StoryLog options is the input for the next step&#39;s decision request.</p>    <section class="self-check" aria-labelledby="compare-investigation-options--check">
+      <h4 id="compare-investigation-options--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Are the two actions distinguished by evidence and reversibility?</span></label></li><li><label><input type="checkbox"> <span>Does options preserve the correction from claim-check?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+<details class="step anchor" id="write-decision-request">
+  <summary>
+    <span class="step-meta">8 min / Advanced</span>
+    <h3>Turn the options into a request</h3>
+    <span class="summary-hint">State what the reviewer must decide and what remains unknown.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel &gt; StoryLog options from Compare next actions, plus its referenced evidence rows</p>
+    <p>A decision-ready brief names the requested review, not merely the largest number. Keep the action inside the limits established by the earlier chapters.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Draft the bounded request <span class="mode-badge" data-mode="chat">Chat</span></span>
+    <button class="copy-button" type="button" data-copy-target="write-decision-request--prompt-1" aria-label="Copy prompt: Draft the bounded request">Copy prompt</button>
+  </div>
+  <pre id="write-decision-request--prompt-1" tabindex="0"><code>Using StoryLog options and its evidence links, draft a concise decision request for the fictional regional sponsor. Structure it as observed signal, proposed evidence collection, reviewer decision, and unresolved limitations. Refer to the checked shipping movement only with its source. Do not request approval of an untested service change, invent a completion date, or claim that anyone has accepted the proposal. Keep the wording suitable for a PowerPoint decision slide.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Carry the request forward <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="write-decision-request--prompt-2" aria-label="Copy prompt: Carry the request forward">Copy prompt</button>
+  </div>
+  <pre id="write-decision-request--prompt-2" tabindex="0"><code>Append StoryLog row decision-request with the reviewed wording. Point Evidence to options, regional-driver, and claim-check. Keep the request marked Draft for review, even if its source numbers are checked. Add a note that the PowerPoint deck must preserve the same limitations and cannot turn the proposal into an approval. Return the row for manual insertion if editing is unsupported.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A bounded request ready to become a slide, with evidence and uncertainty still attached.</p>
+<ul><li>The request consumes the options comparison.</li><li>The proposed investigation is not an approved policy change.</li><li>Evidence review and decision approval remain separate statuses.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If Edit cannot append the row, insert the approved text manually and keep its evidence links visible.</p></aside>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong><p>Checked source figures do not mean the business decision has been approved.</p>
+    </aside>
+    <aside class="callout callout-real-world" aria-label="Real World">
+      <strong>Real World</strong><p>An authorized production workflow would use approved supporting records. This fictional exercise must never ingest those real records.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> StoryLog decision-request and options are the authoritative inputs for chapter four&#39;s deck outline.</p>    <section class="self-check" aria-labelledby="write-decision-request--check">
+      <h4 id="write-decision-request--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Can the sponsor identify the requested decision?</span></label></li><li><label><input type="checkbox"> <span>Does decision-request retain every material limitation from options?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+<details class="chapter card anchor" id="build-brief">
+  <summary>
+    <span class="eyebrow">Chapter 4 / 18 minutes / Guided</span>
+    <h2>Carry the evidence into PowerPoint</h2>
+    <span class="summary-hint">2 steps / select to expand or collapse</span>
+  </summary>
+  <div class="chapter-body">
+    <dl class="story">
+      <div><dt>The story so far</dt><dd>StoryLog now contains a checked baseline, a regional signal, a corrected headline, options, and a bounded request. The next task is translation, not fresh analysis.</dd></div>
+      <div><dt>Builds on</dt><dd>
+<a href="#frame-decision">Frame a defensible decision</a>      </dd></div>
+      <div><dt>You will add</dt><dd>A four-slide decision brief, its evidence map, and a slide-review row.</dd></div>
+    </dl>
+    <aside class="callout callout-note checkpoint">
+      <strong>Behind? Jump in here</strong>
+      <p><span class="file-name">checkpoints/start-brief.xlsx</span> <span class="provided-separately">Provided separately</span></p>
+      <p>Start chapter four with all earlier evidence plus reviewed options and decision-request rows. It includes no completed slides.</p>
+      <p>Only if you fall behind: use this starting state instead of repeating earlier chapters.</p>
+    </aside>
+<details class="step anchor" id="draft-evidence-deck" open>
+  <summary>
+    <span class="step-meta">10 min / Intermediate</span>
+    <h3>Build a source-linked deck</h3>
+    <span class="summary-hint">Transform the existing story into slides without introducing new claims.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> PowerPoint &gt; reviewed StoryLog baseline, regional-driver, options, and decision-request from Excel</p>
+    <p>Use a blank presentation and the reviewed StoryLog excerpt. The checkpoint supplies the story rows, not a finished deck.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Plan the slide story <span class="mode-badge" data-mode="plan">Plan</span></span>
+    <button class="copy-button" type="button" data-copy-target="draft-evidence-deck--prompt-1" aria-label="Copy prompt: Plan the slide story">Copy prompt</button>
+  </div>
+  <pre id="draft-evidence-deck--prompt-1" tabindex="0"><code>Using only the reviewed QBR Story sheet, plan four slides for fictional Zava Outdoor&#39;s Summit Packs review: baseline, regional pressure point, evidence gaps and options, and decision requested. For each slide give a claim-style title, one visual or compact evidence table, the exact StoryLog rows it consumes, and speaker-note limitations. Carry the claim-check correction through the deck. Do not add a new forecast, external benchmark, decorative fact, or causal explanation.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Create and map the draft slides <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="draft-evidence-deck--prompt-2" aria-label="Copy prompt: Create and map the draft slides">Copy prompt</button>
+  </div>
+  <pre id="draft-evidence-deck--prompt-2" tabindex="0"><code>Create the four-slide draft from the reviewed outline in the current PowerPoint presentation. Include source-row identifiers in speaker notes and numeric labels that remain understandable without color. Keep the fictional-data label visible. If slide editing is unavailable, return slide-by-slide content and notes for manual paste rather than claiming a deck was created. Also return a StoryLog row deck-map that maps each slide to baseline, regional-driver, options, or decision-request; I will append that row to the QBR Story sheet.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A four-slide draft whose claims can be traced to existing StoryLog rows.</p>
+<ul><li>The deck contains no new analytical claims.</li><li>Brook is framed as an investigation priority, not a proven cause.</li><li>The decision slide preserves the draft request and its limitations.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If Edit cannot write slides, create four slides manually from the approved outline and notes. Paste deck-map into Excel yourself.</p></aside>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong><p>A polished visual can hide a changed denominator or unsupported claim. Check the slide against the source row, not just against the chat.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> The draft deck and StoryLog deck-map feed the next review step; deck-map remains in the QBR Story sheet.</p>    <section class="self-check" aria-labelledby="draft-evidence-deck--check">
+      <h4 id="draft-evidence-deck--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Does every slide have a source-row identifier?</span></label></li><li><label><input type="checkbox"> <span>Does the deck preserve the corrected claim and the proposal&#39;s status?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+<details class="step anchor" id="review-slide-evidence">
+  <summary>
+    <span class="step-meta">8 min / Advanced</span>
+    <h3>Review the deck against its source</h3>
+    <span class="summary-hint">Catch narrative drift before turning the workflow into reusable instructions.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> PowerPoint &gt; draft deck and StoryLog deck-map from Build a source-linked deck</p>
+    <p>Read the slides and their evidence map together. A reviewer should be able to trace every numerical or causal statement without reconstructing the conversation.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Audit the slide claims <span class="mode-badge" data-mode="chat">Chat</span></span>
+    <button class="copy-button" type="button" data-copy-target="review-slide-evidence--prompt-1" aria-label="Copy prompt: Audit the slide claims">Copy prompt</button>
+  </div>
+  <pre id="review-slide-evidence--prompt-1" tabindex="0"><code>Compare the draft Summit Packs slides with StoryLog deck-map and the referenced rows. List any unsupported claim, changed scope, missing denominator, altered approval status, or omitted limitation. For each finding identify the slide, the source row, and a proposed correction. Check that the quarter-wide return rate is not confused with Brook&#39;s regional rate. Do not silently rewrite the evidence or treat a well-designed slide as proof. Return a short review checklist before suggesting changes.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Apply only reviewed corrections <span class="mode-badge" data-mode="edit">Edit</span></span>
+    <button class="copy-button" type="button" data-copy-target="review-slide-evidence--prompt-2" aria-label="Copy prompt: Apply only reviewed corrections">Copy prompt</button>
+  </div>
+  <pre id="review-slide-evidence--prompt-2" tabindex="0"><code>Apply only the slide corrections I approve, preserving the source-row notes and fictional-data labels. Then return StoryLog row slide-review with the checked slides, unresolved questions, and a link to deck-map. Leave the business decision as Draft for review. If editing is unavailable, provide exact replacement text for manual insertion. Do not send or publish the presentation, and do not claim review steps that I have not performed.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A corrected deck and explicit review record that can be used as the skill&#39;s acceptance checklist.</p>
+<ul><li>The unit-wide FY28-Q2 return rate remains 6.55%; Brook&#39;s rate remains 10%.</li><li>No slide claims that returns caused the shipping increase.</li><li>slide-review distinguishes checked content from unresolved decisions.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If the deck cannot be inspected directly, paste each slide&#39;s text and source-row notes into Chat. Apply approved changes manually and document that review method.</p></aside>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong><p>A generated review is a candidate checklist. You still verify the actual deck and the workbook references.</p>
+    </aside>
+    <aside class="callout callout-stretch" aria-label="Stretch">
+      <strong>Stretch</strong><p>Ask a peer to follow one slide back to the raw rows without using your chat transcript.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> StoryLog slide-review and deck-map become the quality checklist for the reusable prompt and skill in chapter five.</p>    <section class="self-check" aria-labelledby="review-slide-evidence--check">
+      <h4 id="review-slide-evidence--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Were all approved corrections checked in the actual slides?</span></label></li><li><label><input type="checkbox"> <span>Does slide-review list unresolved questions rather than hiding them?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+<details class="chapter card anchor" id="make-repeatable">
+  <summary>
+    <span class="eyebrow">Chapter 5 / 16 minutes / Individual</span>
+    <h2>Make it repeatable</h2>
+    <span class="summary-hint">2 steps / select to expand or collapse</span>
+  </summary>
+  <div class="chapter-body">
+    <dl class="story">
+      <div><dt>The story so far</dt><dd>The evidence trail and deck review are complete. Preserve the method, not just the current quarter&#39;s prose, and prove that it behaves responsibly when the next input has less evidence.</dd></div>
+      <div><dt>Builds on</dt><dd>
+<a href="#build-brief">Carry the evidence into PowerPoint</a>      </dd></div>
+      <div><dt>You will add</dt><dd>A saved prompt, a reusable skill draft, and a prior-quarter replay record in the QBR Story sheet.</dd></div>
+    </dl>
+    <aside class="callout callout-note checkpoint">
+      <strong>Behind? Jump in here</strong>
+      <p><span class="file-name">checkpoints/start-repeat.xlsx</span> <span class="provided-separately">Provided separately</span></p>
+      <p>Start chapter five with the StoryLog through slide-review, including the slide-to-evidence map and the final text of the draft brief. Rebuild slides from that text if needed.</p>
+      <p>Only if you fall behind: use this starting state instead of repeating earlier chapters.</p>
+    </aside>
+<details class="step anchor" id="save-prompt-and-skill" open>
+  <summary>
+    <span class="step-meta">8 min / Advanced</span>
+    <h3>Save the prompt, then generalize the workflow</h3>
+    <span class="summary-hint">Use the reviewed artifacts to define a repeatable workflow with explicit limits.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Cowork &gt; StoryLog slide-review, deck-map, and the reviewed evidence workflow from chapter four</p>
+    <p>Use Cowork&#39;s own tools or your editor to save the reviewed text. A reusable instruction file is not automatically an installed skill or a deployable plugin.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Save a reviewed reusable prompt <span class="mode-badge" data-mode="cowork">Cowork</span></span>
+    <button class="copy-button" type="button" data-copy-target="save-prompt-and-skill--prompt-1" aria-label="Copy prompt: Save a reviewed reusable prompt">Copy prompt</button>
+  </div>
+  <pre id="save-prompt-and-skill--prompt-1" tabindex="0"><code>Consume StoryLog slide-review and deck-map. Extract a reusable QBR-review prompt from the workflow we actually checked, replacing quarter and workbook names with explicit inputs. Preserve the denominator checks, source references, cause-versus-correlation boundary, manual edit fallback, and human review gate. Show me the prompt first. After I approve it, use your own file tools to save summit-review-prompt.txt, or return the text for me to save if those tools are unavailable. Do not claim a save without confirmation.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Turn the reviewed prompt into a skill <span class="mode-badge" data-mode="cowork">Cowork</span></span>
+    <button class="copy-button" type="button" data-copy-target="save-prompt-and-skill--prompt-2" aria-label="Copy prompt: Turn the reviewed prompt into a skill">Copy prompt</button>
+  </div>
+  <pre id="save-prompt-and-skill--prompt-2" tabindex="0"><code>Using the approved saved prompt plus StoryLog slide-review, draft summit-qbr-skill.md as reusable instructions. Include purpose, required inputs, source validation, weighted ratio formulas, StoryLog updates, slide mapping, review gates, fallback behavior, and refusal to invent a missing comparison quarter. Require fictional practice data for this accelerator. Separate drafting from saving and sending; do not embed secrets, tenant paths, fixed quarter figures, or automatic approvals. Return a proposed StoryLog row reusable-skill describing the inputs and acceptance checks. Ask me to review before saving with your own tools; do not claim this file is installed or packaged.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>A reviewed prompt and skill draft whose parameters and safety checks come from the completed workflow.</p>
+<ul><li>The skill consumes named inputs rather than hard-coding the current quarter&#39;s answers.</li><li>Human review and manual fallbacks remain explicit.</li><li>StoryLog reusable-skill records the draft&#39;s acceptance checks and save status.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If Cowork cannot save files, copy the approved text into your editor and record that manual action. Do not invent a skill-installation command.</p></aside>
+    <aside class="callout callout-important" aria-label="Important">
+      <strong>Important</strong><p>The MCP server does not save these files. A text draft is not proof of installation, execution, or successful reuse.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> The saved prompt, skill draft, and StoryLog reusable-skill become the inputs to the prior-quarter replay.</p>    <section class="self-check" aria-labelledby="save-prompt-and-skill--check">
+      <h4 id="save-prompt-and-skill--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Are quarter and workbook names parameters?</span></label></li><li><label><input type="checkbox"> <span>Does the skill retain the checks from slide-review?</span></label></li><li><label><input type="checkbox"> <span>Is the actual save status recorded honestly?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+<details class="step anchor" id="replay-prior-quarter">
+  <summary>
+    <span class="step-meta">8 min / Advanced</span>
+    <h3>Test the skill on a prior quarter</h3>
+    <span class="summary-hint">Demonstrate reproducibility and an honest boundary when comparison evidence is missing.</span>
+  </summary>
+  <div class="step-body">
+    <p class="step-meta"><strong>Uses:</strong> Excel and Cowork &gt; saved prompt, skill draft, and StoryLog reusable-skill from the preceding step; separate FY28-Q1 source and answer key</p>
+    <p>Use a fresh workbook containing only the three FY28-Q1 source rows. Do not carry FY28-Q2 outputs into the replay. Consult the supplied answer key only after the independent run.</p>
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Plan a clean replay <span class="mode-badge" data-mode="plan">Plan</span></span>
+    <button class="copy-button" type="button" data-copy-target="replay-prior-quarter--prompt-1" aria-label="Copy prompt: Plan a clean replay">Copy prompt</button>
+  </div>
+  <pre id="replay-prior-quarter--prompt-1" tabindex="0"><code>Using the reviewed summit-qbr-skill.md and StoryLog reusable-skill acceptance checks, plan a fresh run on the fictional FY28-Q1-only source. Do not use the prior answer key yet and do not read outputs from the FY28-Q2 workbook. Identify which checks still apply and which comparisons are impossible because FY28-Q0 is absent. Propose a separate replay workbook and a review checklist so the original QBR Story sheet is not overwritten.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Run with only the available evidence <span class="mode-badge" data-mode="cowork">Cowork</span></span>
+    <button class="copy-button" type="button" data-copy-target="replay-prior-quarter--prompt-2" aria-label="Copy prompt: Run with only the available evidence">Copy prompt</button>
+  </div>
+  <pre id="replay-prior-quarter--prompt-2" tabindex="0"><code>Follow the reviewed skill on the FY28-Q1-only source in the separate replay workbook. Calculate source totals and weighted shipping and return rates with visible references. Draft a baseline StoryLog row and a short decision brief limited to that quarter. Explicitly decline quarter-over-quarter growth or variance claims because no earlier quarter is supplied. Do not reuse the previous deck&#39;s figures, invent an earlier period, or mark the replay passed before a human compares it with the answer key. Return a manual execution checklist if file editing is unavailable.</code></pre>
+</div>
+
+    <div class="prompt-block">
+  <div class="prompt-heading">
+    <span>Compare with the key and record the result <span class="mode-badge" data-mode="chat">Chat</span></span>
+    <button class="copy-button" type="button" data-copy-target="replay-prior-quarter--prompt-3" aria-label="Copy prompt: Compare with the key and record the result">Copy prompt</button>
+  </div>
+  <pre id="replay-prior-quarter--prompt-3" tabindex="0"><code>Now compare the independently produced replay with the fictional prior-quarter answer key: Units 1,900; NetSales 171,000; ShipCost 11,790; ReturnUnits 93; shipping burden 11,790/171,000 (about 6.8947%); return rate 93/1,900 (about 4.8947%). No earlier quarter is provided, so a growth or variance claim is unsupported. Report each match, mismatch, and missing-evidence behavior. Do not overwrite the replay to manufacture a pass. Draft StoryLog row replay-check for the original QBR Story sheet, linking it to reusable-skill and recording the actual outcome plus any skill revision needed.</code></pre>
+</div>
+
+    <section class="expected">
+      <h4>Wording varies; the substance should match</h4>
+      <p>An independent replay with explicit comparison results and no invented prior-quarter movement.</p>
+<ul><li>FY28-Q1 totals match 1,900 units, 171,000 sales, 11,790 shipping, and 93 returns.</li><li>Weighted rates are about 6.8947% shipping burden and 4.8947% returns.</li><li>The skill declines unsupported comparisons to FY28-Q0.</li><li>replay-check records mismatches instead of silently adjusting the run.</li></ul>    </section>
+    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>If the prior workbook or answer key has not been supplied, build the prior-only source from the original TSV and use the explicit checks above manually. Record that limitation and do not claim an automated skill run.</p></aside>
+    <aside class="callout callout-warning" aria-label="Warning">
+      <strong>Warning</strong><p>Do not show the key to the independent run, and do not correct the run before recording mismatches. Missing comparison data is a test of restraint.</p>
+    </aside>
+    <aside class="callout callout-note" aria-label="Note">
+      <strong>Note</strong><p>Success means correct evidence handling as well as correct arithmetic. A refusal to invent FY28-Q0 is a desired result.</p>
+    </aside>
+<p class="carry-forward"><strong>Carry forward:</strong> Append replay-check to the original QBR Story sheet, preserving the skill draft, source checks, and any unresolved revision before future reuse.</p>    <section class="self-check" aria-labelledby="replay-prior-quarter--check">
+      <h4 id="replay-prior-quarter--check">Before you move on</h4>
+      <ul><li><label><input type="checkbox"> <span>Was the replay independent of the answer key?</span></label></li><li><label><input type="checkbox"> <span>Were missing comparisons explicitly declined?</span></label></li><li><label><input type="checkbox"> <span>Does the original Story sheet record the actual replay outcome?</span></label></li></ul>
+    </section>
+  </div>
+</details>
+  </div>
+</details>
+<section id="story-map" class="card anchor" aria-labelledby="story-map--title">
+  <h2 id="story-map--title">The story in one table</h2>
+  <div class="table-scroll" role="region" aria-label="Story map" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">Chapter</th><th scope="col">Where</th><th scope="col">Mode</th><th scope="col">Lands in</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><a href="#check-quarter-source">1. Establish the QBR case / Inspect, reconcile, then write</a></th><td>Excel &gt; fictional quarterly source, then QuarterData and QuarterSummary</td><td>
+<span class="mode-badge">Plan</span><span class="mode-badge">Chat</span><span class="mode-badge">Edit</span>        </td><td>QuarterSummary is the checked input for the next step; its source and review limits will become StoryLog row baseline.</td></tr>
+        <tr><th scope="row"><a href="#start-story-log">1. Establish the QBR case / Start the running Story sheet</a></th><td>Excel &gt; checked QuarterSummary from Inspect, reconcile, then write</td><td>
+<span class="mode-badge">Chat</span><span class="mode-badge">Edit</span>        </td><td>StoryLog row baseline is the source for chapter two&#39;s regional-driver analysis.</td></tr>
+        <tr><th scope="row"><a href="#derive-regional-driver">2. Find the regional pressure point / Build a movement view</a></th><td>Excel &gt; StoryLog baseline, QuarterSummary, and preserved QuarterData</td><td>
+<span class="mode-badge">Chat</span><span class="mode-badge">Edit</span>        </td><td>RegionalDrivers and StoryLog regional-driver supply the evidence for the next independent challenge.</td></tr>
+        <tr><th scope="row"><a href="#challenge-the-claim">2. Find the regional pressure point / Challenge a tempting headline</a></th><td>Excel &gt; RegionalDrivers and StoryLog regional-driver from Build a movement view</td><td>
+Independent challenge        </td><td>StoryLog claim-check becomes a required constraint on the decision options in chapter three.</td></tr>
+        <tr><th scope="row"><a href="#compare-investigation-options">3. Frame a defensible decision / Compare next actions</a></th><td>Excel &gt; StoryLog regional-driver and claim-check, produced in chapter two</td><td>
+<span class="mode-badge">Plan</span><span class="mode-badge">Edit</span>        </td><td>StoryLog options is the input for the next step&#39;s decision request.</td></tr>
+        <tr><th scope="row"><a href="#write-decision-request">3. Frame a defensible decision / Turn the options into a request</a></th><td>Excel &gt; StoryLog options from Compare next actions, plus its referenced evidence rows</td><td>
+<span class="mode-badge">Chat</span><span class="mode-badge">Edit</span>        </td><td>StoryLog decision-request and options are the authoritative inputs for chapter four&#39;s deck outline.</td></tr>
+        <tr><th scope="row"><a href="#draft-evidence-deck">4. Carry the evidence into PowerPoint / Build a source-linked deck</a></th><td>PowerPoint &gt; reviewed StoryLog baseline, regional-driver, options, and decision-request from Excel</td><td>
+<span class="mode-badge">Plan</span><span class="mode-badge">Edit</span>        </td><td>The draft deck and StoryLog deck-map feed the next review step; deck-map remains in the QBR Story sheet.</td></tr>
+        <tr><th scope="row"><a href="#review-slide-evidence">4. Carry the evidence into PowerPoint / Review the deck against its source</a></th><td>PowerPoint &gt; draft deck and StoryLog deck-map from Build a source-linked deck</td><td>
+<span class="mode-badge">Chat</span><span class="mode-badge">Edit</span>        </td><td>StoryLog slide-review and deck-map become the quality checklist for the reusable prompt and skill in chapter five.</td></tr>
+        <tr><th scope="row"><a href="#save-prompt-and-skill">5. Make it repeatable / Save the prompt, then generalize the workflow</a></th><td>Cowork &gt; StoryLog slide-review, deck-map, and the reviewed evidence workflow from chapter four</td><td>
+<span class="mode-badge">Cowork</span>        </td><td>The saved prompt, skill draft, and StoryLog reusable-skill become the inputs to the prior-quarter replay.</td></tr>
+        <tr><th scope="row"><a href="#replay-prior-quarter">5. Make it repeatable / Test the skill on a prior quarter</a></th><td>Excel and Cowork &gt; saved prompt, skill draft, and StoryLog reusable-skill from the preceding step; separate FY28-Q1 source and answer key</td><td>
+<span class="mode-badge">Plan</span><span class="mode-badge">Cowork</span><span class="mode-badge">Chat</span>        </td><td>Append replay-check to the original QBR Story sheet, preserving the skill draft, source checks, and any unresolved revision before future reuse.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section id="troubleshooting" class="card anchor" aria-labelledby="troubleshooting--title">
+  <h2 id="troubleshooting--title">Troubleshooting</h2>
+  <dl class="reference-list"><dt>A named mode is not available</dt><dd>Use Chat for a plan or explanation and carry out the reviewed changes manually. Never claim a missing mode executed an action.</dd><dt>Edit cannot write to the workbook or presentation</dt><dd>Ask for exact formulas, rows, or slide text. Paste them manually and verify the actual artifact before changing ReviewStatus.</dd><dt>The quarter ratios differ from expectations</dt><dd>Check the selected rows, numeric types, and denominators. Divide totals by totals; do not average regional percentages.</dd><dt>The chapter checkpoint is not supplied</dt><dd>Ask the facilitator or Cowork content-writing skill for the declared starting state. Files labeled Provided separately are not hidden download links.</dd><dt>The slides add an unsupported cause</dt><dd>Return to claim-check and decision-request. Replace the unsupported sentence and preserve the limitation in the slide notes.</dd><dt>The replay appears to pass suspiciously well</dt><dd>Check whether the answer key or prior outputs leaked into the run. Repeat with only the prior-quarter source and record the result honestly.</dd></dl>
+</section>
+<section id="glossary" class="card anchor" aria-labelledby="glossary--title">
+  <h2 id="glossary--title">Glossary</h2>
+  <dl class="reference-list"><dt>QBR</dt><dd>Quarterly business review: a discussion of evidence, uncertainty, and proposed decisions.</dd><dt>Through-line artifact</dt><dd>The single reviewed Story sheet carried and extended across the chapters.</dd><dt>Weighted rate</dt><dd>A ratio of aggregate numerator to aggregate denominator, not an average of local percentages.</dd><dt>Checkpoint</dt><dd>A separately supplied starting state that lets a learner rejoin without repeating earlier work.</dd><dt>Answer key</dt><dd>An independent set of expected checks used after a replay, not an input used to manufacture its output.</dd><dt>Reusable skill draft</dt><dd>Reviewed workflow instructions with inputs, checks, and boundaries; not proof of installation or execution.</dd></dl>
+</section>
+      <footer id="disclaimer" class="page-footer">
+        <h2>Disclaimer</h2>
+        <p>Zava Outdoor, Summit Packs, the regions, reporting periods, and all figures are fictional. This page is for practice, not financial advice or an approval record. No customer or tenant data may be submitted. Copilot capabilities vary by environment; verify every result and file action yourself.</p>
+        <p>This guide works offline. Linked resources and Copilot itself may require internet access.</p>
+      </footer>
+    </main>
+  </div>
+  <p id="studio--copy-status" class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
+  <script>
+(() => {
+  "use strict";
+  document.body.classList.add("js-ready");
+  const nav = document.getElementById("studio--navigation");
+  const navToggle = document.getElementById("studio--nav-toggle");
+  const links = Array.from(nav.querySelectorAll(".nav-link"));
+  const sections = links.map(link => document.getElementById(link.hash.slice(1)));
+  const details = Array.from(document.querySelectorAll("main details"));
+  const sectionDetails = details.filter(detail => detail.matches(".chapter, .step"));
+  const status = document.getElementById("studio--copy-status");
+  let batchToggle = false;
+  let printState = null;
+  let statusTimer;
+
+  function setActive(id) {
+    if (!links.some(link => link.hash === "#" + id)) return;
+    links.forEach(link => {
+      const active = link.hash === "#" + id;
+      link.classList.toggle("active", active);
+      if (active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+  }
+  function isVisible(section) {
+    let parent = section.parentElement;
+    while (parent) {
+      if (parent.tagName === "DETAILS" && !parent.open) return false;
+      parent = parent.parentElement;
+    }
+    return true;
+  }
+  function updateActive() {
+    const visible = sections.filter(isVisible);
+    const passed = visible.filter(section => section.getBoundingClientRect().top <= innerHeight * 0.3);
+    const current = passed.length ? passed[passed.length - 1] : visible[0];
+    if (current) setActive(current.id);
+  }
+  const observer = new IntersectionObserver(updateActive, {
+    rootMargin: "-5% 0px -65% 0px", threshold: [0, 0.25, 1]
+  });
+  sections.forEach(section => observer.observe(section));
+  let scrollPending = false;
+  addEventListener("scroll", () => {
+    if (!scrollPending) requestAnimationFrame(() => { updateActive(); scrollPending = false; });
+    scrollPending = true;
+  }, { passive: true });
+
+  function reveal(target) {
+    let current = target;
+    while (current) {
+      if (current.tagName === "DETAILS") current.open = true;
+      current = current.parentElement;
+    }
+    target.scrollIntoView({ block: "start" });
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
+    setActive(target.id);
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener("click", event => {
+    const target = document.getElementById(link.hash.slice(1));
+    if (!target) return;
+    event.preventDefault();
+    nav.classList.remove("is-open");
+    navToggle.setAttribute("aria-expanded", "false");
+    history.replaceState(null, "", link.hash);
+    reveal(target);
+  }));
+  function followHash() {
+    const target = document.getElementById(location.hash.slice(1));
+    if (target) reveal(target);
+  }
+  addEventListener("hashchange", followHash);
+  followHash();
+  sectionDetails.forEach(detail => detail.addEventListener("toggle", () => {
+    if (!batchToggle && isVisible(detail)) setActive(detail.id);
+  }));
+  navToggle.addEventListener("click", () => {
+    const open = nav.classList.toggle("is-open");
+    navToggle.setAttribute("aria-expanded", String(open));
+  });
+  function toggleAll(open) {
+    batchToggle = true;
+    sectionDetails.forEach(detail => { detail.open = open; });
+    setTimeout(() => { batchToggle = false; updateActive(); }, 0);
+  }
+  document.getElementById("studio--expand").addEventListener("click", () => toggleAll(true));
+  document.getElementById("studio--collapse").addEventListener("click", () => toggleAll(false));
+  document.getElementById("studio--print").addEventListener("click", () => print());
+  addEventListener("beforeprint", () => {
+    printState = details.map(detail => detail.open);
+    details.forEach(detail => { detail.open = true; });
+    toggleAll(true);
+  });
+  addEventListener("afterprint", () => {
+    if (printState) details.forEach((detail, index) => { detail.open = printState[index]; });
+    printState = null;
+    updateActive();
+  });
+
+  function legacyCopy(text) {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    try {
+      field.select();
+      if (!document.execCommand("copy")) throw new Error("Clipboard unavailable");
+    } finally {
+      field.remove();
+    }
+  }
+  document.querySelectorAll(".copy-button").forEach(button => {
+    button.addEventListener("click", async () => {
+      const prompt = document.getElementById(button.dataset.copyTarget);
+      const text = prompt.textContent;
+      try {
+        if (navigator.clipboard && isSecureContext) {
+          try { await navigator.clipboard.writeText(text); }
+          catch { legacyCopy(text); }
+        } else {
+          legacyCopy(text);
+        }
+        button.textContent = "Copied";
+        status.textContent = "Copied prompt to clipboard.";
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(prompt);
+        const selection = getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        button.textContent = "Select and copy";
+        status.textContent = "Clipboard unavailable. Prompt selected; press Ctrl+C or Command+C.";
+      } finally {
+        button.focus({ preventScroll: true });
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(() => { status.textContent = ""; }, 6000);
+        setTimeout(() => { button.textContent = "Copy prompt"; }, 2500);
+      }
+    });
+  });
+})();
+  </script>
+</body>
+</html>

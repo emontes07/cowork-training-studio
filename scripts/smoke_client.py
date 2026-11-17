@@ -10,7 +10,7 @@ from fastmcp import Client
 
 
 async def smoke(url: str) -> None:
-    fixture = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "zava_finance_lab.json"
+    fixture = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "zava_story_lab.json"
     spec = json.loads(fixture.read_text(encoding="utf-8"))
     async with Client(url, timeout=30) as client:
         names = {tool.name for tool in await client.list_tools()}
@@ -19,7 +19,11 @@ async def smoke(url: str) -> None:
         print("tools/list:", ", ".join(sorted(names)))
         schema = (await client.call_tool("get_lab_spec_schema", {})).structured_content
         assert schema is not None
-        assert "scenarios" in schema["required"]
+        assert {"schema_version", "chapters"} <= set(schema["required"])
+        assert schema["properties"]["schema_version"]["const"] == "2.0"
+        formats = (await client.call_tool("list_session_formats", {})).data
+        assert len(formats) == 4
+        print("list_session_formats: 4 formats")
         validation = (await client.call_tool("validate_lab_spec", {"spec": spec})).structured_content
         assert validation is not None
         assert validation["valid"] and not validation["warnings"], validation
@@ -32,7 +36,7 @@ async def smoke(url: str) -> None:
         assert rendered["stats"] == validation["stats"]
         print("render_lab_page:", rendered["filename"], "(HTML returned, not saved)")
         invalid = deepcopy(spec)
-        del invalid["scenarios"]
+        del invalid["chapters"]
         envelope = (await client.call_tool("render_lab_page", {"spec": invalid})).structured_content
         assert envelope is not None
         rejected = envelope["result"]

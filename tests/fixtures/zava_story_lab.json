@@ -1,0 +1,519 @@
+{
+  "schema_version": "2.0",
+  "title": "Summit Packs: One QBR, One Evidence Trail",
+  "subtitle": "Move from a checked Excel baseline to a PowerPoint decision brief, then replay the same workflow as a reusable skill.",
+  "audience": "Regional operations and finance analysts",
+  "duration_minutes": 90,
+  "skill_level": "intermediate",
+  "products": ["Copilot in Excel", "Copilot in PowerPoint", "Copilot Cowork"],
+  "functional_area": "Regional operations and finance",
+  "company": {
+    "name": "Zava Outdoor",
+    "is_fictional": true,
+    "description": "Zava Outdoor and its Summit Packs business unit are invented for this workshop. Aster, Brook, and Cinder are fictional operating regions. Every workbook row, reporting period, and business situation below is fabricated."
+  },
+  "theme_id": "microsoft",
+  "narrative": {
+    "role": "You are the regional operations/finance analyst responsible for the Summit Packs quarterly business review.",
+    "situation": "Sales have grown, but shipping costs and returns are drawing questions. The leadership team has fragments of analysis rather than a traceable decision story.",
+    "trigger": "The fictional regional sponsor asks for a review that distinguishes measured change from untested explanations before deciding what evidence to collect next.",
+    "deadline": "Your practice review begins in 90 minutes. Each chapter adds a reviewed row to one QBR Story sheet rather than restarting the analysis.",
+    "leave_with": [
+      "A reconciled regional comparison with clearly defined denominators.",
+      "A QBR Story sheet linking claims, evidence, uncertainty, and next actions.",
+      "A corrected unsupported claim from an independent challenge.",
+      "A four-slide PowerPoint decision brief grounded in the Story sheet.",
+      "A saved prompt and reusable skill draft tested on a prior quarter."
+    ]
+  },
+  "through_line": {
+    "name": "QBR Story sheet",
+    "location": "Summit-QBR.xlsx > QBR Story",
+    "description": "Keep one StoryLog table with RowID, Claim, Evidence, Limitation, NextAction, and ReviewStatus. Chapters append or revise named rows; later steps explicitly consume those rows. This is the source of the slide narrative and the replay test."
+  },
+  "files": [
+    {
+      "id": "quarter-source",
+      "filename": "sources/summit-quarterly.xlsx",
+      "kind": "source",
+      "purpose": "Six fictional region-quarter rows for FY28-Q1 and FY28-Q2. The first prompt includes the complete TSV so the source can also be created manually.",
+      "used_in": ["establish-case", "locate-pressure"]
+    },
+    {
+      "id": "prior-quarter-source",
+      "filename": "sources/summit-prior-quarter.xlsx",
+      "kind": "source",
+      "purpose": "Only the three FY28-Q1 rows, copied from the original source for a clean replay. It contains no FY28-Q0 comparison.",
+      "used_in": ["make-repeatable"]
+    },
+    {
+      "id": "story-workbook",
+      "filename": "Summit-QBR.xlsx",
+      "kind": "worksheet",
+      "purpose": "Working workbook containing QuarterData, checked summaries, and the QBR Story sheet. Learners create it; it is not bundled with this page.",
+      "used_in": ["establish-case", "locate-pressure", "frame-decision", "build-brief", "make-repeatable"]
+    },
+    {
+      "id": "checkpoint-decision",
+      "filename": "checkpoints/start-decision.xlsx",
+      "kind": "checkpoint",
+      "purpose": "Start chapter three with reconciled quarter summaries and StoryLog rows baseline, regional-driver, and claim-check already reviewed. No decision options have been drafted yet.",
+      "used_in": ["frame-decision"]
+    },
+    {
+      "id": "checkpoint-brief",
+      "filename": "checkpoints/start-brief.xlsx",
+      "kind": "checkpoint",
+      "purpose": "Start chapter four with all earlier evidence plus reviewed options and decision-request rows. It includes no completed slides.",
+      "used_in": ["build-brief"]
+    },
+    {
+      "id": "checkpoint-repeat",
+      "filename": "checkpoints/start-repeat.xlsx",
+      "kind": "checkpoint",
+      "purpose": "Start chapter five with the StoryLog through slide-review, including the slide-to-evidence map and the final text of the draft brief. Rebuild slides from that text if needed.",
+      "used_in": ["make-repeatable"]
+    },
+    {
+      "id": "prior-answer-key",
+      "filename": "answers/prior-quarter-checks.xlsx",
+      "kind": "answer_key",
+      "purpose": "Independent FY28-Q1 checks: units 1,900; sales 171,000; shipping 11,790; returned units 93; shipping/sales about 6.8947%; returns/units about 4.8947%. No prior-period variance can be established.",
+      "used_in": ["make-repeatable"]
+    },
+    {
+      "id": "decision-deck",
+      "filename": "Summit-QBR-Brief.pptx",
+      "kind": "extra",
+      "purpose": "Learner-created four-slide brief. The HTML renderer does not create a PowerPoint file.",
+      "used_in": ["build-brief", "make-repeatable"]
+    },
+    {
+      "id": "saved-review-prompt",
+      "filename": "summit-review-prompt.txt",
+      "kind": "extra",
+      "purpose": "A reviewed, parameterized prompt saved by the learner or Cowork's own tools.",
+      "used_in": ["make-repeatable"]
+    },
+    {
+      "id": "reusable-skill",
+      "filename": "summit-qbr-skill.md",
+      "kind": "extra",
+      "purpose": "A user-created skill draft containing the workflow and checks; not an installed or packaged Cowork plugin.",
+      "used_in": ["make-repeatable"]
+    }
+  ],
+  "setup": {
+    "steps": [
+      "Open a blank practice workbook and a blank PowerPoint deck. Use an approved environment with the relevant Copilot capabilities; names and availability vary.",
+      "Ask the facilitator or a Cowork content-writing skill for the listed assets if using checkpoints. This sample includes metadata only, not downloadable workbooks; every file is Provided separately.",
+      "If no source workbook is supplied, use the complete fictional TSV in the first step to create QuarterData manually. Do not substitute real tenant data.",
+      "Create a working copy named Summit-QBR.xlsx. Keep the original data unchanged and place calculations on separate sheets.",
+      "Follow the cumulative agenda. Use checkpoints only to rejoin; inspect their starting state before continuing."
+    ],
+    "ground_rules": [
+      "All data is fictional. Never use customer workbooks, real employee details, tenant documents, credentials, or secrets.",
+      "A model's confidence is not evidence. Verify ranges, signs, denominators, and source references before carrying a claim forward.",
+      "Do not infer why shipping costs or returns changed from this small table alone.",
+      "Review proposed edits. If Edit cannot write, use the explicit fallback rather than pretending an action occurred.",
+      "The Training Studio server returns this page only. File creation, skill saving, and sending belong to the learner or Cowork tools with permission."
+    ],
+    "modes": [
+      {"name": "Chat", "description": "Inspect evidence, explain formulas, and critique claims without assuming a file was changed."},
+      {"name": "Plan", "description": "Agree on a sequence and output structure before making edits. If no separate Plan mode is available, ask Chat for a plan."},
+      {"name": "Edit", "description": "Request supported workbook or deck edits, then verify the actual artifact. Otherwise follow manual steps."},
+      {"name": "Cowork", "description": "Use the reviewed artifacts to draft and save reusable instructions with your own tools; no automatic installation or sending."}
+    ]
+  },
+  "chapters": [
+    {
+      "id": "establish-case",
+      "title": "Establish the QBR case",
+      "minutes": 18,
+      "format": "guided",
+      "story_so_far": "The regional sponsor has requested a clear decision story, but you have only a small fictional source table. No claim has been approved.",
+      "builds_on": [],
+      "you_will_add": "A checked QuarterSummary and the baseline row that starts the QBR Story sheet.",
+      "steps": [
+        {
+          "id": "check-quarter-source",
+          "title": "Inspect, reconcile, then write",
+          "minutes": 10,
+          "goal": "Establish the source and verify weighted ratios before making a narrative claim.",
+          "uses": "Excel > fictional quarterly source, then QuarterData and QuarterSummary",
+          "level": "basic",
+          "intro": "Work in a new practice workbook. Treat the TSV as the whole evidence base: it contains no shipment detail, customer mix, or cause codes.",
+          "prompts": [
+            {
+              "label": "Plan the source check",
+              "mode": "plan",
+              "text": "I am preparing a fictional Summit Packs QBR for Zava Outdoor. Plan a safe Excel workflow using only the TSV below. Preserve it as a table named QuarterData. Check duplicate Quarter-plus-Region keys, blank values, numeric types, and positive denominators before calculating anything. NetSales and ShipCost are fictional currency units; ReturnUnits is a subset of Units, not money. Do not invent missing rows or causes.\n\nQuarter\tRegion\tUnits\tNetSales\tShipCost\tReturnUnits\nFY28-Q1\tAster\t800\t72000\t4320\t32\nFY28-Q1\tBrook\t600\t54000\t4320\t36\nFY28-Q1\tCinder\t500\t45000\t3150\t25\nFY28-Q2\tAster\t840\t75600\t5040\t42\nFY28-Q2\tBrook\t620\t55800\t5580\t62\nFY28-Q2\tCinder\t540\t48600\t3780\t27\n\nReturn a short plan with the exact source checks, proposed output sheets, and a human review gate before edits."
+            },
+            {
+              "label": "Reconcile the baseline",
+              "mode": "chat",
+              "text": "Using the supplied fictional QuarterData and the source-check plan, calculate quarter totals for Units, NetSales, ShipCost, and ReturnUnits. Define shipping burden as SUM(ShipCost)/SUM(NetSales) and return rate as SUM(ReturnUnits)/SUM(Units); never average regional percentages. Show the formula and source range for each result. Keep full precision in calculations and show four decimal places for percentages. Flag missing or zero denominators rather than fabricating a rate. Explain which business questions this table cannot answer."
+            },
+            {
+              "label": "Write only the checked summary",
+              "mode": "edit",
+              "text": "After I confirm the reconciliation, create a QuarterSummary sheet from QuarterData with separate rows for FY28-Q1 and FY28-Q2, visible formulas, and clearly labeled units. Keep the six source rows untouched. Add a check showing that the summary totals equal the original source totals. Mark the sheet Fictional practice and record that causes of change are unknown. If you cannot edit the workbook, return the exact formulas and cell layout for me to insert; do not claim the sheet exists."
+            }
+          ],
+          "expected": {
+            "summary": "A traceable two-quarter summary with weighted rates and no invented explanations.",
+            "key_facts": [
+              "FY28-Q2: units 2,000; net sales 180,000; shipping 14,400; returned units 131.",
+              "FY28-Q1: units 1,900; net sales 171,000; shipping 11,790; returned units 93.",
+              "FY28-Q2 shipping burden is 8%; return rate is 6.55%. Source totals, not averages of regional rates, supply the denominators."
+            ]
+          },
+          "fallback": "If Edit cannot write it, paste the TSV into Excel, format it as QuarterData, and manually insert the reviewed summary formulas. Verify the resulting cells before moving on.",
+          "carries_forward": "QuarterSummary is the checked input for the next step; its source and review limits will become StoryLog row baseline.",
+          "callouts": [
+            {"type": "warning", "text": "Verify all amounts and denominator choices yourself. ReturnUnits is a count; mixing it with currency creates a meaningless ratio."},
+            {"type": "tip", "text": "Keep the original table unchanged so later claims can always be traced back to the same evidence."}
+          ],
+          "self_check": ["Are there exactly six unique region-quarter rows?", "Do the weighted quarter totals reconcile to the source?", "Are the limitations written down?"]
+        },
+        {
+          "id": "start-story-log",
+          "title": "Start the running Story sheet",
+          "minutes": 8,
+          "goal": "Turn the verified baseline into a durable review trail, not an isolated answer.",
+          "uses": "Excel > checked QuarterSummary from Inspect, reconcile, then write",
+          "level": "intermediate",
+          "intro": "The first step produced the evidence. Now create the artifact every later chapter must consume and update.",
+          "prompts": [
+            {
+              "label": "Draft the first Story row",
+              "mode": "chat",
+              "text": "Using only the checked QuarterSummary from the previous step, draft StoryLog row baseline for the QBR Story sheet. Use columns RowID, Claim, Evidence, Limitation, NextAction, and ReviewStatus. State the quarter totals and weighted rates with cell or table references, not unsupported business causes. The limitation must say that shipment detail and reasons for returns are absent. Set ReviewStatus to Draft until I verify each reference. Return one row plus a short explanation of how another analyst could reproduce it."
+            },
+            {
+              "label": "Create the shared narrative spine",
+              "mode": "edit",
+              "text": "Create a sheet named QBR Story and a table named StoryLog using the approved column layout and baseline row. Record my checked references and set ReviewStatus to Checked only for claims I have verified. Add a note that later rows must identify the earlier evidence they consume. Keep QuarterData and QuarterSummary unchanged. If editing is unavailable, return a tab-separated header and row for manual paste. Do not create additional conclusions or send the workbook."
+            }
+          ],
+          "expected": {
+            "summary": "One reviewed baseline row in a clearly named StoryLog, ready to be consumed rather than rewritten.",
+            "key_facts": ["The baseline row points to QuarterSummary.", "The row separates a measured fact from a missing explanation.", "ReviewStatus reflects human checking, not the model's confidence."]
+          },
+          "fallback": "If the sheet cannot be created automatically, paste the approved row into a new sheet named QBR Story and format it as StoryLog.",
+          "carries_forward": "StoryLog row baseline is the source for chapter two's regional-driver analysis.",
+          "callouts": [{"type": "important", "text": "A checked label means you checked the references. Do not let a generated status substitute for review."}],
+          "self_check": ["Can the next analyst locate baseline without reading the chat history?", "Does baseline retain the scope and uncertainty of the source?"]
+        }
+      ]
+    },
+    {
+      "id": "locate-pressure",
+      "title": "Find the regional pressure point",
+      "minutes": 20,
+      "format": "interactive",
+      "story_so_far": "QuarterSummary reconciles and StoryLog baseline records the scope. The sponsor now wants to know where to look, not a fictional explanation of why costs changed.",
+      "builds_on": ["establish-case"],
+      "you_will_add": "A regional-driver row plus an independently checked correction to a misleading claim.",
+      "steps": [
+        {
+          "id": "derive-regional-driver",
+          "title": "Build a movement view",
+          "minutes": 12,
+          "goal": "Locate the largest shipping increase without confusing it with the sales-growth leader.",
+          "uses": "Excel > StoryLog baseline, QuarterSummary, and preserved QuarterData",
+          "level": "intermediate",
+          "intro": "Consume the reviewed baseline. Create a separate region-level comparison whose totals reconcile before adding it to the story.",
+          "prompts": [
+            {
+              "label": "Explain the regional movement",
+              "mode": "chat",
+              "text": "Starting from StoryLog baseline and its verified QuarterSummary references, compare FY28-Q2 with FY28-Q1 by Region in QuarterData. Calculate changes in NetSales and ShipCost, plus each region's FY28-Q2 return rate. Reconcile regional changes to the quarter changes. Identify the largest shipping increase and show its share of the total increase. Do not infer a cause or call the largest shipping mover the largest sales-growth contributor. Return a table with formulas, source references, and a separate list of questions for investigation."
+            },
+            {
+              "label": "Append the evidence-backed driver",
+              "mode": "edit",
+              "text": "After I verify the movement table, create RegionalDrivers and append StoryLog row regional-driver. Link it to baseline and the checked region cells. Describe Brook as a priority for evidence collection based on its shipping movement and return rate, not as a proven root cause. Keep the other regions and favorable context visible. Put the missing shipment-level evidence in Limitation and the proposed investigation in NextAction. Do not overwrite baseline or claim the analysis has been approved."
+            }
+          ],
+          "expected": {
+            "summary": "A reconciled regional movement view and one limited, source-linked investigation claim.",
+            "key_facts": [
+              "Net sales increase by 9,000: Aster +3,600, Brook +1,800, Cinder +3,600.",
+              "Shipping increases by 2,610: Aster +720, Brook +1,260, Cinder +630.",
+              "Brook accounts for about 48.28% of the shipping increase and has a FY28-Q2 return rate of 10%; neither fact proves a cause."
+            ]
+          },
+          "fallback": "If Edit cannot write RegionalDrivers, build a PivotTable or formula-based comparison manually, then paste the reviewed StoryLog row.",
+          "carries_forward": "RegionalDrivers and StoryLog regional-driver supply the evidence for the next independent challenge.",
+          "callouts": [
+            {"type": "warning", "text": "A largest movement is a prioritization signal, not causal evidence. Retain all three regions in the reconciliation."},
+            {"type": "instructor", "text": "Ask a learner to explain the difference between contribution to growth and a regional rate before opening the challenge answer."}
+          ],
+          "self_check": ["Do regional movements reconcile to the quarter changes?", "Is Brook's return rate labeled as regional, not company-wide?", "Are causes explicitly unproven?"]
+        },
+        {
+          "id": "challenge-the-claim",
+          "title": "Challenge a tempting headline",
+          "minutes": 8,
+          "goal": "Correct the narrative independently before it reaches a slide.",
+          "uses": "Excel > RegionalDrivers and StoryLog regional-driver from Build a movement view",
+          "level": "challenge",
+          "intro": "Pause Copilot. Inspect the checked tables yourself, then add a correction to the same Story sheet.",
+          "prompts": [],
+          "challenge": {
+            "task": "A draft says: 'Brook generated all sales growth, and the unit's return rate is 10%, so returns caused the shipping increase.' Identify each unsupported or incorrect statement. Write a corrected StoryLog row claim-check with references and an explicit uncertainty.",
+            "hint": "Compare contribution to the sales movement, the scope of the return-rate denominator, and what the source says about causality.",
+            "answer": "Brook contributes 1,800 of the 9,000 sales increase, or 20%, not all of it. The unit-wide FY28-Q2 return rate is 131/2,000 = 6.55%; 10% applies only to Brook. The table contains no evidence that returns caused shipping costs to rise. A defensible correction prioritizes Brook for investigation while preserving the other regions and labeling the cause unknown."
+          },
+          "expected": {"summary": "A correction that separates contribution, rate scope, and unsupported causality.", "key_facts": []},
+          "fallback": "If formulas are hard to inspect, use the reviewed RegionalDrivers output and the source table side by side; ask the facilitator for navigation help, not the answer.",
+          "carries_forward": "StoryLog claim-check becomes a required constraint on the decision options in chapter three.",
+          "callouts": [{"type": "important", "text": "Try the challenge before revealing the answer. Keep your corrected claim even if its wording differs from the answer."}],
+          "self_check": ["Did I correct all three claims?", "Does claim-check cite the evidence and retain the uncertainty?"]
+        }
+      ]
+    },
+    {
+      "id": "frame-decision",
+      "title": "Frame a defensible decision",
+      "minutes": 18,
+      "format": "group",
+      "story_so_far": "The regional movement is reconciled and a misleading headline has been corrected. You can now ask for evidence collection without pretending that the source proves a cause.",
+      "builds_on": ["locate-pressure"],
+      "you_will_add": "An options comparison and a bounded decision request in StoryLog.",
+      "checkpoint_file_id": "checkpoint-decision",
+      "steps": [
+        {
+          "id": "compare-investigation-options",
+          "title": "Compare next actions",
+          "minutes": 10,
+          "goal": "Use the corrected claim to separate a low-risk investigation from unsupported operational changes.",
+          "uses": "Excel > StoryLog regional-driver and claim-check, produced in chapter two",
+          "level": "intermediate",
+          "intro": "The checkpoint, if supplied, contains the same reviewed starting rows. Do not bypass the uncertainty just because a slide deadline is approaching.",
+          "prompts": [
+            {
+              "label": "Plan evidence collection",
+              "mode": "plan",
+              "text": "Consume StoryLog regional-driver and claim-check. Compare two possible next actions for fictional Summit Packs: investigate Brook shipment and return records, or immediately change the regional service policy. For each, list the evidence currently available, the missing evidence, the reversibility of the action, and a human review gate. Do not invent savings, forecasts, contracts, probabilities, or customer impacts. Explain why the current table can prioritize investigation but cannot justify a causal claim."
+            },
+            {
+              "label": "Write the options row",
+              "mode": "edit",
+              "text": "Append StoryLog row options using the reviewed comparison. Link its Evidence to regional-driver and claim-check. Recommend evidence collection as a proposal for human review, not an approved action. In Limitation, retain that shipment-level facts are absent. In NextAction, request a fictional reviewer to define the minimum evidence needed before any service change. Preserve all earlier rows and return a manual-paste version if you cannot edit."
+            }
+          ],
+          "expected": {
+            "summary": "Two clearly distinguished options with an evidence-gathering proposal rather than an invented business case.",
+            "key_facts": ["Neither the source nor the corrected headline establishes causality.", "Options must reference regional-driver and claim-check.", "No savings amount or approved policy change is asserted."]
+          },
+          "fallback": "If Plan is unavailable, request the same comparison in Chat. If Edit is unavailable, paste only the reviewed options row.",
+          "carries_forward": "StoryLog options is the input for the next step's decision request.",
+          "callouts": [{"type": "warning", "text": "Do not fill an evidence gap with plausible cost savings. A proposed next action is not authorization."}],
+          "self_check": ["Are the two actions distinguished by evidence and reversibility?", "Does options preserve the correction from claim-check?"]
+        },
+        {
+          "id": "write-decision-request",
+          "title": "Turn the options into a request",
+          "minutes": 8,
+          "goal": "State what the reviewer must decide and what remains unknown.",
+          "uses": "Excel > StoryLog options from Compare next actions, plus its referenced evidence rows",
+          "level": "advanced",
+          "intro": "A decision-ready brief names the requested review, not merely the largest number. Keep the action inside the limits established by the earlier chapters.",
+          "prompts": [
+            {
+              "label": "Draft the bounded request",
+              "mode": "chat",
+              "text": "Using StoryLog options and its evidence links, draft a concise decision request for the fictional regional sponsor. Structure it as observed signal, proposed evidence collection, reviewer decision, and unresolved limitations. Refer to the checked shipping movement only with its source. Do not request approval of an untested service change, invent a completion date, or claim that anyone has accepted the proposal. Keep the wording suitable for a PowerPoint decision slide."
+            },
+            {
+              "label": "Carry the request forward",
+              "mode": "edit",
+              "text": "Append StoryLog row decision-request with the reviewed wording. Point Evidence to options, regional-driver, and claim-check. Keep the request marked Draft for review, even if its source numbers are checked. Add a note that the PowerPoint deck must preserve the same limitations and cannot turn the proposal into an approval. Return the row for manual insertion if editing is unsupported."
+            }
+          ],
+          "expected": {
+            "summary": "A bounded request ready to become a slide, with evidence and uncertainty still attached.",
+            "key_facts": ["The request consumes the options comparison.", "The proposed investigation is not an approved policy change.", "Evidence review and decision approval remain separate statuses."]
+          },
+          "fallback": "If Edit cannot append the row, insert the approved text manually and keep its evidence links visible.",
+          "carries_forward": "StoryLog decision-request and options are the authoritative inputs for chapter four's deck outline.",
+          "callouts": [
+            {"type": "important", "text": "Checked source figures do not mean the business decision has been approved."},
+            {"type": "real_world", "text": "An authorized production workflow would use approved supporting records. This fictional exercise must never ingest those real records."}
+          ],
+          "self_check": ["Can the sponsor identify the requested decision?", "Does decision-request retain every material limitation from options?"]
+        }
+      ]
+    },
+    {
+      "id": "build-brief",
+      "title": "Carry the evidence into PowerPoint",
+      "minutes": 18,
+      "format": "guided",
+      "story_so_far": "StoryLog now contains a checked baseline, a regional signal, a corrected headline, options, and a bounded request. The next task is translation, not fresh analysis.",
+      "builds_on": ["frame-decision"],
+      "you_will_add": "A four-slide decision brief, its evidence map, and a slide-review row.",
+      "checkpoint_file_id": "checkpoint-brief",
+      "steps": [
+        {
+          "id": "draft-evidence-deck",
+          "title": "Build a source-linked deck",
+          "minutes": 10,
+          "goal": "Transform the existing story into slides without introducing new claims.",
+          "uses": "PowerPoint > reviewed StoryLog baseline, regional-driver, options, and decision-request from Excel",
+          "level": "intermediate",
+          "intro": "Use a blank presentation and the reviewed StoryLog excerpt. The checkpoint supplies the story rows, not a finished deck.",
+          "prompts": [
+            {
+              "label": "Plan the slide story",
+              "mode": "plan",
+              "text": "Using only the reviewed QBR Story sheet, plan four slides for fictional Zava Outdoor's Summit Packs review: baseline, regional pressure point, evidence gaps and options, and decision requested. For each slide give a claim-style title, one visual or compact evidence table, the exact StoryLog rows it consumes, and speaker-note limitations. Carry the claim-check correction through the deck. Do not add a new forecast, external benchmark, decorative fact, or causal explanation."
+            },
+            {
+              "label": "Create and map the draft slides",
+              "mode": "edit",
+              "text": "Create the four-slide draft from the reviewed outline in the current PowerPoint presentation. Include source-row identifiers in speaker notes and numeric labels that remain understandable without color. Keep the fictional-data label visible. If slide editing is unavailable, return slide-by-slide content and notes for manual paste rather than claiming a deck was created. Also return a StoryLog row deck-map that maps each slide to baseline, regional-driver, options, or decision-request; I will append that row to the QBR Story sheet."
+            }
+          ],
+          "expected": {
+            "summary": "A four-slide draft whose claims can be traced to existing StoryLog rows.",
+            "key_facts": ["The deck contains no new analytical claims.", "Brook is framed as an investigation priority, not a proven cause.", "The decision slide preserves the draft request and its limitations."]
+          },
+          "fallback": "If Edit cannot write slides, create four slides manually from the approved outline and notes. Paste deck-map into Excel yourself.",
+          "carries_forward": "The draft deck and StoryLog deck-map feed the next review step; deck-map remains in the QBR Story sheet.",
+          "callouts": [{"type": "warning", "text": "A polished visual can hide a changed denominator or unsupported claim. Check the slide against the source row, not just against the chat."}],
+          "self_check": ["Does every slide have a source-row identifier?", "Does the deck preserve the corrected claim and the proposal's status?"]
+        },
+        {
+          "id": "review-slide-evidence",
+          "title": "Review the deck against its source",
+          "minutes": 8,
+          "goal": "Catch narrative drift before turning the workflow into reusable instructions.",
+          "uses": "PowerPoint > draft deck and StoryLog deck-map from Build a source-linked deck",
+          "level": "advanced",
+          "intro": "Read the slides and their evidence map together. A reviewer should be able to trace every numerical or causal statement without reconstructing the conversation.",
+          "prompts": [
+            {
+              "label": "Audit the slide claims",
+              "mode": "chat",
+              "text": "Compare the draft Summit Packs slides with StoryLog deck-map and the referenced rows. List any unsupported claim, changed scope, missing denominator, altered approval status, or omitted limitation. For each finding identify the slide, the source row, and a proposed correction. Check that the quarter-wide return rate is not confused with Brook's regional rate. Do not silently rewrite the evidence or treat a well-designed slide as proof. Return a short review checklist before suggesting changes."
+            },
+            {
+              "label": "Apply only reviewed corrections",
+              "mode": "edit",
+              "text": "Apply only the slide corrections I approve, preserving the source-row notes and fictional-data labels. Then return StoryLog row slide-review with the checked slides, unresolved questions, and a link to deck-map. Leave the business decision as Draft for review. If editing is unavailable, provide exact replacement text for manual insertion. Do not send or publish the presentation, and do not claim review steps that I have not performed."
+            }
+          ],
+          "expected": {
+            "summary": "A corrected deck and explicit review record that can be used as the skill's acceptance checklist.",
+            "key_facts": ["The unit-wide FY28-Q2 return rate remains 6.55%; Brook's rate remains 10%.", "No slide claims that returns caused the shipping increase.", "slide-review distinguishes checked content from unresolved decisions."]
+          },
+          "fallback": "If the deck cannot be inspected directly, paste each slide's text and source-row notes into Chat. Apply approved changes manually and document that review method.",
+          "carries_forward": "StoryLog slide-review and deck-map become the quality checklist for the reusable prompt and skill in chapter five.",
+          "callouts": [
+            {"type": "important", "text": "A generated review is a candidate checklist. You still verify the actual deck and the workbook references."},
+            {"type": "stretch", "text": "Ask a peer to follow one slide back to the raw rows without using your chat transcript."}
+          ],
+          "self_check": ["Were all approved corrections checked in the actual slides?", "Does slide-review list unresolved questions rather than hiding them?"]
+        }
+      ]
+    },
+    {
+      "id": "make-repeatable",
+      "title": "Make it repeatable",
+      "minutes": 16,
+      "format": "individual",
+      "story_so_far": "The evidence trail and deck review are complete. Preserve the method, not just the current quarter's prose, and prove that it behaves responsibly when the next input has less evidence.",
+      "builds_on": ["build-brief"],
+      "you_will_add": "A saved prompt, a reusable skill draft, and a prior-quarter replay record in the QBR Story sheet.",
+      "checkpoint_file_id": "checkpoint-repeat",
+      "steps": [
+        {
+          "id": "save-prompt-and-skill",
+          "title": "Save the prompt, then generalize the workflow",
+          "minutes": 8,
+          "goal": "Use the reviewed artifacts to define a repeatable workflow with explicit limits.",
+          "uses": "Cowork > StoryLog slide-review, deck-map, and the reviewed evidence workflow from chapter four",
+          "level": "advanced",
+          "intro": "Use Cowork's own tools or your editor to save the reviewed text. A reusable instruction file is not automatically an installed skill or a deployable plugin.",
+          "prompts": [
+            {
+              "label": "Save a reviewed reusable prompt",
+              "mode": "cowork",
+              "text": "Consume StoryLog slide-review and deck-map. Extract a reusable QBR-review prompt from the workflow we actually checked, replacing quarter and workbook names with explicit inputs. Preserve the denominator checks, source references, cause-versus-correlation boundary, manual edit fallback, and human review gate. Show me the prompt first. After I approve it, use your own file tools to save summit-review-prompt.txt, or return the text for me to save if those tools are unavailable. Do not claim a save without confirmation."
+            },
+            {
+              "label": "Turn the reviewed prompt into a skill",
+              "mode": "cowork",
+              "text": "Using the approved saved prompt plus StoryLog slide-review, draft summit-qbr-skill.md as reusable instructions. Include purpose, required inputs, source validation, weighted ratio formulas, StoryLog updates, slide mapping, review gates, fallback behavior, and refusal to invent a missing comparison quarter. Require fictional practice data for this accelerator. Separate drafting from saving and sending; do not embed secrets, tenant paths, fixed quarter figures, or automatic approvals. Return a proposed StoryLog row reusable-skill describing the inputs and acceptance checks. Ask me to review before saving with your own tools; do not claim this file is installed or packaged."
+            }
+          ],
+          "expected": {
+            "summary": "A reviewed prompt and skill draft whose parameters and safety checks come from the completed workflow.",
+            "key_facts": ["The skill consumes named inputs rather than hard-coding the current quarter's answers.", "Human review and manual fallbacks remain explicit.", "StoryLog reusable-skill records the draft's acceptance checks and save status."]
+          },
+          "fallback": "If Cowork cannot save files, copy the approved text into your editor and record that manual action. Do not invent a skill-installation command.",
+          "carries_forward": "The saved prompt, skill draft, and StoryLog reusable-skill become the inputs to the prior-quarter replay.",
+          "callouts": [{"type": "important", "text": "The MCP server does not save these files. A text draft is not proof of installation, execution, or successful reuse."}],
+          "self_check": ["Are quarter and workbook names parameters?", "Does the skill retain the checks from slide-review?", "Is the actual save status recorded honestly?"]
+        },
+        {
+          "id": "replay-prior-quarter",
+          "title": "Test the skill on a prior quarter",
+          "minutes": 8,
+          "goal": "Demonstrate reproducibility and an honest boundary when comparison evidence is missing.",
+          "uses": "Excel and Cowork > saved prompt, skill draft, and StoryLog reusable-skill from the preceding step; separate FY28-Q1 source and answer key",
+          "level": "advanced",
+          "intro": "Use a fresh workbook containing only the three FY28-Q1 source rows. Do not carry FY28-Q2 outputs into the replay. Consult the supplied answer key only after the independent run.",
+          "prompts": [
+            {
+              "label": "Plan a clean replay",
+              "mode": "plan",
+              "text": "Using the reviewed summit-qbr-skill.md and StoryLog reusable-skill acceptance checks, plan a fresh run on the fictional FY28-Q1-only source. Do not use the prior answer key yet and do not read outputs from the FY28-Q2 workbook. Identify which checks still apply and which comparisons are impossible because FY28-Q0 is absent. Propose a separate replay workbook and a review checklist so the original QBR Story sheet is not overwritten."
+            },
+            {
+              "label": "Run with only the available evidence",
+              "mode": "cowork",
+              "text": "Follow the reviewed skill on the FY28-Q1-only source in the separate replay workbook. Calculate source totals and weighted shipping and return rates with visible references. Draft a baseline StoryLog row and a short decision brief limited to that quarter. Explicitly decline quarter-over-quarter growth or variance claims because no earlier quarter is supplied. Do not reuse the previous deck's figures, invent an earlier period, or mark the replay passed before a human compares it with the answer key. Return a manual execution checklist if file editing is unavailable."
+            },
+            {
+              "label": "Compare with the key and record the result",
+              "mode": "chat",
+              "text": "Now compare the independently produced replay with the fictional prior-quarter answer key: Units 1,900; NetSales 171,000; ShipCost 11,790; ReturnUnits 93; shipping burden 11,790/171,000 (about 6.8947%); return rate 93/1,900 (about 4.8947%). No earlier quarter is provided, so a growth or variance claim is unsupported. Report each match, mismatch, and missing-evidence behavior. Do not overwrite the replay to manufacture a pass. Draft StoryLog row replay-check for the original QBR Story sheet, linking it to reusable-skill and recording the actual outcome plus any skill revision needed."
+            }
+          ],
+          "expected": {
+            "summary": "An independent replay with explicit comparison results and no invented prior-quarter movement.",
+            "key_facts": ["FY28-Q1 totals match 1,900 units, 171,000 sales, 11,790 shipping, and 93 returns.", "Weighted rates are about 6.8947% shipping burden and 4.8947% returns.", "The skill declines unsupported comparisons to FY28-Q0.", "replay-check records mismatches instead of silently adjusting the run."]
+          },
+          "fallback": "If the prior workbook or answer key has not been supplied, build the prior-only source from the original TSV and use the explicit checks above manually. Record that limitation and do not claim an automated skill run.",
+          "carries_forward": "Append replay-check to the original QBR Story sheet, preserving the skill draft, source checks, and any unresolved revision before future reuse.",
+          "callouts": [
+            {"type": "warning", "text": "Do not show the key to the independent run, and do not correct the run before recording mismatches. Missing comparison data is a test of restraint."},
+            {"type": "note", "text": "Success means correct evidence handling as well as correct arithmetic. A refusal to invent FY28-Q0 is a desired result."}
+          ],
+          "self_check": ["Was the replay independent of the answer key?", "Were missing comparisons explicitly declined?", "Does the original Story sheet record the actual replay outcome?"]
+        }
+      ]
+    }
+  ],
+  "troubleshooting": [
+    {"problem": "A named mode is not available", "fix": "Use Chat for a plan or explanation and carry out the reviewed changes manually. Never claim a missing mode executed an action."},
+    {"problem": "Edit cannot write to the workbook or presentation", "fix": "Ask for exact formulas, rows, or slide text. Paste them manually and verify the actual artifact before changing ReviewStatus."},
+    {"problem": "The quarter ratios differ from expectations", "fix": "Check the selected rows, numeric types, and denominators. Divide totals by totals; do not average regional percentages."},
+    {"problem": "The chapter checkpoint is not supplied", "fix": "Ask the facilitator or Cowork content-writing skill for the declared starting state. Files labeled Provided separately are not hidden download links."},
+    {"problem": "The slides add an unsupported cause", "fix": "Return to claim-check and decision-request. Replace the unsupported sentence and preserve the limitation in the slide notes."},
+    {"problem": "The replay appears to pass suspiciously well", "fix": "Check whether the answer key or prior outputs leaked into the run. Repeat with only the prior-quarter source and record the result honestly."}
+  ],
+  "glossary": [
+    {"term": "QBR", "definition": "Quarterly business review: a discussion of evidence, uncertainty, and proposed decisions."},
+    {"term": "Through-line artifact", "definition": "The single reviewed Story sheet carried and extended across the chapters."},
+    {"term": "Weighted rate", "definition": "A ratio of aggregate numerator to aggregate denominator, not an average of local percentages."},
+    {"term": "Checkpoint", "definition": "A separately supplied starting state that lets a learner rejoin without repeating earlier work."},
+    {"term": "Answer key", "definition": "An independent set of expected checks used after a replay, not an input used to manufacture its output."},
+    {"term": "Reusable skill draft", "definition": "Reviewed workflow instructions with inputs, checks, and boundaries; not proof of installation or execution."}
+  ],
+  "disclaimer": "Zava Outdoor, Summit Packs, the regions, reporting periods, and all figures are fictional. This page is for practice, not financial advice or an approval record. No customer or tenant data may be submitted. Copilot capabilities vary by environment; verify every result and file action yourself."
+}
