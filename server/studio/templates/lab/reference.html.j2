@@ -9,7 +9,7 @@
         {% for step in chapter.steps %}
         <tr><th scope="row"><a href="#{{ step.id }}">{{ number }}. {{ chapter.title }} / {{ step.title }}</a></th><td>{{ step.uses }}</td><td>
           {% for mode in step.prompts | map(attribute="mode") | unique %}<span class="mode-badge">{{ mode | capitalize }}</span>{% else %}Independent challenge{% endfor %}
-        </td><td>{{ step.carries_forward or "No carry-forward declared" }}</td></tr>
+        </td><td>{{ step.carries_forward or "No next-step notes" }}</td></tr>
         {% endfor %}
         {% endfor %}
       </tbody>

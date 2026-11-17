@@ -80,6 +80,21 @@ def test_rendered_shape_and_anchors(minimal_spec):
     assert "open" in chapters[0] and "open" not in chapters[1]
 
 
+def test_summary_counters_pluralize_singular_and_zero(minimal_spec):
+    html = render_lab_page(minimal_spec)["html"]
+    assert "4 steps / 4 prompts / 0 challenges" in html
+    assert "2 steps / select to expand or collapse" in html
+    for chapter in minimal_spec["chapters"]:
+        chapter["steps"] = chapter["steps"][:1]
+    minimal_spec["chapters"][0]["steps"][0].update(prompts=[], challenge={
+        "task": "Check the evidence.", "hint": "", "answer": "Keep checked facts.",
+    })
+    html = render_lab_page(minimal_spec)["html"]
+    assert "2 steps / 1 prompt / 1 challenge" in html
+    assert html.count("1 step / select to expand or collapse") == 2
+    assert "1 steps" not in html and "1 prompts" not in html and "1 challenges" not in html
+
+
 def test_all_prompt_text_and_story_content_are_escaped(minimal_spec):
     injected = '  <script>alert("fictional")</script>\n& <b>Not HTML</b> </pre>  '
     step = minimal_spec["chapters"][0]["steps"][0]
@@ -137,11 +152,13 @@ def test_file_links_and_checkpoint_callouts(minimal_spec, href):
     downloads = [attrs for tag, attrs in page.tags if tag == "a" and "download" in attrs]
     if href is None:
         assert downloads == []
-        assert result["html"].count("Provided separately") == 2
+        assert sum(
+            "provided-separately" in attrs.get("class", "").split() for _, attrs in page.tags
+        ) == 2
     else:
         assert len(downloads) == 2
         assert all(link["href"] == href and link["download"] == "checkpoint.xlsx" for link in downloads)
-        assert "Provided separately" not in result["html"]
+        assert not any("provided-separately" in attrs.get("class", "").split() for _, attrs in page.tags)
     assert "Only if you fall behind" in result["html"]
 
 

@@ -30,7 +30,7 @@
     </section>
     {% endif %}
     {% if step.fallback %}
-    <aside class="callout callout-tip fallback"><strong>If the mode cannot complete the action</strong><p>{{ step.fallback }}</p></aside>
+    <aside class="callout callout-tip fallback"><strong>Need another way?</strong><p>{{ step.fallback }}</p></aside>
     {% endif %}
     {% for callout in step.callouts %}
     <aside class="callout callout-{{ callout.type | replace('_', '-') }}" aria-label="{{ callout.type | replace('_', ' ') | title }}">

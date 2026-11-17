@@ -33,7 +33,7 @@
     {% include "navigation.html.j2" %}
     <main id="studio--content" tabindex="-1">
       <div class="toolbar" aria-label="Lab controls">
-        <span>{{ stats.step_count }} steps / {{ stats.prompt_count }} prompts / {{ stats.challenge_count }} challenges</span>
+        <span>{{ stats.step_count }} {{ "step" if stats.step_count == 1 else "steps" }} / {{ stats.prompt_count }} {{ "prompt" if stats.prompt_count == 1 else "prompts" }} / {{ stats.challenge_count }} {{ "challenge" if stats.challenge_count == 1 else "challenges" }}</span>
         <div>
           <button type="button" id="studio--expand">Expand all</button>
           <button type="button" id="studio--collapse">Collapse all</button>

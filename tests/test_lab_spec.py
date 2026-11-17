@@ -213,6 +213,50 @@ def test_brand_warning(minimal_spec):
     assert codes(minimal_spec, "warnings") == {"real_brand_name"}
 
 
+@pytest.mark.parametrize("term", [
+    "MCP server", "consume ", "tenant path", "do not claim", "if supplied", "JSON", "schema",
+])
+def test_learner_voice_warning_is_case_insensitive_and_nonblocking(minimal_spec, term):
+    minimal_spec["chapters"][0]["steps"][0]["prompts"][0]["text"] += f" {term.swapcase()}."
+    result = validate_lab_spec(minimal_spec)
+    assert result["valid"] and result["errors"] == []
+    assert result["warnings"] == [{
+        "code": "learner_voice", "path": "chapters.0.steps.0.prompts.0.text",
+        "message": f"Use learner-facing wording instead of {term!r}.",
+    }]
+
+
+@pytest.mark.parametrize("path", [
+    "narrative.situation", "narrative.leave_with.0", "through_line.description",
+    "setup.steps.0", "chapters.0.title", "chapters.0.story_so_far", "chapters.0.you_will_add",
+    "chapters.0.steps.0.intro", "chapters.0.steps.0.challenge.task",
+    "chapters.0.steps.0.callouts.0.text", "files.0.purpose", "files.0.filename",
+])
+def test_learner_voice_paths_include_file_and_checkpoint_text(minimal_spec, path):
+    step = minimal_spec["chapters"][0]["steps"][0]
+    step["challenge"] = {"task": "Check the evidence.", "hint": "", "answer": "Keep checked facts."}
+    step["callouts"] = [{"type": "important", "text": "Check the evidence."}]
+    add_file(minimal_spec, kind="checkpoint")
+    minimal_spec["chapters"][1]["checkpoint_file_id"] = "practice-file"
+    parts = [int(part) if part.isdigit() else part for part in path.split(".")]
+    target = minimal_spec
+    for part in parts[:-1]:
+        target = target[part]
+    target[parts[-1]] = "schema-notes.xlsx"
+    result = validate_lab_spec(minimal_spec)
+    assert result["valid"]
+    assert result["warnings"] == [{
+        "code": "learner_voice", "path": path,
+        "message": "Use learner-facing wording instead of 'schema'.",
+    }]
+
+
+def test_clean_learner_voice_and_facilitator_notes_do_not_warn(minimal_spec):
+    minimal_spec["chapters"][0]["steps"][0]["intro"] = "Review the consumer feedback in the Story sheet."
+    minimal_spec["troubleshooting"][0]["fix"] = "Facilitator: check the JSON schema and MCP server."
+    assert validate_lab_spec(minimal_spec)["warnings"] == []
+
+
 @pytest.mark.parametrize("href", [
     "javascript:alert(1)", "data:text/html,test", "JaVaScRiPt:alert(1)",
     "java\tscript:alert(1)", "//example.test/path", "\\\\example.test", "https://",

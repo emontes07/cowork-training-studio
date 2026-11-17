@@ -38,6 +38,10 @@ with (Path(__file__).resolve().parent.parent / "data" / "real_brand_denylist.jso
 
 _NUMBERS = re.compile(r"\d|\b(?:numbers?|totals?)\b", re.I)
 _RISK_WORDS = re.compile(r"\d|\b(?:numbers?|totals?|forecasts?|variances?|contracts?)\b", re.I)
+# Literal, case-insensitive authoring hints; the space in "consume " avoids "consumer".
+_LEARNER_VOICE_TERMS = (
+    "MCP server", "consume ", "tenant path", "do not claim", "if supplied", "JSON", "schema",
+)
 _RESERVED_IDS = frozenset({
     "overview", "setup", "capstone", "agenda", "files", "story-map", "troubleshooting",
     "glossary", "disclaimer",
@@ -62,6 +66,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
     step_count, prompt_count, challenge_count, checkpoint_count (declared files),
     files_by_kind, and total_minutes (chapters) within stats. Schema errors
     return zero stats. Reference errors block rendering; quality warnings do not.
+    Learner-voice warnings name the field and system term, not its full text.
     File usage is declared via used_in/checkpoint_file_id, not inferred from prose.
     This is not a tenant-data detector; submit only wholly fictional content.
     """
@@ -95,6 +100,27 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             issue(errors, "reserved_id", path, f"ID '{identifier}' is reserved for page navigation.")
         seen.add(identifier)
 
+    def check_voice(text: str | None, path: str) -> None:
+        if text is None:
+            return
+        folded = text.casefold()
+        for term in _LEARNER_VOICE_TERMS:
+            if term.casefold() in folded:
+                issue(warnings, "learner_voice", path, f"Use learner-facing wording instead of {term!r}.")
+
+    for field in ("role", "situation", "trigger", "deadline"):
+        check_voice(getattr(lab_spec.narrative, field), f"narrative.{field}")
+    for index, outcome in enumerate(lab_spec.narrative.leave_with):
+        check_voice(outcome, f"narrative.leave_with.{index}")
+    if lab_spec.through_line:
+        for field in ("name", "location", "description"):
+            check_voice(getattr(lab_spec.through_line, field), f"through_line.{field}")
+    for field in ("steps", "ground_rules"):
+        for index, text in enumerate(getattr(lab_spec.setup, field)):
+            check_voice(text, f"setup.{field}.{index}")
+    for index, mode in enumerate(lab_spec.setup.modes):
+        check_voice(mode.description, f"setup.modes.{index}.description")
+
     chapter_positions = {chapter.id: index for index, chapter in enumerate(lab_spec.chapters)}
     files = {file.id: file for file in lab_spec.files}
     referenced_files = {
@@ -104,6 +130,8 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
     for index, file in enumerate(lab_spec.files):
         path = f"files.{index}"
         check_id(file.id, f"{path}.id")
+        check_voice(file.filename, f"{path}.filename")
+        check_voice(file.purpose, f"{path}.purpose")
         stats["files_by_kind"][file.kind] += 1
         if file.filename.casefold() in filenames:
             issue(errors, "duplicate_filename", f"{path}.filename", "File names must be unique (case-insensitive).")
@@ -120,6 +148,8 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         stats["total_minutes"] += chapter.minutes
         path = f"chapters.{index}"
         check_id(chapter.id, f"{path}.id")
+        for field in ("title", "story_so_far", "you_will_add"):
+            check_voice(getattr(chapter, field), f"{path}.{field}")
         for reference_index, chapter_id in enumerate(chapter.builds_on):
             reference_path = f"{path}.builds_on.{reference_index}"
             if chapter_id not in chapter_positions:
@@ -142,15 +172,29 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             stats["step_count"] += 1
             step_path = f"{path}.steps.{step_index}"
             check_id(step.id, f"{step_path}.id")
+            for field in ("title", "goal", "uses", "intro", "fallback", "carries_forward"):
+                check_voice(getattr(step, field), f"{step_path}.{field}")
+            for check_index, text in enumerate(step.self_check):
+                check_voice(text, f"{step_path}.self_check.{check_index}")
+            for callout_index, callout in enumerate(step.callouts):
+                check_voice(callout.text, f"{step_path}.callouts.{callout_index}.text")
+            if step.expected:
+                check_voice(step.expected.summary, f"{step_path}.expected.summary")
+                for fact_index, text in enumerate(step.expected.key_facts):
+                    check_voice(text, f"{step_path}.expected.key_facts.{fact_index}")
             if not step.prompts and step.challenge is None:
                 issue(errors, "empty_step", step_path, "A step needs at least one prompt or a challenge.")
             if step.level == "challenge" and step.challenge is None:
                 issue(errors, "missing_challenge_answer", f"{step_path}.challenge", "A challenge-level step needs a challenge with an answer.")
             if step.challenge:
                 stats["challenge_count"] += 1
+                for field in ("task", "hint", "answer"):
+                    check_voice(getattr(step.challenge, field), f"{step_path}.challenge.{field}")
             for prompt_index, prompt in enumerate(step.prompts):
                 stats["prompt_count"] += 1
                 prompt_path = f"{step_path}.prompts.{prompt_index}.text"
+                check_voice(prompt.text, prompt_path)
+                check_voice(prompt.label, f"{step_path}.prompts.{prompt_index}.label")
                 if len(prompt.text.strip()) < 60:
                     issue(warnings, "short_prompt", prompt_path, "Prompt is under 60 characters; add task, context, and output requirements.")
                 if _NUMBERS.search(prompt.text) and (step.expected is None or not step.expected.key_facts):
