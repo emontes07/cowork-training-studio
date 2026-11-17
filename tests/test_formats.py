@@ -161,6 +161,9 @@ def test_http_aliases_use_stateless_transport(monkeypatch, transport, port):
 
     server.main()
 
+    middleware = calls[0].pop("middleware")
+    assert len(middleware) == 1
+    assert middleware[0].cls is server.MCPPathAlias
     assert calls == [
         {
             "transport": "streamable-http",
@@ -171,6 +174,34 @@ def test_http_aliases_use_stateless_transport(monkeypatch, transport, port):
             "uvicorn_config": {"timeout_graceful_shutdown": 5},
         }
     ]
+
+
+@pytest.mark.parametrize("path", ["/mcp", "/mcp/"])
+def test_http_paths_initialize_without_redirect_or_session(path):
+    from starlette.middleware import Middleware
+    from starlette.testclient import TestClient
+
+    server = importlib.import_module("main")
+    app = server.mcp.http_app(
+        path="/mcp", stateless_http=True,
+        middleware=[Middleware(server.MCPPathAlias)],
+    )
+    with TestClient(app, follow_redirects=False) as client:
+        response = client.post(path, headers={
+            "Accept": "application/json, text/event-stream",
+        }, json={
+            "jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26", "capabilities": {},
+                "clientInfo": {"name": "endpoint-test", "version": "1.0"},
+            },
+        })
+        assert response.status_code == 200
+        assert "location" not in response.headers
+        assert "mcp-session-id" not in response.headers
+        data = next(line[6:] for line in response.text.splitlines() if line.startswith("data: "))
+        assert json.loads(data)["result"]["serverInfo"]["name"] == "Cowork Training Studio"
+        assert client.get("/not-mcp").status_code == 404
 
 
 @pytest.mark.parametrize(
