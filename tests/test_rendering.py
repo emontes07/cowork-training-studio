@@ -152,6 +152,15 @@ def test_golden_output_is_deterministic_and_current(golden_spec):
     assert result["html"] == (ROOT / "examples" / "zava-finance-lab.html").read_text()
 
 
+def test_golden_page_within_size_budget(golden_spec):
+    result = render_lab_page(golden_spec)
+    assert "html" in result
+    size_bytes = len(result["html"].encode("utf-8"))
+    assert size_bytes <= 120_000, (
+        f"Rendered golden page is {size_bytes:,} bytes; exceeds 120 KB (120,000 bytes)."
+    )
+
+
 def test_pipeline_writes_no_files(monkeypatch, tmp_path, minimal_spec):
     working = tmp_path / "working"
     temporary = tmp_path / "temporary"
