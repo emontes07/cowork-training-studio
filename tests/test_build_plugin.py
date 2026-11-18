@@ -125,14 +125,14 @@ def test_invalid_manifest_and_skill_cases(package_files, failure):
         builder.validate_package(package_files)
 
 
-@pytest.mark.parametrize("line_count", [140, 141])
+@pytest.mark.parametrize("line_count", [150, 151])
 def test_skill_line_limit(package_files, line_count):
     lines = package_files[SKILL].decode().splitlines()
     package_files[SKILL] = ("\n".join(lines + ["Practice detail."] * (line_count - len(lines))) + "\n").encode()
-    if line_count == 140:
+    if line_count == 150:
         builder.validate_package(package_files)
     else:
-        with pytest.raises(ValueError, match="exceeds 140 lines"):
+        with pytest.raises(ValueError, match="exceeds 150 lines"):
             builder.validate_package(package_files)
 
 

@@ -219,8 +219,8 @@ def validate_package(files: dict[str, bytes]) -> dict[str, Any]:
         if name not in files:
             raise ValueError(f"Missing skill file: {name}")
         text = files[name].decode("utf-8")
-        if len(text.splitlines()) > 140:
-            raise ValueError(f"{name} exceeds 140 lines.")
+        if len(text.splitlines()) > 150:
+            raise ValueError(f"{name} exceeds 150 lines.")
         front = re.match(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\Z)", text, re.S)
         if front is None:
             raise ValueError(f"{name} needs YAML front matter.")
