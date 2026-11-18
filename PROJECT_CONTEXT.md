@@ -12,12 +12,13 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M3b
+## Current checkpoint: M4a
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
 It returns a JSON list, optionally filtered by an exact ID, and raises an error
-for an unknown ID. The catalog contains skill routing names, not skill packages.
+for an unknown ID. Only `html_lab` is available, routed to the shipped
+`build-training-lab` skill; the other formats are planned.
 M2 added `get_lab_spec_schema`, `validate_lab_spec`, and `render_lab_page`.
 M3a replaces the v1 scenario/lab model with **LabSpec 2.0**: one narrative,
 an optional through-line artifact, linked chapters and steps, checkpoints,
@@ -28,7 +29,10 @@ Rendering returns a single offline-capable HTML page, never a saved file.
 M3b adds warning-only learner-voice lint, correct summary plurals, and a shorter,
 learner-facing golden sample ending in a personal Cowork skill creation/reuse
 activity. Skill creation stays in Cowork, with a saved-prompt fallback.
-There is no autonomous content generation, plugin packaging, or Azure deployment.
+M3c-M3f added Cowork packaging, Azure hosting, flat structured tool results and
+safe request metadata logging. M4a adds **LabSpec 2.1**, retaining 2.0 compatibility
+and the exact 84,022-byte golden page. The plugin stays at 0.1.2; M4a does not
+deploy or build a release. The skill update and redeployment belong to M4b.
 
 The reference implementation is
 [inventory-mcp-copilot](https://github.com/emontes07/inventory-mcp-copilot).
@@ -67,9 +71,9 @@ The spec-first workflow is:
 The server is not an autonomous author and does not make editorial or business
 judgments. Validation and rendering must remain separate, testable operations.
 
-### M3a contract decisions
+### LabSpec contract decisions
 
-- `schema_version` is required and must be `"2.0"`. Unknown fields and type
+- `schema_version` is required and accepts `"2.0"` or `"2.1"`. Unknown fields and type
   coercion are rejected; there is no v1 compatibility layer.
 - File, chapter, and step IDs are globally unique slugs. Reserved IDs include
   M2's `overview`, `setup`, `capstone` plus `agenda`, `files`, `story-map`,
@@ -79,12 +83,25 @@ judgments. Validation and rendering must remain separate, testable operations.
   is a nonblocking isolated-chapter warning, not a schema error.
 - Omitted `checkpoint_file_id` is allowed. A supplied reference must exist and
   have kind `checkpoint`; long sessions warn when later chapters lack one.
-- File usage is declared via `used_in` or `checkpoint_file_id`, not guessed from
-  prose. Filenames are relative file paths, unique case-insensitively.
-- Optional file `href` preserves M2's safe URL rules: HTTP(S), mailto, or relative
-  paths only; no executable schemes, credentials, controls, or network paths.
-  Supplied hrefs render as links; absent hrefs render as plain text with
-  "Provided separately". No download link is invented.
+- File usage counts use `used_in` or `checkpoint_file_id`. Filenames are relative
+  paths, unique case-insensitively; missing prose references warn.
+- Optional file `href` allows HTTPS or relative paths in 2.1; 2.0 retains HTTP(S),
+  mailto and relative paths. No executable schemes, credentials, controls or
+  network paths. Learner links open with `noopener noreferrer`; absent hrefs
+  keep "Provided separately". `audience` defaults to `learner`; `facilitator`
+  files appear under Answer keys, marked "Facilitator only", never linked.
+- `expected.key_facts` accepts existing strings or `{kind, text, source_file?,
+  section?}` objects; kinds are `number`, `quote`, `clause`, `fact`. Missing or
+  unknown quote/clause sources and missing clause section numbers are warnings,
+  not schema errors. Sources match an exact file ID or filename; unknown kinds
+  remain schema errors. Only the fact's `text` is rendered.
+- Optional `through_line.headings` enables carry-forward heading checks.
+  Warning-only heuristics also check undeclared containers/files, overview quote
+  drift (a shared contiguous run of at least 25 characters), undeclared section
+  references, and sensitive-domain safeguards: professional-advice disclaimer,
+  questions for an expert, and fictional-party wording. See
+  [check scopes](README.md#labspec-21-consistency-warnings); no broad NLP or
+  source-file inspection is performed.
 - The sample contains metadata only. Real workbooks, checkpoints, answer keys,
   decks, and skill files are authored later by Cowork skills or the learner.
 - `uses`, `fallback`, and `carries_forward` are plain text. Steps need a prompt
@@ -134,15 +151,18 @@ judgments. Validation and rendering must remain separate, testable operations.
 | M2 | Implemented: LabSpec schema, validation, `render_lab_page`, and fictional golden sample. |
 | M3a | Implemented: LabSpec 2.0 story model, narrative renderer, and original connected QBR sample. |
 | M3b | Implemented: learner-voice sample, personal Cowork skill activity, voice lint, and summary plurals. |
+| M3c-M3f | Implemented: Cowork connector/package, Azure hosting, and first-run polish. |
 | M3 remaining | Themes, blueprints, and a prompt library. |
-| M4 | ThreadScript schema and Azure Container Apps deployment. |
+| M4a | Implemented: additive LabSpec 2.1, typed facts, consistency warnings, and file links. |
+| M4b | Skill update, plugin release and Azure redeployment; not part of M4a. |
+| M4 remaining | ThreadScript schema. |
 | M5 | Cowork plugin packaging with [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
 
 ## Layout
 
 - [server/](server/): FastMCP entrypoint, pure tools, and packaged static data.
 - [tests/](tests/): direct tool-function tests, without a running server.
-- [infra/](infra/): Azure deployment placeholder and reserved resource names.
+- [infra/](infra/): Azure deployment and redeployment guidance.
 - [docs/architecture.md](docs/architecture.md): boundaries and planned flow.
 - [docs/prompts/](docs/prompts/): reserved for future development prompts.
 - [examples/zava-story-lab.html](examples/zava-story-lab.html): generated offline story guide.

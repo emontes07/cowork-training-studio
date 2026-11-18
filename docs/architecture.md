@@ -35,7 +35,7 @@ file creation, saving, sharing, and sending with the user's permissions. The
 server does not call either Microsoft Graph or Microsoft Learn MCP. The future
 plugin connects independently to both MCP servers.
 
-The pipeline is spec-first: a skill writes LabSpec 2.0 JSON, calls the validator, fixes reported
+The pipeline is spec-first: a skill writes LabSpec 2.1 (or 2.0) JSON, calls the validator, fixes reported
 errors, reviews warnings, and then calls the HTML renderer. All three tools are
 implemented alongside the M1 format catalog.
 
@@ -44,7 +44,7 @@ implemented alongside the M1 format catalog.
 | Tool | Status | Input | Output / when to call |
 | --- | --- | --- | --- |
 | `list_session_formats` | M1, implemented | Optional exact `id` | JSON list of four formats, or one matching format; call before selecting a skill or gathering inputs. Unknown IDs raise an explicit error. |
-| `get_lab_spec_schema` | M3a, v2 | None | JSON Schema for drafting fictional LabSpec 2.0; v1 is rejected. |
+| `get_lab_spec_schema` | M4a, v2.1 | None | JSON Schema for drafting fictional LabSpec 2.0/2.1; v1 is rejected. |
 | `validate_lab_spec` | M3a, v2 | `spec` object | `{valid, errors, warnings, stats}`; call before rendering. |
 | `render_lab_page` | M3a, v2 | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
 
@@ -65,7 +65,8 @@ that chapters extend; this is metadata, not runtime state.
 [Validation](../server/studio/tools/validation.py) adds globally unique file/
 chapter/step IDs, earlier-chapter dependency checks, declared file usage,
 checkpoint kind checks, duplicate filenames, and quality warnings. It does not
-try to infer artifact dependencies from prose. Empty `builds_on` after the first
+infer dependency edges from prose; conservative missing-file references only warn.
+Empty `builds_on` after the first
 chapter is a warning; unknown/same/later chapter references are errors.
 No prompts and no challenge is an error. Challenge-level steps require an
 answered challenge, even when they also contain prompts.
@@ -85,6 +86,14 @@ are documented in [README.md](../README.md#spec-first-lab-pipeline).
 Quality rules are authoring
 aids, not proof that a spec is safe or contains no tenant data.
 
+M4a accepts string or typed key facts (`number`, `quote`, `clause`, `fact`).
+Quote/clause source references and clause section numbers are warning-only
+requirements. Optional `through_line.headings` enables destination matching;
+other warnings cover undeclared containers/files, overview quote drift with a
+25-character contiguous match, unknown section references and sensitive-domain
+safeguards. See [check scopes and examples](../README.md#labspec-21-consistency-warnings).
+No source assets are read to perform these checks.
+
 [Rendering](../server/studio/tools/rendering.py) validates first, selects a bundled
 theme by exact ID, and renders local Jinja templates with autoescape enabled for
 every template, including `.html.j2` files. Spec content is never interpreted as
@@ -96,6 +105,11 @@ chapter budgets. Tables group files by kind and map steps to inputs, modes, and
 carry-forward outputs. Checkpoint callouts reference the declared starting-state
 file. If a file has no href, the filename is plain text labeled "Provided
 separately"; no broken download is invented and no asset is fetched or created.
+2.1 limits hrefs to HTTPS or relative paths; 2.0 keeps its legacy URL policy.
+Learner links open in a new tab with `noopener noreferrer`. Optional file
+`audience` defaults to learner; facilitator files are grouped under Answer keys,
+marked "Facilitator only", and never linked. Existing default/no-href markup
+and the 84,022-byte golden page are unchanged.
 
 IDs are stable from the spec; internal IDs use double hyphens, outside the
 accepted slug grammar. IntersectionObserver and native details toggles maintain
