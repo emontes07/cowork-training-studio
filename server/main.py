@@ -1,9 +1,13 @@
+from datetime import UTC, datetime
+import json
+import logging
 import os
+from time import perf_counter
 
 import fastmcp
 from fastmcp import FastMCP
 from starlette.middleware import Middleware
-from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from studio.tools.formats import list_session_formats
 from studio.tools.rendering import render_lab_page
@@ -27,6 +31,44 @@ mcp.tool(list_session_formats, task=False)
 mcp.tool(get_lab_spec_schema, task=False)
 mcp.tool(validate_lab_spec, task=False)
 mcp.tool(render_lab_page, task=False)
+
+_REQUEST_LOG = logging.getLogger("uvicorn.error.studio.requests")
+
+
+class RequestLogging:
+    """Log HTTP metadata only, without buffering requests or streaming responses."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        started = perf_counter()
+        status = 500
+
+        async def record_status(message: Message) -> None:
+            nonlocal status
+            if message["type"] == "http.response.start":
+                status = message["status"]
+            await send(message)
+
+        try:
+            await self.app(scope, receive, record_status)
+        finally:
+            user_agent = next(
+                (value.decode("latin-1") for name, value in scope["headers"] if name.lower() == b"user-agent"),
+                "",
+            )
+            _REQUEST_LOG.info(json.dumps({
+                "timestamp": datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+                "method": scope["method"],
+                "path": scope["path"],
+                "status": status,
+                "duration_ms": round((perf_counter() - started) * 1000, 3),
+                "user_agent": user_agent,
+            }))
 
 
 class MCPPathAlias:
@@ -55,9 +97,9 @@ def main() -> None:
             port=port,
             path="/mcp",
             stateless_http=True,
-            middleware=[Middleware(MCPPathAlias)],
+            middleware=[Middleware(RequestLogging), Middleware(MCPPathAlias)],
             # FastMCP defaults to zero grace; allow active requests to finish.
-            uvicorn_config={"timeout_graceful_shutdown": 5},
+            uvicorn_config={"timeout_graceful_shutdown": 5, "access_log": False},
         )
     else:
         raise ValueError("MCP_TRANSPORT must be stdio, http, or streamable-http.")

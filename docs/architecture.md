@@ -140,6 +140,16 @@ The container runs as a non-root user. STDIO keeps protocol output on stdout;
 diagnostics go to stderr. HTTP shutdown allows five seconds for active requests
 to finish instead of FastMCP's zero-second grace default.
 
+HTTP request logs are single-line JSON on stderr: UTC `timestamp`, `method`,
+`path` (without a query string), `status`, `duration_ms`, and `user_agent`.
+Streaming responses are not buffered; duration runs through request completion.
+The original requested path is logged before the trailing-slash alias is applied.
+Bodies, query strings, tokens, cookies and authorization headers are not logged.
+JSON escaping prevents control characters in user-agent/path from creating
+extra log lines. The default Uvicorn access log is disabled to avoid duplicate
+lines that could include query strings. Unexpected exceptions still propagate;
+the metadata log records a 500 if no response status was sent.
+
 ## Data handling
 
 - The application has no durable or per-user storage, secrets, authentication,

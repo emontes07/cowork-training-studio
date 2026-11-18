@@ -176,8 +176,7 @@ def test_http_aliases_use_stateless_transport(monkeypatch, transport, port):
     server.main()
 
     middleware = calls[0].pop("middleware")
-    assert len(middleware) == 1
-    assert middleware[0].cls is server.MCPPathAlias
+    assert [item.cls for item in middleware] == [server.RequestLogging, server.MCPPathAlias]
     assert calls == [
         {
             "transport": "streamable-http",
@@ -185,7 +184,7 @@ def test_http_aliases_use_stateless_transport(monkeypatch, transport, port):
             "port": 8000 if port is None else int(port),
             "path": "/mcp",
             "stateless_http": True,
-            "uvicorn_config": {"timeout_graceful_shutdown": 5},
+            "uvicorn_config": {"timeout_graceful_shutdown": 5, "access_log": False},
         }
     ]
 
