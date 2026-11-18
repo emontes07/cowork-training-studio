@@ -9,6 +9,7 @@ import pytest
 from main import mcp
 from studio.schemas.demo_pack import Audience, ContextFact, DemoFile, Payoff, SeededItem, Tension
 from studio.tools.demo_validation import get_demo_pack_schema, validate_demo_pack
+from studio.tools.demo_rendering import render_demo_guide
 
 
 def test_demo_schema_exports_typed_evidence_and_strict_objects_through_mcp():
@@ -99,3 +100,22 @@ def test_demo_validation_warnings_and_text_fallback_are_top_level(small_demo):
             assert set(result.structuredContent) == {"valid", "errors", "warnings", "stats"}
             assert json.loads(result.content[0].text) == result.structuredContent
     asyncio.run(check())
+
+
+def test_demo_renderer_escapes_prompt_keeps_presenter_notes_closed_and_returns_readme(small_demo):
+    from test_rendering import parse
+
+    prompt = '  <script>alert("fictional")</script>\n& <b>Do not execute</b>  '
+    small_demo["scenarios"][0]["prompt"] = prompt
+    result = render_demo_guide(small_demo)
+    assert result["filename"] == "invented-review-demo-guide.html"
+    page = parse(result["html"])
+    assert page.pre_text == [prompt]
+    assert sum(tag == "script" for tag, _ in page.tags) == 1
+    notes = [attrs for tag, attrs in page.tags if tag == "details" and "presenter-payoffs" in attrs.get("class", "")]
+    assert len(notes) == 1 and "open" not in notes[0]
+    assert "context--facts" in page.ids and "context--assumptions" in page.ids
+    assert "Demo pack approach adapted from work by Shailesh Mittal and Giovanna; see CREDITS.md" in result["readme_md"]
+    small_demo["scenarios"][0]["input_file_ids"] = ["missing"]
+    rejected = render_demo_guide(small_demo)
+    assert set(rejected) == {"errors", "stats", "warnings"}
