@@ -2,6 +2,7 @@
   {
     "id": "html_lab",
     "name": "HTML training lab",
+    "status": "available",
     "description": "A self-contained, GitHub Pages-ready HTML lab guide with a story arc, left navigation, collapsible labs, copyable prompts, and self-checks.",
     "best_for": [
       "Hands-on workshops",
@@ -36,12 +37,13 @@
       }
     ],
     "default_duration_minutes": 60,
-    "produced_by_skill": "html-training-lab"
+    "produced_by_skill": "build-training-lab"
   },
   {
     "id": "word_guide",
     "name": "Word training guide",
-    "description": "A .docx training guide plus a one-page quick reference, written by a skill and saved using Cowork's own tools.",
+    "description": "Not available yet; planned: a .docx training guide plus a one-page quick reference, saved using Cowork's own tools.",
+    "status": "coming_soon",
     "best_for": [
       "Instructor-led training",
       "Printable learner handouts",
@@ -70,12 +72,13 @@
       }
     ],
     "default_duration_minutes": 45,
-    "produced_by_skill": "training-guide"
+    "produced_by_skill": null
   },
   {
     "id": "demo_pack",
     "name": "Cowork demo pack",
-    "description": "Fictional source documents, seeded email content, and calendar event drafts for a Cowork demo; this server never creates mailbox or calendar items.",
+    "description": "Not available yet; planned: fictional source documents, seeded email content, and calendar event drafts for a Cowork demo. This server never creates mailbox or calendar items.",
+    "status": "coming_soon",
     "best_for": [
       "Repeatable product demonstrations",
       "Scenario-based walkthroughs",
@@ -104,12 +107,13 @@
       }
     ],
     "default_duration_minutes": 20,
-    "produced_by_skill": "cowork-demo-pack"
+    "produced_by_skill": null
   },
   {
     "id": "prompt_a_thon",
     "name": "Prompt-a-thon",
-    "description": "A facilitated prompt challenge session with timed rounds, fictional scenarios, peer review, and a shared reflection.",
+    "description": "Not available yet; planned: a facilitated prompt challenge session with timed rounds, fictional scenarios, peer review, and a shared reflection.",
+    "status": "coming_soon",
     "best_for": [
       "Collaborative prompt practice",
       "Team learning sessions",

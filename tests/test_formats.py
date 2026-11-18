@@ -30,6 +30,7 @@ def test_catalog_is_complete_and_json_serializable():
             "id",
             "name",
             "description",
+            "status",
             "best_for",
             "required_inputs",
             "default_duration_minutes",
@@ -39,18 +40,31 @@ def test_catalog_is_complete_and_json_serializable():
         assert item["best_for"] and all(item["best_for"])
         assert isinstance(item["default_duration_minutes"], int)
         assert item["default_duration_minutes"] > 0
-        assert item["produced_by_skill"] in {
-            "html-training-lab",
-            "training-guide",
-            "cowork-demo-pack",
-            None,
-        }
+        assert item["status"] in {"available", "coming_soon"}
+        assert item["produced_by_skill"] in {"build-training-lab", None}
         assert item["required_inputs"]
         input_names = [field["name"] for field in item["required_inputs"]]
         assert len(input_names) == len(set(input_names))
         for field in item["required_inputs"]:
             assert set(field) == {"name", "description", "example"}
             assert all(isinstance(value, str) and value for value in field.values())
+
+
+def test_format_skills_are_shipped_and_planned_formats_are_unavailable():
+    skills = Path(__file__).resolve().parents[1] / "plugin" / "skills"
+    for item in list_session_formats():
+        skill = item["produced_by_skill"]
+        if skill is not None:
+            assert (skills / skill / "SKILL.md").is_file(), f"Unshipped skill: {skill}"
+            assert item["status"] == "available"
+        else:
+            assert item["status"] == "coming_soon"
+            assert "not available yet; planned" in item["description"].casefold()
+    assert list_session_formats("html_lab")[0]["produced_by_skill"] == "build-training-lab"
+    assert all(
+        list_session_formats(identifier)[0]["produced_by_skill"] is None
+        for identifier in ("word_guide", "demo_pack", "prompt_a_thon")
+    )
 
 
 @pytest.mark.parametrize("id", ["html_lab", "word_guide", "demo_pack", "prompt_a_thon"])

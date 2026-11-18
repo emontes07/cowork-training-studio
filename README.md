@@ -107,10 +107,11 @@ and `render_lab_page` (`{"spec": ..., "theme_id": "microsoft"}`).
 
 Each entry includes `id`, `name`, `description`, `best_for`,
 `required_inputs` (a list of `name`, `description`, `example` objects),
-`default_duration_minutes`, and `produced_by_skill`.
-The skill mappings are `html-training-lab`, `training-guide`, and
-`cowork-demo-pack`; `prompt_a_thon` has `null` because no dedicated skill is
-assigned. These skills are not included in M1.
+`default_duration_minutes`, `status`, and `produced_by_skill`.
+`html_lab` is `available` through the shipped `build-training-lab` skill.
+`word_guide`, `demo_pack`, and `prompt_a_thon` are `coming_soon`, not available
+yet, with `produced_by_skill: null`. Planned formats remain discoverable but
+must not be offered as ready-to-use capabilities.
 
 The underlying Python functions stay directly callable. FastMCP may wrap a
 list in the MCP structured-content `result` field on the wire. The renderer's

@@ -2,7 +2,7 @@
 
 ```text
 +-----------------------------------------------------------+
-| Cowork plugin skills (planned packaging)                   |
+| Cowork plugin: build-training-lab                          |
 | Write content, choose the scenario, own editorial judgment |
 +-----------------------------+-----------------------------+
                               |
@@ -49,9 +49,10 @@ implemented alongside the M1 format catalog.
 | `render_lab_page` | M3a, v2 | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
 
 Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
-(each with `name`, `description`, and `example`), `default_duration_minutes`, and
-`produced_by_skill`. Skill names are routing metadata, not installed skills.
-`prompt_a_thon` has no assigned skill yet (`null`).
+(each with `name`, `description`, and `example`), `default_duration_minutes`,
+`status`, and `produced_by_skill`. Only `html_lab` is `available`, routed to the
+shipped `build-training-lab` skill. Word guides, demo packs and prompt-a-thons
+are planned, `coming_soon`, with no assigned skill (`null`).
 
 ## Lab pipeline
 
