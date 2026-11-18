@@ -19,6 +19,7 @@ ENVIRONMENT='<environment-name>'
 ACR='<globally-unique-registry-name>'
 IDENTITY='<pull-identity-name>'
 APP='cowork-training-studio-mcp'
+SERVER_SOURCE="$(pwd)/server"
 
 az provider register --namespace Microsoft.App --subscription "$SUBSCRIPTION" --wait
 az provider register --namespace Microsoft.ContainerRegistry --subscription "$SUBSCRIPTION" --wait
@@ -39,8 +40,7 @@ az role assignment create --assignee-object-id "$PRINCIPAL_ID" \
   --assignee-principal-type ServicePrincipal --role AcrPull --scope "$ACR_ID" \
   --subscription "$SUBSCRIPTION"
 
-cd server
-az containerapp up --name "$APP" --source . --ingress external --target-port 8000 \
+az containerapp up --name "$APP" --source "$SERVER_SOURCE" --ingress external --target-port 8000 \
   --resource-group "$RG" --environment "$ENVIRONMENT" --location westus3 \
   --registry-server "$ACR.azurecr.io" --registry-identity "$IDENTITY_ID" \
   --user-assigned "$IDENTITY_ID" \
@@ -48,12 +48,11 @@ az containerapp up --name "$APP" --source . --ingress external --target-port 800
 az containerapp update --name "$APP" --resource-group "$RG" \
   --cpu 0.25 --memory 0.5Gi --min-replicas 1 --max-replicas 2 \
   --subscription "$SUBSCRIPTION"
-cd ..
 az containerapp show --name "$APP" --resource-group "$RG" \
   --subscription "$SUBSCRIPTION" --query properties.configuration.ingress.fqdn -o tsv
 ```
 
-The **server directory** is the build context, not the repository root.
+The **absolute server directory** is the build context, never the repository root.
 Its `.dockerignore` allows only runtime source/dependencies and excludes caches,
 virtual environments, `.env`, logs, tests, ZIPs and Git metadata. The image runs
 as non-root. A precreated registry and scoped managed identity avoid registry
@@ -61,9 +60,13 @@ passwords and stored Container App secrets; never enable registry admin access.
 Environment log collection is disabled. Application host/origin settings are
 unchanged.
 
-To redeploy, restore the variables above (including `IDENTITY_ID`) and repeat
-the `cd server`, `az containerapp up`, replica update and `cd ..` commands.
-The cloud build creates a new image and revision. Then run:
+To redeploy, restore the variables above (including `IDENTITY_ID` and the
+absolute `SERVER_SOURCE`) and repeat `az containerapp up`. Do not pass `--output`
+to `up`; this extension rejects it. The cloud build creates a new image/revision.
+Verify identity, registry, environment, CPU/memory, environment variables,
+replica settings and ingress are unchanged. Confirm the healthy ready revision
+gets 100% of traffic; the previous revision may briefly show as deprovisioning
+with 0%. Never build from the repository root. Then run:
 
 ```sh
 .venv/bin/python -m scripts.smoke_client --url 'https://<app-fqdn>/mcp/'
@@ -137,7 +140,8 @@ for either the tunnel or Azure; server host/origin settings remain unchanged.
 .venv/bin/python -m scripts.smoke_client --url 'https://<tunnel-host>/mcp/'
 ```
 
-Pass: initialize has no session ID, all four tools are available, the golden
+Pass: initialize has no session ID, all five tools are available, blueprint
+summaries and details return top-level objects, the golden
 spec has zero errors/warnings, and rendered HTML matches the committed example
 byte-for-byte. The client prints render round-trip time and actual downloaded
 HTTP-body bytes (MCP/SSE included; headers/TLS excluded), not a JSON-size estimate.
@@ -154,9 +158,9 @@ In the existing server virtual environment, install the separate, pinned
 ```
 
 Build against the **Azure URL**, not an expiring tunnel.
-The ZIP lands at `dist/cowork-training-studio-0.1.2.zip`; `--out <directory>`
+The ZIP lands at `dist/cowork-training-studio-0.1.3.zip`; `--out <directory>`
 changes the output directory. The script prints its SHA-256 and root-level file
-list, fetches the live server's four tool descriptions/schemas, and generates
+list, fetches the live server's five tool descriptions/schemas, and generates
 the original TS icons with Pillow. No tool catalog is hand-written.
 Names and descriptions are unchanged. By default, local schema references are
 inlined, definitions/extensions/nonstandard keywords and titles are removed,
@@ -179,19 +183,24 @@ not prove tenant upload permission or successful Cowork execution.
 The manifest uses `/mcp` without a trailing slash; either endpoint now works
 without redirecting. Keep the same manifest ID when rebuilding.
 
-The [build-training-lab skill](../plugin/skills/build-training-lab/SKILL.md)
-offers practice files after saving the exact returned HTML. Cowork creates and
-re-reads those files, checking fictional numbers, verbatim quoted key facts
-and section numbers, chapter-start checkpoints, and separate facilitator keys.
-The server does not create or save those files.
+The [build-training-lab skill](../plugin/skills/build-training-lab/SKILL.md) is
+137 lines (limit 150). It offers blueprint choices, writes LabSpec 2.1 and fixes
+all validation warnings. Cowork builds `learner/` sources/checkpoints and
+`facilitator/` keys/run-of-show notes, then adds learner-relative hrefs, validates
+and renders again, and saves the exact returned HTML at the pack root. It
+re-reads every file, checks quote/clause placements and sections, verifies dates
+and calculations with code, reports counts/fixes and offers a ZIP.
+The server does not create files, mail, calendar items or ZIPs.
 
 ## Cowork checklist
 
 | Test | Prompt/action | Pass condition |
 | --- | --- | --- |
 | A | "List the session formats you support" | Four formats returned; only HTML lab is available via build-training-lab. Word guide, demo pack and prompt-a-thon are marked coming soon. |
+| A2 | "Help me choose a workshop shape" | Three blueprint choices; selected outline has the declared duration. Build super-day lab outlines as five separate HTML labs. |
 | B | "Build me a 30-minute, 2-chapter story lab for Copilot in Excel for a fictional bakery chain; validate it, then render it and save the page to my files" | Zero validation errors; Cowork saves the page; the saved HTML opens offline. |
 | C | During B, inspect the save step and record how Cowork handles the HTML. | Record whether it writes the tool result directly, retypes/reconstructs the HTML, or the behavior cannot be determined. Do not infer this from MCP smoke success. |
+| D | "Create the practice pack and zip it" | Learner links resolve relative to the guide, facilitator keys/notes stay separate and unlinked, quote/calculation checks report counts, and the ZIP comes from Cowork's tools. |
 
 Observed: tunnel and Azure remote MCP smoke passed; golden HTML matched at
 84,022 bytes. The 0.1.0 tunnel plugin installed and its connector showed
@@ -201,8 +210,10 @@ attribution. Version 0.1.1 completed a real 60-minute Cowork lab run:
 specification, three validation rounds ending at zero errors/warnings, render
 and save. Cowork had to parse the render result as text. Version 0.1.2 exposes
 render fields at the top level of structured content while retaining a text
-fallback. **Retest direct-write behavior and the practice-file offer with 0.1.2**;
-no server-side content-saving code was added.
+fallback. M4b's 0.1.3 release adds five-tool discovery, blueprints and the pack
+workflow; local and Azure smoke checks pass with the same golden bytes.
+**Retest direct-write and full pack/ZIP behavior in Cowork with 0.1.3**; protocol
+and package validation do not prove a live Cowork file workflow.
 
 ## Stop
 

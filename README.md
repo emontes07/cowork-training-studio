@@ -4,11 +4,11 @@ A stateless MCP server for Microsoft 365 Copilot Cowork training workflows.
 **Skills own judgment, MCP owns consistency.** Skills write content; Cowork's
 own tools save and send it.
 
-M4a extends the story pipeline to LabSpec **2.1**, retaining **2.0** support:
+M4b ships LabSpec **2.1**, retaining **2.0** support:
 `get_lab_spec_schema` -> `validate_lab_spec` -> `render_lab_page`.
 The result is one self-contained HTML page, returned to Cowork rather than
-saved by the server. Azure hosting and plugin 0.1.2 remain on the M3f release
-until M4b; M4a changes the contract without deploying or releasing a plugin.
+saved by the server. Plugin **0.1.3** adds three workshop blueprints and a checked
+learner/facilitator pack workflow, backed by the five-tool Azure server.
 Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
 
 No authentication, secrets, Microsoft Graph calls, telemetry integration,
@@ -123,11 +123,38 @@ filename. Both tools also include the same object as JSON in a text block for
 clients without structured-content support. The smoke client reads structured
 content directly rather than SDK-generated Python model objects.
 
+## Workshop blueprints
+
+When the learner has no shape in mind, call `get_blueprint()` and offer the three
+summaries in `blueprints`. Call again with an exact `blueprint_id` for top-level
+`id`, `title`, `default_minutes`, `best_for`, `required_inputs`, `chapter_outline`
+(`title`, `minutes`, `purpose`, `step_patterns`), `quality_bar` and `ends_with`.
+Unknown IDs raise an explicit error. Results are static, read-only metadata;
+they are not complete LabSpecs or created files.
+
+| ID | Minutes | Shape |
+| --- | --- | --- |
+| `app_deep_dive` | 60 | One role/workflow, raw inputs to deliverable, then a reviewed personal skill tested on new data. |
+| `prompt_to_agent_ladder` | 90 | Single prompt, file grounding, multi-step Cowork task, personal skill, optional presenter-led shared skill/agent. |
+| `domain_super_day` | 300 | Foundations, three role labs and a prompt-challenge close, with breaks, using one invented company. |
+
+For the super-day, `chapter_outline` is the day agenda, and `lab_outlines`
+contains five separate outlines with `id`, `title`, `format_id`, `default_minutes`
+and `chapter_outline`. Every lab agenda slot names `lab_id` and matches the lab's
+title and duration; non-lab slots are breaks. The day totals 300 minutes including
+breaks, and each lab's chapters total its own duration. Build each as a separate
+`html_lab`; the closing challenge moves to `prompt_a_thon` only once that format
+ships. The optional shared-skill/agent rung has a sharing-plan fallback; no
+tenant capabilities are assumed.
+
 ## Spec-first lab pipeline
 
 1. Call `get_lab_spec_schema` and draft a LabSpec with `schema_version: "2.1"` using fictional content only; `"2.0"` remains supported.
 2. Call `validate_lab_spec`. Fix errors; review nonblocking quality warnings.
 3. Call `render_lab_page`. Cowork saves the returned `html` using `filename`.
+
+The shipped skill requires zero errors **and** zero warnings before rendering,
+even though warnings remain nonblocking at the server API.
 
 Validation returns `{valid, errors, warnings, stats}`. Issues have `code`, `path`,
 and `message`. Schema failures return zero stats. Otherwise stats contain
@@ -239,6 +266,28 @@ checkpoint callouts. This presentation rule is not access control on the URL.
 Files and checkpoint states are produced later by the learner or Cowork skills,
 not by this server. Links are inert until clicked; no remote assets are embedded.
 
+### Facilitator pack workflow (plugin 0.1.3)
+
+After clean validation, Cowork builds the practice files from the typed key facts,
+with learner permission. It saves sources, fresh test inputs and chapter-start
+checkpoints under `<lab-slug>/learner/`, and answer keys plus
+`facilitator-notes.md` under `<lab-slug>/facilitator/`. The notes contain a
+chapter run of show, handouts, dates and expected answers.
+
+Only saved learner files receive relative `learner/<filename>` hrefs; keys and
+notes use `audience: "facilitator"` and no href. The skill validates again,
+re-renders and saves the **exact** returned HTML at `<lab-slug>/<lab-slug>.html`,
+aligning the folder to the returned filename. Cowork re-reads every file, checks
+verbatim quote/clause placements and section numbers, verifies dates and numeric
+calculations with code, checks relative links and reports counts and corrections.
+Mismatched practice files are fixed to match the canonical facts, not vice versa.
+
+The skill offers a ZIP of the complete pack for facilitators; learners receive
+the HTML and learner subtree together, not the facilitator answers. There is no
+server-side file/ZIP, mail or calendar creation. Folder labels and absent links
+are not access control. Actual saving, code execution and ZIP creation depend on
+Cowork's available tools; unavailable operations must be reported as unverified.
+
 Rendering success returns `{html, filename, stats, warnings}`. Failure returns
 `{errors, stats, warnings}` with **no HTML or filename**. Only the `microsoft`
 theme is bundled; an optional `theme_id` overrides the spec theme, and unknown
@@ -310,7 +359,7 @@ With the HTTP server running in another terminal:
 python scripts/smoke_client.py
 ```
 
-This lists and calls all four tools, retrieves the v2 schema, validates/renders the golden
+This lists and calls all five tools, checks blueprint summaries/details, retrieves the v2 schema, validates/renders the golden
 spec, and verifies invalid input returns no HTML. It never saves the response.
 
 Docker must be installed with a running engine for the build. To run the image:

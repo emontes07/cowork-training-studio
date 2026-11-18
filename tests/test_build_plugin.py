@@ -205,7 +205,7 @@ def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools, raw_s
         assert all(content == (out / name).read_bytes() for name, content in files.items())
         builder.validate_package(files)
     assert calls == ["https://mcp.example.test/mcp"]
-    assert archive_path.name == "cowork-training-studio-0.1.2.zip"
+    assert archive_path.name == "cowork-training-studio-0.1.3.zip"
 
 
 def test_sanitizer_resolves_nested_refs_and_preserves_constraints():

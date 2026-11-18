@@ -37,13 +37,14 @@ plugin connects independently to both MCP servers.
 
 The pipeline is spec-first: a skill writes LabSpec 2.1 (or 2.0) JSON, calls the validator, fixes reported
 errors, reviews warnings, and then calls the HTML renderer. All three tools are
-implemented alongside the M1 format catalog.
+implemented alongside the format catalog and the M4b read-only blueprint tool.
 
 ## Tool surface
 
 | Tool | Status | Input | Output / when to call |
 | --- | --- | --- | --- |
 | `list_session_formats` | M1, implemented | Optional exact `id` | JSON list of four formats, or one matching format; call before selecting a skill or gathering inputs. Unknown IDs raise an explicit error. |
+| `get_blueprint` | M4b | Optional exact `blueprint_id` | `{blueprints: [summaries]}` without an ID, or top-level blueprint detail fields; call when a workshop shape is needed. Unknown IDs raise an explicit error. |
 | `get_lab_spec_schema` | M4a, v2.1 | None | JSON Schema for drafting fictional LabSpec 2.0/2.1; v1 is rejected. |
 | `validate_lab_spec` | M3a, v2 | `spec` object | `{valid, errors, warnings, stats}`; call before rendering. |
 | `render_lab_page` | M3a, v2 | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
@@ -53,6 +54,13 @@ Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
 `status`, and `produced_by_skill`. Only `html_lab` is `available`, routed to the
 shipped `build-training-lab` skill. Word guides, demo packs and prompt-a-thons
 are planned, `coming_soon`, with no assigned skill (`null`).
+
+Blueprint JSON is loaded once and copied for each response, like the format
+catalog. It contains generic 60/90/300-minute plans, not tenant content or rendered
+specs. The super-day adds `lab_outlines`; agenda `lab_id`, title and minutes match
+each separate lab. Tests enforce every duration total, including breaks.
+An explicit object return type keeps both result shapes at the top level of MCP
+structured content, with equivalent JSON text for other clients.
 
 ## Lab pipeline
 
@@ -110,6 +118,13 @@ Learner links open in a new tab with `noopener noreferrer`. Optional file
 `audience` defaults to learner; facilitator files are grouped under Answer keys,
 marked "Facilitator only", and never linked. Existing default/no-href markup
 and the 84,022-byte golden page are unchanged.
+
+Plugin 0.1.3's skill uses 2.1 typed facts/headings, requires zero warnings, and
+builds the pack with Cowork tools before the final render. Learner files live in
+`learner/`; keys and run-of-show notes live in `facilitator/`. It sets relative
+hrefs only after saves, validates/re-renders, writes exact HTML, re-reads files,
+checks quotes/calculations and offers a ZIP. The MCP server never performs those
+file operations. Share only the guide plus learner subtree with learners.
 
 IDs are stable from the spec; internal IDs use double hyphens, outside the
 accepted slug grammar. IntersectionObserver and native details toggles maintain
