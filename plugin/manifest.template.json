@@ -1,0 +1,48 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.28/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.28",
+  "version": "0.1.1",
+  "id": "b1d78c7d-72fe-4cdb-9534-a70e8f324057",
+  "developer": {
+    "name": "Cowork Training Studio (demo)",
+    "websiteUrl": "https://github.com/emontes07/cowork-training-studio",
+    "privacyUrl": "https://github.com/emontes07/cowork-training-studio/blob/main/SECURITY.md",
+    "termsOfUseUrl": "https://github.com/emontes07/cowork-training-studio/blob/main/LICENSE"
+  },
+  "name": {
+    "short": "Cowork Training Studio",
+    "full": "Cowork Training Studio for Microsoft 365 Copilot Cowork"
+  },
+  "description": {
+    "short": "Demo build: fictional training labs only. Not production ready.",
+    "full": "Cowork Training Studio is a community demo build for Microsoft 365 Copilot Cowork, not production ready. Build story-driven training labs using fictional data only. The skill helps you plan a connected workshop, check its structure and render an offline HTML guide. Cowork saves the exact returned page to your files. Never include tenant or customer data, real documents, personal information, credentials or secrets in a lab specification. The remote service is stateless and does not save files or call Microsoft Graph. This demo uses anonymous access and may connect through an expiring development tunnel; availability and upload permissions depend on your environment."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0F6CBD",
+  "agentSkills": [
+    {
+      "folder": "./skills/build-training-lab"
+    }
+  ],
+  "agentConnectors": [
+    {
+      "id": "training-studio",
+      "displayName": "Training Studio",
+      "description": "Demo tools for fictional training formats, story-lab validation and offline HTML rendering. Not production ready.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "{{MCP_SERVER_URL}}",
+          "mcpToolDescription": {
+            "file": "mcp-tools.json"
+          },
+          "authorization": {
+            "type": "None"
+          }
+        }
+      }
+    }
+  ]
+}

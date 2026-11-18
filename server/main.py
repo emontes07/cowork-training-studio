@@ -2,6 +2,8 @@ import os
 
 import fastmcp
 from fastmcp import FastMCP
+from starlette.middleware import Middleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from studio.tools.formats import list_session_formats
 from studio.tools.rendering import render_lab_page
@@ -27,6 +29,18 @@ mcp.tool(validate_lab_spec, task=False)
 mcp.tool(render_lab_page, task=False)
 
 
+class MCPPathAlias:
+    """Serve the trailing-slash alias through the same MCP handler."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http" and scope["path"] == "/mcp/":
+            scope = {**scope, "path": "/mcp", "raw_path": b"/mcp"}
+        await self.app(scope, receive, send)
+
+
 def main() -> None:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
     if transport == "stdio":
@@ -41,6 +55,7 @@ def main() -> None:
             port=port,
             path="/mcp",
             stateless_http=True,
+            middleware=[Middleware(MCPPathAlias)],
             # FastMCP defaults to zero grace; allow active requests to finish.
             uvicorn_config={"timeout_graceful_shutdown": 5},
         )

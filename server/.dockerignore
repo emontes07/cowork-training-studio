@@ -1,0 +1,15 @@
+**
+!Dockerfile
+!requirements.txt
+!main.py
+!studio/
+!studio/**
+**/__pycache__/
+**/*.py[cod]
+.venv/
+dist/
+tests/
+.git/
+.env
+.env.*
+**/*.log
