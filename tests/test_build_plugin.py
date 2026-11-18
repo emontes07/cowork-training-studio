@@ -262,7 +262,7 @@ def test_sanitizer_rejects_unresolvable_references(reference, definitions, messa
 def test_tool_sanitizer_keeps_metadata_and_simplifies_spec_and_outputs(tools):
     original = deepcopy(tools)
     result = builder.sanitize_tools(tools)
-    assert len(result) == 4
+    assert len(result) == 5
     assert tools == original
     for before, after in zip(tools, result):
         for field in ("name", "description", "annotations"):

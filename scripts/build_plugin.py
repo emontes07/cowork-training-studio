@@ -23,7 +23,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 PLACEHOLDER = "{{MCP_SERVER_URL}}"
 TOOL_FIELDS = {"name", "description", "inputSchema", "outputSchema", "annotations"}
-EXPECTED_TOOLS = {"list_session_formats", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
+EXPECTED_TOOLS = {"list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
 # Only schema locations are traversed; property names and literal values stay intact.
 SCHEMA_MAP_KEYS = {"properties", "patternProperties", "dependentSchemas"}
 SCHEMA_LIST_KEYS = {"allOf", "anyOf", "oneOf", "prefixItems"}
@@ -253,8 +253,8 @@ def validate_package(files: dict[str, bytes]) -> dict[str, Any]:
 
     catalog = json.loads(files["mcp-tools.json"])
     tools = catalog["tools"]
-    if not isinstance(tools, list) or len(tools) != 4 or {tool["name"] for tool in tools} != EXPECTED_TOOLS:
-        raise ValueError("Tool catalog must contain exactly the four Training Studio tools.")
+    if not isinstance(tools, list) or len(tools) != len(EXPECTED_TOOLS) or {tool["name"] for tool in tools} != EXPECTED_TOOLS:
+        raise ValueError("Tool catalog must contain exactly the five Training Studio tools.")
     for tool in tools:
         if set(tool) - TOOL_FIELDS:
             raise ValueError("Tool catalog contains unsupported metadata fields.")
