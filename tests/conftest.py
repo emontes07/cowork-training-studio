@@ -1,9 +1,15 @@
+import json
 from pathlib import Path
 import sys
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "server"))
+
+
+@pytest.fixture
+def legal_spec():
+    return json.loads((Path(__file__).parent / "fixtures" / "legal_notice_lab.json").read_text(encoding="utf-8"))
 
 
 @pytest.fixture

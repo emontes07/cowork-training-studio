@@ -174,8 +174,43 @@ def test_file_links_and_checkpoint_callouts(minimal_spec, href):
     else:
         assert len(downloads) == 2
         assert all(link["href"] == href and link["download"] == "checkpoint.xlsx" for link in downloads)
+        assert all(link["target"] == "_blank" and link["rel"] == "noopener noreferrer" for link in downloads)
         assert not any("provided-separately" in attrs.get("class", "").split() for _, attrs in page.tags)
     assert "Only if you fall behind" in result["html"]
+
+
+def test_facilitator_checkpoint_is_unlinked_everywhere_and_grouped_as_answer_key(minimal_spec):
+    minimal_spec["files"] = [{
+        "id": "facilitator-file", "filename": "facilitator.xlsx", "kind": "checkpoint",
+        "purpose": "Facilitator starting state", "used_in": ["chapter-2"],
+        "audience": "facilitator", "href": "https://example.test/private.xlsx",
+    }]
+    minimal_spec["chapters"][1]["checkpoint_file_id"] = "facilitator-file"
+    html = render_lab_page(minimal_spec)["html"]
+    assert "private.xlsx" not in html
+    assert html.count("Facilitator only") == 2
+    assert "Answer keys" in html
+    assert "Checkpoints - Only if you fall behind" not in html
+
+
+def test_legal_links_facilitator_grouping_and_typed_facts_are_escaped(legal_spec):
+    legal_spec["files"][0]["href"] = 'https://example.test/source?a=1&b="quoted"'
+    fact = legal_spec["chapters"][0]["steps"][0]["expected"]["key_facts"][0]
+    fact["text"] = "<b>Original fictional wording & evidence</b>"
+    result = render_lab_page(legal_spec)
+    assert result["warnings"] == []
+    html = result["html"]
+    page = parse(html)
+    links = [attrs for tag, attrs in page.tags if tag == "a" and "download" in attrs]
+    assert len(links) == 1
+    assert links[0]["href"] == legal_spec["files"][0]["href"]
+    assert links[0]["target"] == "_blank" and links[0]["rel"] == "noopener noreferrer"
+    assert '&amp;b=&#34;quoted&#34;' in html
+    assert "<li>&lt;b&gt;Original fictional wording &amp; evidence&lt;/b&gt;</li>" in html
+    assert "Facilitator only" in html
+    assert html.index("Answer keys") < html.index("renewal-answer-key.txt")
+    assert legal_spec["files"][2]["href"] not in html
+    assert "Provided separately" in html
 
 
 def test_agenda_uses_chapter_minutes_and_missing_optionals_omit_cleanly(minimal_spec):

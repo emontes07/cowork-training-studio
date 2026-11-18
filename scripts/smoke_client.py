@@ -60,7 +60,7 @@ async def smoke(url: str) -> None:
         schema = (await client.call_tool("get_lab_spec_schema", {})).structured_content
         assert schema is not None
         assert {"schema_version", "chapters"} <= set(schema["required"])
-        assert schema["properties"]["schema_version"]["const"] == "2.0"
+        assert schema["properties"]["schema_version"]["enum"] == ["2.0", "2.1"]
         formats = (await client.call_tool("list_session_formats", {})).data
         assert len(formats) == 4
         print("list_session_formats: 4 formats")

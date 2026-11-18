@@ -26,7 +26,7 @@
     <section class="expected">
       <h4>Wording varies; the substance should match</h4>
       <p>{{ step.expected.summary }}</p>
-      {% if step.expected.key_facts %}<ul>{% for fact in step.expected.key_facts %}<li>{{ fact }}</li>{% endfor %}</ul>{% endif %}
+      {% if step.expected.key_facts %}<ul>{% for fact in step.expected.key_facts %}<li>{{ fact if fact is string else fact.text }}</li>{% endfor %}</ul>{% endif %}
     </section>
     {% endif %}
     {% if step.fallback %}

@@ -1,0 +1,187 @@
+{
+  "schema_version": "2.1",
+  "title": "Zava renewal notice practice",
+  "subtitle": "Keep source wording separate from questions for counsel",
+  "audience": "Fictional legal operations learners",
+  "duration_minutes": 40,
+  "skill_level": "basic",
+  "products": ["Copilot Cowork"],
+  "functional_area": "Legal",
+  "company": {
+    "name": "Zava Athletic Supply",
+    "is_fictional": true,
+    "description": "Zava Athletic Supply and Vellum Kite Services are invented training organizations. All parties are fictional."
+  },
+  "narrative": {
+    "role": "A fictional operations coordinator preparing a source-grounded review",
+    "situation": "An invented agreement says: \"Either fictional party may decline renewal by giving 45 days of written notice.\"",
+    "trigger": "A fictional email says: \"Please keep the notice wording unchanged while we collect questions for counsel.\"",
+    "deadline": "Before the practice review meeting",
+    "leave_with": ["Checked source wording", "Questions for counsel", "A reviewed renewal note"]
+  },
+  "through_line": {
+    "name": "Renewal review note",
+    "location": "A new practice document",
+    "description": "A running note separating source wording from interpretation.",
+    "headings": ["Source wording", "Questions for counsel"]
+  },
+  "files": [
+    {
+      "id": "renewal-terms",
+      "filename": "renewal-terms.txt",
+      "kind": "source",
+      "purpose": "Invented agreement wording for Zava Athletic Supply and Vellum Kite Services",
+      "used_in": ["notice-wording", "counsel-review"],
+      "href": "./practice/renewal-terms.txt",
+      "audience": "learner"
+    },
+    {
+      "id": "renewal-email",
+      "filename": "renewal-email.txt",
+      "kind": "source",
+      "purpose": "An invented request to preserve the agreement wording",
+      "used_in": ["notice-wording"]
+    },
+    {
+      "id": "renewal-key",
+      "filename": "renewal-answer-key.txt",
+      "kind": "answer_key",
+      "purpose": "Facilitator comparison notes, not advice",
+      "used_in": ["counsel-review"],
+      "href": "https://example.test/facilitator/renewal-answer-key.txt",
+      "audience": "facilitator"
+    }
+  ],
+  "setup": {
+    "steps": [
+      "Open renewal-terms.txt and renewal-email.txt.",
+      "Create the Renewal review note with Source wording and Questions for counsel headings."
+    ],
+    "ground_rules": [
+      "All parties are fictional. Use only these invented practice materials.",
+      "Keep quoted wording unchanged and separate it from interpretation."
+    ],
+    "modes": [{"name": "Chat", "description": "Compare the fictional wording before editing the note."}]
+  },
+  "chapters": [
+    {
+      "id": "notice-wording",
+      "title": "Capture the wording",
+      "minutes": 20,
+      "format": "guided",
+      "story_so_far": "The fictional coordinator needs a traceable source record.",
+      "builds_on": [],
+      "you_will_add": "The clause and the email sentence, unchanged",
+      "steps": [
+        {
+          "id": "read-clause",
+          "title": "Read the notice clause",
+          "minutes": 10,
+          "goal": "Capture Section 2.1 without interpreting it.",
+          "uses": "renewal-terms.txt",
+          "level": "basic",
+          "intro": "The invented clause mentions 45 days; preserve the wording rather than calculating a deadline.",
+          "prompts": [{
+            "label": "Extract the source",
+            "mode": "chat",
+            "text": "From renewal-terms.txt, copy Section 2.1 exactly into the Source wording heading of the Renewal review note. Include the section number and distinguish the source sentence from any interpretation."
+          }],
+          "expected": {
+            "summary": "The section number and sentence match the fictional source.",
+            "key_facts": [{
+              "kind": "clause",
+              "text": "Either fictional party may decline renewal by giving 45 days of written notice.",
+              "source_file": "renewal-terms",
+              "section": "2.1"
+            }]
+          },
+          "carries_forward": "Copy the checked sentence into \"Source wording\" in the Renewal review note.",
+          "callouts": [{"type": "important", "text": "Practice exercise, not professional advice. Verify wording against the invented source."}],
+          "self_check": ["Does the wording match exactly?", "Is Section 2.1 visible?"]
+        },
+        {
+          "id": "read-email",
+          "title": "Keep the request distinct",
+          "minutes": 10,
+          "goal": "Capture the email request without changing the clause.",
+          "uses": "renewal-email.txt and the Renewal review note",
+          "level": "basic",
+          "intro": "The email asks for a faithful record, not a legal conclusion.",
+          "prompts": [{
+            "label": "Add the email sentence",
+            "mode": "chat",
+            "text": "Read renewal-email.txt and copy its request verbatim beneath the clause in the Source wording heading. Label it as email wording, not as a term of the agreement."
+          }],
+          "expected": {
+            "summary": "The email wording remains distinct from the agreement.",
+            "key_facts": [{
+              "kind": "quote",
+              "text": "Please keep the notice wording unchanged while we collect questions for counsel.",
+              "source_file": "renewal-email.txt",
+              "section": "Email 1"
+            }]
+          },
+          "carries_forward": "Add the email sentence under the \"Source wording\" heading.",
+          "callouts": [],
+          "self_check": ["Is the email clearly labelled?", "Did the clause remain unchanged?"]
+        }
+      ]
+    },
+    {
+      "id": "counsel-review",
+      "title": "Prepare questions, not conclusions",
+      "minutes": 20,
+      "format": "individual",
+      "story_so_far": "The note holds unchanged wording from the invented sources.",
+      "builds_on": ["notice-wording"],
+      "you_will_add": "Questions for counsel and a checked handoff",
+      "steps": [
+        {
+          "id": "ask-counsel",
+          "title": "Questions for counsel",
+          "minutes": 10,
+          "goal": "Turn interpretations into questions for an expert.",
+          "uses": "renewal-terms.txt and the Renewal review note",
+          "level": "basic",
+          "intro": "Keep plain text and interpretation in separate parts of the note.",
+          "prompts": [{
+            "label": "Prepare questions",
+            "mode": "chat",
+            "text": "Review the Source wording heading in the Renewal review note. Turn each interpretation or uncertainty into a question for counsel under Questions for counsel. Separate what the clause actually says from what an expert must assess."
+          }],
+          "expected": {
+            "summary": "Questions for counsel are separate from the copied source.",
+            "key_facts": [
+              {"kind": "fact", "text": "The practice note records questions, not professional advice."}
+            ]
+          },
+          "carries_forward": "Add the questions under \"Questions for counsel\".",
+          "callouts": [],
+          "self_check": ["Are interpretations framed as questions?", "Is the source sentence unchanged?"]
+        },
+        {
+          "id": "check-handoff",
+          "title": "Check the handoff",
+          "minutes": 10,
+          "goal": "Keep an unsupported interpretation out of the source record.",
+          "uses": "renewal-terms.txt and the Renewal review note",
+          "level": "challenge",
+          "intro": "An invented draft treats an assumption as if it were source wording.",
+          "prompts": [],
+          "challenge": {
+            "task": "A draft says the clause settles which delivery method is sufficient. Compare it with Section 2.1 in renewal-terms.txt and turn the interpretation into a question for counsel.",
+            "hint": "Keep the clause unchanged and put uncertainty under Questions for counsel.",
+            "answer": "The quoted clause does not settle a delivery method. Keep the source sentence intact and ask counsel what delivery requirements should be checked."
+          },
+          "expected": {"summary": "A reviewed handoff with source text separate from questions.", "key_facts": []},
+          "carries_forward": "Keep the reviewed question under \"Questions for counsel\".",
+          "callouts": [],
+          "self_check": ["Is the interpretation separated from plain text?", "Does the handoff ask rather than decide?"]
+        }
+      ]
+    }
+  ],
+  "troubleshooting": [{"problem": "A sentence was paraphrased", "fix": "Copy the expected key-fact wording back into the fictional practice source."}],
+  "glossary": [{"term": "Interpretation", "definition": "A possible meaning to ask an expert about, distinct from quoted text."}],
+  "disclaimer": "Fictional practice exercise, not professional advice. All parties are fictional."
+}

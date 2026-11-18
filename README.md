@@ -4,11 +4,12 @@ A stateless MCP server for Microsoft 365 Copilot Cowork training workflows.
 **Skills own judgment, MCP owns consistency.** Skills write content; Cowork's
 own tools save and send it.
 
-M3a implements a LabSpec **2.0** story pipeline alongside the M1 format catalog:
+M4a extends the story pipeline to LabSpec **2.1**, retaining **2.0** support:
 `get_lab_spec_schema` -> `validate_lab_spec` -> `render_lab_page`.
 The result is one self-contained HTML page, returned to Cowork rather than
-saved by the server. Azure deployment and Cowork plugin packaging remain future
-milestones. Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
+saved by the server. Azure hosting and plugin 0.1.2 remain on the M3f release
+until M4b; M4a changes the contract without deploying or releasing a plugin.
+Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
 
 No authentication, secrets, Microsoft Graph calls, telemetry integration,
 tenant-data access, or generated-content storage. Use fictional Zava-style
@@ -124,7 +125,7 @@ content directly rather than SDK-generated Python model objects.
 
 ## Spec-first lab pipeline
 
-1. Call `get_lab_spec_schema` and draft a LabSpec with `schema_version: "2.0"` using fictional content only.
+1. Call `get_lab_spec_schema` and draft a LabSpec with `schema_version: "2.1"` using fictional content only; `"2.0"` remains supported.
 2. Call `validate_lab_spec`. Fix errors; review nonblocking quality warnings.
 3. Call `render_lab_page`. Cowork saves the returned `html` using `filename`.
 
@@ -179,6 +180,45 @@ chapter titles also appear in the Files table. IDs, URL targets, troubleshooting
 and glossary entries are not scanned. Put technical facilitator guidance in
 troubleshooting rather than learner prompts.
 
+### LabSpec 2.1 consistency warnings
+
+`chapters[].steps[].expected.key_facts` accepts the existing strings or typed
+objects: `{kind, text, source_file?, section?}`. `kind` must be `number`, `quote`,
+`clause`, or `fact`; unknown kinds are schema errors. A quote/clause should name
+an exact `files[].id` or `files[].filename` in `source_file`; a clause should
+have a section number such as `2.1` (or `Section 2.1`). Missing, blank or unknown
+sources and missing/non-numeric clause sections **warn**, never block rendering.
+Only `text` appears in the expected-facts list.
+
+The deterministic checks return field paths and one-line fixes:
+
+- **Headings/containers:** optional `through_line.headings` checks quoted
+  destinations and explicitly named quoted/capitalized headings in
+  `carries_forward` (also rendered as "Lands in"). Without headings, heading-list
+  matching is skipped. Named containers such as "your timeline" still warn if
+  absent from the declared running document, headings or files.
+- **Files:** common document filenames and concrete "the X log/report/file"
+  phrases in `uses`, setup and challenges must identify declared files or the
+  running document. Generic "the source file" is not treated as a missing named
+  file. A new workbook already named in `through_line.location` need not also
+  be a provided file. This is a conservative prose check, not a dependency graph.
+- **Quotes:** quoted overview/company/narrative/through-line wording that shares
+  a case-sensitive contiguous run of **25+ characters** with a typed quote/clause
+  but differs from it warns "quote differs from the key fact". Exact matches
+  are accepted; unquoted paraphrases and semantic similarity are not inferred.
+- **Clauses:** missing section numbers warn at the key fact; learner references
+  such as "Section 9.2" warn when no clause fact declares that number.
+- **Sensitive domains:** legal, HR/human resources, compliance, privacy and
+  medical in `functional_area` or `audience` require wording "not professional
+  advice" in ground rules/disclaimer, a step connecting interpretations or
+  uncertainty to questions for an expert, and fictional-party wording. These
+  are text-marker checks, not professional or safety judgments.
+
+All consistency findings are warnings; structural types and unsafe URLs remain
+errors. The wholly invented [legal fixture](tests/fixtures/legal_notice_lab.json)
+demonstrates 2.1 with zero errors/warnings. The original 2.0 golden fixture still
+validates without warnings and renders the same 84,022 bytes.
+
 ### Files are metadata, not generated assets
 
 Each file has a globally unique ID, a relative `filename`, kind, purpose, and
@@ -186,11 +226,16 @@ Each file has a globally unique ID, a relative `filename`, kind, purpose, and
 `checkpoint_file_id`; it is not inferred from prose. Omitted checkpoint IDs are
 allowed; supplied IDs must reference a file of kind `checkpoint`.
 
-An optional `href` accepts `https`, `http`, `mailto`, and relative paths;
+In 2.1 an optional `href` accepts HTTPS or relative paths; 2.0 retains HTTP(S),
+mailto and relative paths. In both versions,
 executable schemes, embedded credentials, controls, and protocol-relative
 network paths are rejected. If supplied, it becomes a download link (browser
-download behavior depends on URL/origin). Without it, the filename is plain text
+download behavior depends on URL/origin) with `target="_blank"` and
+`rel="noopener noreferrer"`. Without it, the filename is plain text
 labeled **Provided separately**. No link is fabricated from `filename`.
+`audience` defaults to `learner`. Files marked `facilitator` appear under
+**Answer keys**, marked **Facilitator only**, and are never linked, including in
+checkpoint callouts. This presentation rule is not access control on the URL.
 Files and checkpoint states are produced later by the learner or Cowork skills,
 not by this server. Links are inert until clicked; no remote assets are embedded.
 
