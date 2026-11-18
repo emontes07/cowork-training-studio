@@ -44,9 +44,8 @@ def test_smoke_redirects_streamed_requests_and_checks_results(monkeypatch, capsy
                 if name == "render_lab_page":
                     if failure == "golden" and "html" in result:
                         result["html"] += "\n"
-                    result = {"result": result}
             wire = json.dumps(result).encode("utf-8")
-            if message.get("params", {}).get("name") == "render_lab_page" and "html" in result["result"]:
+            if message.get("params", {}).get("name") == "render_lab_page" and "html" in result:
                 expected_wire_bytes.append(len(wire))
             return httpx.Response(200, headers=headers, stream=httpx.ByteStream(wire))
 

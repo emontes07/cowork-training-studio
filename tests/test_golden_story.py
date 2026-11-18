@@ -1,3 +1,4 @@
+import asyncio
 import json
 from pathlib import Path
 
@@ -61,3 +62,34 @@ def test_golden_page_within_size_budget(golden_spec, capsys, record_property):
     assert size_bytes <= 400_000, (
         f"Rendered golden page is {size_bytes:,} bytes; exceeds 400 KB (400,000 bytes)."
     )
+
+
+@pytest.mark.parametrize("valid", [True, False])
+def test_raw_mcp_results_are_top_level_with_text_fallback(golden_spec, valid):
+    from fastmcp import Client
+    from main import mcp
+
+    if not valid:
+        del golden_spec["chapters"]
+
+    async def check():
+        async with Client(mcp) as client:
+            for name in ("validate_lab_spec", "render_lab_page"):
+                raw = await client.call_tool_mcp(name, {"spec": golden_spec})
+                assert raw.isError is False
+                structured = raw.structuredContent
+                assert structured is not None and "result" not in structured
+                assert len(raw.content) == 1 and raw.content[0].type == "text"
+                assert json.loads(raw.content[0].text) == structured
+                if name == "validate_lab_spec":
+                    assert set(structured) == {"valid", "errors", "warnings", "stats"}
+                    assert structured["valid"] is valid
+                elif valid:
+                    assert set(structured) == {"html", "filename", "stats", "warnings"}
+                    assert structured["filename"].endswith(".html")
+                    assert structured["html"].encode() == (ROOT / "examples/zava-story-lab.html").read_bytes()
+                else:
+                    assert set(structured) == {"errors", "warnings", "stats"}
+                    assert structured["errors"]
+
+    asyncio.run(check())

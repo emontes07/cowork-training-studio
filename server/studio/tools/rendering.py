@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 import re
-from typing import Any, TypedDict
+from typing import Any, NotRequired, TypedDict
 import unicodedata
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -10,17 +10,12 @@ from studio.schemas.lab_spec import LabSpec
 from studio.tools.validation import Issue, Stats, validate_lab_spec
 
 
-class RenderSuccess(TypedDict):
-    html: str
-    filename: str
+class RenderResult(TypedDict):
     stats: Stats
     warnings: list[Issue]
-
-
-class RenderFailure(TypedDict):
-    errors: list[Issue]
-    stats: Stats
-    warnings: list[Issue]
+    html: NotRequired[str]
+    filename: NotRequired[str]
+    errors: NotRequired[list[Issue]]
 
 
 _STUDIO = Path(__file__).resolve().parent.parent
@@ -44,7 +39,7 @@ _FILE_LABELS = {
 }
 
 
-def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> RenderSuccess | RenderFailure:
+def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> RenderResult:
     """Validate fictional LabSpec 2.0 and return one self-contained story lab page.
 
     Success returns html, filename, stats, and quality warnings. Invalid specs

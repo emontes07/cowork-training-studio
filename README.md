@@ -114,8 +114,12 @@ assigned. These skills are not included in M1.
 
 The underlying Python functions stay directly callable. FastMCP may wrap a
 list in the MCP structured-content `result` field on the wire. The renderer's
-success/failure union is also wrapped in `result` on the wire; the smoke client
-uses `structured_content` rather than SDK-generated Python model objects.
+`html`, `filename`, `stats`, and `warnings` are top-level structured content,
+as are the validator's `valid`, `errors`, `warnings`, and `stats`. Invalid
+renders return top-level `errors`, `stats`, and `warnings` without HTML or a
+filename. Both tools also include the same object as JSON in a text block for
+clients without structured-content support. The smoke client reads structured
+content directly rather than SDK-generated Python model objects.
 
 ## Spec-first lab pipeline
 
