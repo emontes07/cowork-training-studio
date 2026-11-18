@@ -62,6 +62,14 @@ _RESERVED_IDS = frozenset({
     "overview", "setup", "capstone", "agenda", "files", "story-map", "troubleshooting",
     "glossary", "disclaimer",
 })
+_SECTION_NUMBER = re.compile(r"(?:section\s+)?(\d+(?:\.\d+)*(?:\([a-z0-9]+\))*)", re.I)
+
+
+def _section_number(value: str | None) -> str | None:
+    if value is None:
+        return None
+    match = _SECTION_NUMBER.fullmatch(value.strip())
+    return match.group(1).casefold() if match else None
 
 
 def _needs_numeric_evidence(text: str) -> bool:
@@ -73,9 +81,10 @@ def _needs_numeric_evidence(text: str) -> bool:
 
 
 def get_lab_spec_schema() -> dict[str, Any]:
-    """Return the LabSpec 2.0 JSON Schema before drafting a fictional story lab.
+    """Return the LabSpec 2.1 JSON Schema before drafting a fictional story lab.
 
-    Version 1 is not supported. Draft a narrative, a through-line artifact,
+    schema_version accepts 2.0 and 2.1; version 1 is not supported.
+    Draft a narrative, a through-line artifact,
     linked chapters/steps, and file metadata; then call validate_lab_spec for
     reference, ID, URL, and quality checks not fully expressed in JSON Schema.
     All content is plain text. File href links are optional; files are not created.
@@ -84,7 +93,7 @@ def get_lab_spec_schema() -> dict[str, Any]:
 
 
 def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
-    """Validate fictional LabSpec 2.0 before rendering; never save or log the spec.
+    """Validate fictional LabSpec 2.0 or 2.1; never save or log the spec.
 
     Returns valid, errors/warnings (code/path/message), and chapter_count,
     step_count, prompt_count, challenge_count, checkpoint_count (declared files),
@@ -204,8 +213,20 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
                 check_voice(callout.text, f"{step_path}.callouts.{callout_index}.text")
             if step.expected:
                 check_voice(step.expected.summary, f"{step_path}.expected.summary")
-                for fact_index, text in enumerate(step.expected.key_facts):
-                    check_voice(text, f"{step_path}.expected.key_facts.{fact_index}")
+                for fact_index, fact in enumerate(step.expected.key_facts):
+                    fact_path = f"{step_path}.expected.key_facts.{fact_index}"
+                    if isinstance(fact, str):
+                        check_voice(fact, fact_path)
+                    else:
+                        check_voice(fact.text, f"{fact_path}.text")
+                        if fact.kind == "clause" and _section_number(fact.section) is None:
+                            issue(warnings, "clause_section", f"{fact_path}.section",
+                                  "Add the clause's section number, for example 2.1.")
+                        if fact.kind in {"quote", "clause"}:
+                            source = fact.source_file.strip() if fact.source_file else ""
+                            if not source or (source not in files and source not in {file.filename for file in files.values()}):
+                                issue(warnings, "key_fact_source", f"{fact_path}.source_file",
+                                      "Set source_file to the ID or exact filename of a declared file.")
             if not step.prompts and step.challenge is None:
                 issue(errors, "empty_step", step_path, "A step needs at least one prompt or a challenge.")
             if step.level == "challenge" and step.challenge is None:

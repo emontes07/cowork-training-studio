@@ -1,8 +1,8 @@
 from pathlib import PurePosixPath
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 from urllib.parse import urlsplit
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 Slug = Annotated[Text, Field(pattern=r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")]
@@ -62,6 +62,7 @@ class ThroughLine(Contract):
     name: Text
     location: Text
     description: Text
+    headings: list[Text] = Field(default_factory=list)
 
 
 class LabFile(Contract):
@@ -71,6 +72,7 @@ class LabFile(Contract):
     purpose: Text
     used_in: list[Slug]
     href: SafeURL | None = None
+    audience: Literal["learner", "facilitator"] = "learner"
 
     @field_validator("filename")
     @classmethod
@@ -110,9 +112,16 @@ class Challenge(Contract):
     answer: Text
 
 
+class KeyFact(Contract):
+    kind: Literal["number", "quote", "clause", "fact"]
+    text: Text
+    source_file: str | None = Field(default=None, description="ID or exact filename of a declared file.")
+    section: str | None = Field(default=None, description="Section number, for example 2.1; missing clause sections warn.")
+
+
 class Expected(Contract):
     summary: Text
-    key_facts: list[Text]
+    key_facts: list[Text | KeyFact]
 
 
 class Callout(Contract):
@@ -160,9 +169,9 @@ class GlossaryEntry(Contract):
 
 
 class LabSpec(Contract):
-    """LabSpec 2.0: one fictional story with linked chapters and plain-text content."""
+    """LabSpec 2.0/2.1: one fictional story with optional typed evidence."""
 
-    schema_version: Literal["2.0"]
+    schema_version: Literal["2.0", "2.1"]
     title: Text
     subtitle: Text
     audience: Text
@@ -180,3 +189,11 @@ class LabSpec(Contract):
     troubleshooting: list[Troubleshooting]
     glossary: list[GlossaryEntry]
     disclaimer: Text
+
+    @model_validator(mode="after")
+    def versioned_file_urls(self) -> Self:
+        if self.schema_version == "2.1":
+            for index, file in enumerate(self.files):
+                if file.href is not None and urlsplit(file.href).scheme not in {"", "https"}:
+                    raise ValueError(f"files.{index}.href: LabSpec 2.1 allows only HTTPS URLs or relative paths.")
+        return self

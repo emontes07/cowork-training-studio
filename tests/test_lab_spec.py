@@ -33,7 +33,53 @@ def test_v2_schema_and_stats(minimal_spec):
     }
     schema = get_lab_spec_schema()
     assert {"schema_version", "chapters", "narrative"} <= set(schema["required"])
-    assert schema["properties"]["schema_version"]["const"] == "2.0"
+    assert schema["properties"]["schema_version"]["enum"] == ["2.0", "2.1"]
+
+
+@pytest.mark.parametrize("version", ["2.0", "2.1"])
+def test_typed_key_facts_are_additive_and_unknown_kinds_fail(minimal_spec, version):
+    minimal_spec["schema_version"] = version
+    add_file(minimal_spec)
+    minimal_spec["through_line"]["headings"] = ["Evidence", "Questions"]
+    facts = minimal_spec["chapters"][0]["steps"][0]["expected"]["key_facts"]
+    facts.extend(["Keep this plain fact.", {
+        "kind": "clause", "text": "The fictional agreement requires written notice.",
+        "source_file": "practice-file", "section": "2.1",
+    }])
+    assert validate_lab_spec(minimal_spec)["warnings"] == []
+    assert validate_lab_spec(minimal_spec)["valid"]
+    facts[1]["kind"] = "invented"
+    assert "schema_error" in codes(minimal_spec)
+
+
+@pytest.mark.parametrize(("field", "value", "code"), [
+    ("section", None, "clause_section"),
+    ("section", "", "clause_section"),
+    ("source_file", None, "key_fact_source"),
+    ("source_file", "missing-file", "key_fact_source"),
+])
+def test_incomplete_typed_evidence_warns_without_blocking(minimal_spec, field, value, code):
+    add_file(minimal_spec)
+    fact = {
+        "kind": "clause", "text": "The fictional agreement requires written notice.",
+        "source_file": "practice.xlsx", "section": "Section 2.1",
+    }
+    fact[field] = value
+    minimal_spec["chapters"][0]["steps"][0]["expected"]["key_facts"] = [fact]
+    result = validate_lab_spec(minimal_spec)
+    assert result["valid"] and result["errors"] == []
+    assert [item["code"] for item in result["warnings"]] == [code]
+    assert result["warnings"][0]["path"].endswith(field)
+
+
+@pytest.mark.parametrize("href", ["http://example.test/guide", "mailto:training@example.test"])
+def test_legacy_file_schemes_remain_valid_only_in_2_0(minimal_spec, href):
+    add_file(minimal_spec, href=href)
+    assert validate_lab_spec(minimal_spec)["valid"]
+    minimal_spec["schema_version"] = "2.1"
+    result = validate_lab_spec(minimal_spec)
+    assert not result["valid"]
+    assert "LabSpec 2.1 allows only HTTPS" in result["errors"][0]["message"]
 
 
 @pytest.mark.parametrize("change", ["missing_version", "v1", "unknown", "missing_chapters", "wrong_type"])

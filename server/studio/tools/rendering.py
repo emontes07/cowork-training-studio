@@ -40,7 +40,7 @@ _FILE_LABELS = {
 
 
 def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> RenderResult:
-    """Validate fictional LabSpec 2.0 and return one self-contained story lab page.
+    """Validate fictional LabSpec 2.0/2.1 and return one self-contained story lab page.
 
     Success returns html, filename, stats, and quality warnings. Invalid specs
     or unsupported themes return errors, stats, and warnings with NO html.
