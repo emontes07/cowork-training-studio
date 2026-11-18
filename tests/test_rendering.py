@@ -193,6 +193,26 @@ def test_facilitator_checkpoint_is_unlinked_everywhere_and_grouped_as_answer_key
     assert "Checkpoints - Only if you fall behind" not in html
 
 
+def test_legal_links_facilitator_grouping_and_typed_facts_are_escaped(legal_spec):
+    legal_spec["files"][0]["href"] = 'https://example.test/source?a=1&b="quoted"'
+    fact = legal_spec["chapters"][0]["steps"][0]["expected"]["key_facts"][0]
+    fact["text"] = "<b>Original fictional wording & evidence</b>"
+    result = render_lab_page(legal_spec)
+    assert result["warnings"] == []
+    html = result["html"]
+    page = parse(html)
+    links = [attrs for tag, attrs in page.tags if tag == "a" and "download" in attrs]
+    assert len(links) == 1
+    assert links[0]["href"] == legal_spec["files"][0]["href"]
+    assert links[0]["target"] == "_blank" and links[0]["rel"] == "noopener noreferrer"
+    assert '&amp;b=&#34;quoted&#34;' in html
+    assert "<li>&lt;b&gt;Original fictional wording &amp; evidence&lt;/b&gt;</li>" in html
+    assert "Facilitator only" in html
+    assert html.index("Answer keys") < html.index("renewal-answer-key.txt")
+    assert legal_spec["files"][2]["href"] not in html
+    assert "Provided separately" in html
+
+
 def test_agenda_uses_chapter_minutes_and_missing_optionals_omit_cleanly(minimal_spec):
     minimal_spec["chapters"][0]["minutes"] = 11
     minimal_spec["chapters"][1]["minutes"] = 17

@@ -201,7 +201,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         # Mask declared filenames first, including names with spaces and subdirectories.
         remaining = text
         for file in sorted(lab_spec.files, key=lambda item: len(item.filename), reverse=True):
-            remaining = re.sub(r"(?<![\w./-])" + re.escape(file.filename) + r"(?![\w./-])",
+            remaining = re.sub(r"(?<![\w./-])(?:\./)?" + re.escape(file.filename) + r"(?![\w/-]|\.\w)",
                                " ", remaining, flags=re.I)
         missing = dict.fromkeys(_FILENAME.findall(remaining))
         for name in missing:

@@ -236,6 +236,11 @@ def test_financial_risk_warnings(minimal_spec, word):
 
 @pytest.mark.parametrize(("field", "text", "warns"), [
     ("prompt", "what two questions should I ask", False),
+    ("prompt", "Suggest three options.", False),
+    ("prompt", "Use four headings.", False),
+    ("prompt", "Check 600 units.", True),
+    ("prompt", "Compare $42.", True),
+    ("prompt", "Check 45 days.", True),
     ("prompt", "Summarize the result in one sentence.", False),
     ("intro", "Review step 2 and suggest 3 questions about the numbers.", False),
     ("prompt", "divide on-hand units by weekly sales", True),
@@ -355,6 +360,108 @@ def test_clean_learner_voice_and_facilitator_notes_do_not_warn(minimal_spec):
     minimal_spec["chapters"][0]["steps"][0]["intro"] = "Review the consumer feedback in the Story sheet."
     minimal_spec["troubleshooting"][0]["fix"] = "Facilitator: check the JSON schema and MCP server."
     assert validate_lab_spec(minimal_spec)["warnings"] == []
+
+
+def test_legal_fixture_is_clean_and_matches_exported_schema(legal_spec):
+    from jsonschema import Draft202012Validator
+
+    schema = get_lab_spec_schema()
+    Draft202012Validator.check_schema(schema)
+    Draft202012Validator(schema).validate(legal_spec)
+    result = validate_lab_spec(legal_spec)
+    assert result["valid"] and result["errors"] == [] and result["warnings"] == []
+
+
+@pytest.mark.parametrize(("path", "replacement", "code"), [
+    ("chapters.0.steps.0.carries_forward", "Add the decision to your timeline.", "unknown_container"),
+    ("chapters.0.steps.0.carries_forward", 'Add the decision to "Timeline".', "unknown_heading"),
+    ("chapters.0.steps.0.carries_forward", "Add the decision under the Timeline heading.", "unknown_heading"),
+    ("chapters.0.steps.0.uses", "Check the repair log.", "unknown_file"),
+    ("setup.steps.0", "Open missing-terms.txt.", "unknown_file"),
+    ("chapters.1.steps.1.challenge.task", "Use the repair log to review the claim.", "unknown_file"),
+    ("narrative.situation", 'The agreement says: "Either fictional party may decline renewal by giving 60 days of written notice."', "quote_drift"),
+    ("chapters.0.steps.0.expected.key_facts.0.section", None, "clause_section"),
+    ("chapters.0.steps.0.expected.key_facts.0.source_file", None, "key_fact_source"),
+    ("chapters.0.steps.0.expected.key_facts.0.source_file", "missing-file", "key_fact_source"),
+    ("chapters.0.steps.1.expected.key_facts.0.source_file", "", "key_fact_source"),
+    ("chapters.0.steps.1.expected.key_facts.0.source_file", "missing-file", "key_fact_source"),
+    ("chapters.0.steps.0.intro", "Read Section 9.2 before continuing.", "unknown_section"),
+    ("disclaimer", "Fictional practice only.", "missing_advice_note"),
+])
+def test_legal_consistency_mutations_warn_at_the_learner_path(legal_spec, path, replacement, code):
+    parts = [int(part) if part.isdigit() else part for part in path.split(".")]
+    target = legal_spec
+    for part in parts[:-1]:
+        target = target[part]
+    target[parts[-1]] = replacement
+    result = validate_lab_spec(legal_spec)
+    assert result["valid"] and result["errors"] == []
+    matching = [issue for issue in result["warnings"] if issue["code"] == code]
+    assert len(matching) == 1
+    assert matching[0]["path"] == path
+    assert "\n" not in matching[0]["message"]
+
+
+@pytest.mark.parametrize("href", ["javascript:alert(1)", "data:text/html,test", "ftp://example.test/source", "http://example.test/source"])
+def test_legal_unsafe_file_href_is_a_schema_error(legal_spec, href):
+    legal_spec["files"][0]["href"] = href
+    assert codes(legal_spec) == {"schema_error"}
+
+
+@pytest.mark.parametrize("href", ["./practice/source.txt", "https://example.test/source.txt"])
+def test_legal_safe_file_href_is_accepted(legal_spec, href):
+    legal_spec["files"][0]["href"] = href
+    assert validate_lab_spec(legal_spec)["errors"] == []
+
+
+@pytest.mark.parametrize(("shared_length", "warns"), [(24, False), (25, True)])
+def test_quote_drift_requires_a_contiguous_25_character_match(legal_spec, shared_length, warns):
+    shared = "All renewal notices require signed delivery."[:shared_length]
+    legal_spec["chapters"][0]["steps"][0]["expected"]["key_facts"][0]["text"] = shared + " X."
+    legal_spec["narrative"]["situation"] = '"' + shared + "! Y." + '"'
+    assert ("quote_drift" in codes(legal_spec, "warnings")) is warns
+
+
+@pytest.mark.parametrize("field", ["company", "trigger"])
+def test_quote_drift_checks_overview_and_trigger(legal_spec, field):
+    text = '"Please keep the notice wording unchanged while we collect questions for everyone."'
+    if field == "company":
+        legal_spec["company"]["description"] += text
+    else:
+        legal_spec["narrative"]["trigger"] = text
+    assert "quote_drift" in codes(legal_spec, "warnings")
+
+
+def test_heading_matching_is_optional_and_named_artifacts_are_not_missing_files(legal_spec):
+    del legal_spec["through_line"]["headings"]
+    legal_spec["through_line"]["location"] = "Review-note.docx"
+    legal_spec["setup"]["steps"].append("Create Review-note.docx.")
+    legal_spec["chapters"][0]["steps"][0]["carries_forward"] = 'Add this to the "New heading" heading.'
+    assert validate_lab_spec(legal_spec)["warnings"] == []
+
+
+@pytest.mark.parametrize("domain", ["Legal", "HR", "Compliance", "Privacy", "Medical"])
+def test_sensitive_domains_require_expert_questions_and_fictional_parties(legal_spec, domain):
+    legal_spec["functional_area"] = domain
+    legal_spec["audience"] = "Practice participants"
+    # Remove the steps that ask an expert, retaining only the source-extraction chapter.
+    legal_spec["chapters"][1]["steps"] = deepcopy(legal_spec["chapters"][0]["steps"])
+    for index, step in enumerate(legal_spec["chapters"][1]["steps"]):
+        step["id"] = f"repeat-source-{index}"
+    assert "missing_expert_questions" in codes(legal_spec, "warnings")
+    legal_spec["company"]["description"] = "An invented training organization."
+    legal_spec["setup"]["ground_rules"] = ["Keep quoted wording unchanged."]
+    legal_spec["disclaimer"] = "Practice exercise, not professional advice."
+    assert "missing_fictional_parties" in codes(legal_spec, "warnings")
+
+
+def test_sensitive_domain_in_audience_and_note_in_ground_rules(legal_spec):
+    legal_spec["functional_area"] = "Operations"
+    legal_spec["audience"] = "HR learners"
+    legal_spec["disclaimer"] = "All parties are fictional."
+    assert "missing_advice_note" in codes(legal_spec, "warnings")
+    legal_spec["setup"]["ground_rules"].append("Practice exercise, not professional advice.")
+    assert validate_lab_spec(legal_spec)["warnings"] == []
 
 
 @pytest.mark.parametrize("href", [
