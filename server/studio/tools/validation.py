@@ -1,4 +1,5 @@
 import json
+from difflib import SequenceMatcher
 from pathlib import Path
 import re
 from typing import Any, TypedDict, get_args
@@ -63,6 +64,36 @@ _RESERVED_IDS = frozenset({
     "glossary", "disclaimer",
 })
 _SECTION_NUMBER = re.compile(r"(?:section\s+)?(\d+(?:\.\d+)*(?:\([a-z0-9]+\))*)", re.I)
+_SECTION_REFERENCE = re.compile(r"\bsection\s+(\d+(?:\.\d+)*(?:\([a-z0-9]+\))*)", re.I)
+_QUOTED_TEXT = re.compile(r'''"([^"\n]+)"|\u201c([^\u201d\n]+)\u201d|(?<!\w)'([^'\n]+)'(?!\w)|\u2018([^\u2019\n]+)\u2019''')
+_FILENAME = re.compile(r"\b[\w./-]+\.(?:docx?|xlsx?|pptx?|csv|tsv|txt|md|pdf|html?|json|eml|ics)\b", re.I)
+_NAMED_FILE = re.compile(r"\bthe\s+((?:[\w-]+\s+){1,3}(?:log|report|file))\b", re.I)
+_GENERIC_FILE_WORDS = frozenset({
+    "source", "practice", "current", "input", "output", "provided", "attached",
+    "downloaded", "reference", "answer", "key", "new", "original", "same", "updated",
+    "latest", "checked", "selected", "supplied", "fictional",
+})
+_HEADING_NAME = re.compile(
+    r'\b(?:heading|section)\s+["\u201c]([^"\u201d]+)["\u201d]|'
+    r'["\u201c]([^"\u201d]+)["\u201d]\s+(?:heading|section)\b|'
+    r"\b(?:heading|section)\s+([A-Z][\w-]*(?:\s+[A-Z][\w-]*)*)|"
+    r"\b([A-Z][\w-]*(?:\s+[A-Z][\w-]*)*)\s+(?:heading|section)\b"
+)
+_DESTINATION_QUOTE = re.compile(
+    r'''\b(?:to|into|under|in)\s+(?:the\s+)?(?P<quote>["'\u201c\u2018][^"'\u201d\u2019\n]+["'\u201d\u2019])''',
+    re.I,
+)
+_CONTAINER = re.compile(r"\byour\s+((?:[\w-]+\s+){0,2}(?:timeline|log|report|tracker|register|sheet|workbook|document))\b", re.I)
+_SENSITIVE_DOMAIN = re.compile(r"\b(?:legal|HR|human resources|compliance|privacy|medical)\b", re.I)
+_EXPERT = re.compile(r"\b(?:expert|counsel|lawyer|clinician|doctor|specialist|HR adviser|HR advisor)\b", re.I)
+
+
+def _quoted_text(text: str) -> list[str]:
+    return [next(group for group in match.groups() if group is not None) for match in _QUOTED_TEXT.finditer(text)]
+
+
+def _name_words(text: str) -> str:
+    return re.sub(r"[\W_]+", " ", text.casefold()).strip()
 
 
 def _section_number(value: str | None) -> str | None:
@@ -100,7 +131,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
     files_by_kind, and total_minutes (chapters) within stats. Schema errors
     return zero stats. Reference errors block rendering; quality warnings do not.
     Learner-voice warnings name the field and system term, not its full text.
-    File usage is declared via used_in/checkpoint_file_id, not inferred from prose.
+    File usage counts use used_in/checkpoint_file_id; prose references are warning-only.
     This is not a tenant-data detector; submit only wholly fictional content.
     """
     errors: list[Issue] = []
@@ -122,6 +153,23 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         return {"valid": False, "errors": errors, "warnings": warnings, "stats": stats}
 
     seen: set[str] = set()
+    typed_facts = [
+        (f"chapters.{chapter_index}.steps.{step_index}.expected.key_facts.{fact_index}", fact)
+        for chapter_index, chapter in enumerate(lab_spec.chapters)
+        for step_index, step in enumerate(chapter.steps) if step.expected
+        for fact_index, fact in enumerate(step.expected.key_facts) if not isinstance(fact, str)
+    ]
+    sections = {
+        number for _, fact in typed_facts if fact.kind == "clause"
+        if (number := _section_number(fact.section)) is not None
+    }
+    file_sources = {file.id for file in lab_spec.files} | {file.filename for file in lab_spec.files}
+    artifact_names = [_name_words(value) for file in lab_spec.files for value in (file.id, Path(file.filename).stem)]
+    if lab_spec.through_line:
+        artifact_names.extend(_name_words(value) for value in (
+            lab_spec.through_line.name, lab_spec.through_line.location,
+        ))
+    has_expert_questions = False
 
     def issue(target: list[Issue], code: str, path: str, message: str) -> None:
         target.append({"code": code, "path": path, "message": message})
@@ -133,26 +181,99 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             issue(errors, "reserved_id", path, f"ID '{identifier}' is reserved for page navigation.")
         seen.add(identifier)
 
-    def check_voice(text: str | None, path: str) -> None:
+    def check_text(text: str | None, path: str) -> None:
         if text is None:
             return
         folded = text.casefold()
         for term in _LEARNER_VOICE_TERMS:
             if term.casefold() in folded:
                 issue(warnings, "learner_voice", path, f"Use learner-facing wording instead of {term!r}.")
+        for number in dict.fromkeys(_SECTION_REFERENCE.findall(text)):
+            if number.casefold() not in sections:
+                issue(warnings, "unknown_section", path,
+                      f"Section {number} has no clause key fact; add a clause fact with that section or correct the reference.")
+
+    def declared_artifact(name: str) -> bool:
+        words = _name_words(name)
+        return any(f" {words} " in f" {artifact} " for artifact in artifact_names)
+
+    def check_files(text: str, path: str) -> None:
+        # Mask declared filenames first, including names with spaces and subdirectories.
+        remaining = text
+        for file in sorted(lab_spec.files, key=lambda item: len(item.filename), reverse=True):
+            remaining = re.sub(r"(?<![\w./-])" + re.escape(file.filename) + r"(?![\w./-])",
+                               " ", remaining, flags=re.I)
+        missing = dict.fromkeys(_FILENAME.findall(remaining))
+        for name in missing:
+            if declared_artifact(name):
+                continue
+            issue(warnings, "unknown_file", path,
+                  f"File '{name}' is not declared; add it to files[] or use a declared filename.")
+        for match in _NAMED_FILE.finditer(text):
+            name = match.group(1)
+            qualifiers = _name_words(name).split()[:-1]
+            specific = [word for word in qualifiers if word not in _GENERIC_FILE_WORDS]
+            if specific and not declared_artifact(" ".join(specific)):
+                issue(warnings, "unknown_file", path,
+                      f"'{name}' is not a declared file or running document; add it to files[] or name the provided artifact.")
+
+    def check_destination(text: str, path: str) -> None:
+        if lab_spec.through_line and lab_spec.through_line.headings:
+            headings = {_name_words(name) for name in lab_spec.through_line.headings}
+            candidates = [
+                next(group for group in match.groups() if group is not None)
+                for match in _HEADING_NAME.finditer(text)
+            ]
+            # Quoted destinations also support "Add this to 'Evidence'".
+            for match in _DESTINATION_QUOTE.finditer(text):
+                candidates.extend(_quoted_text(match.group("quote")))
+            for name in dict.fromkeys(candidates):
+                if _name_words(name) not in headings and not declared_artifact(name):
+                    issue(warnings, "unknown_heading", path,
+                          f"Heading '{name}' is not declared; use a through_line.headings entry or declare this heading.")
+        for match in _CONTAINER.finditer(text):
+            name = match.group(1)
+            if not declared_artifact(name) and not (
+                lab_spec.through_line and _name_words(name) in {_name_words(h) for h in lab_spec.through_line.headings}
+            ):
+                issue(warnings, "unknown_container", path,
+                      f"'your {name}' is not declared; name the running document or a declared file.")
 
     for field in ("role", "situation", "trigger", "deadline"):
-        check_voice(getattr(lab_spec.narrative, field), f"narrative.{field}")
+        check_text(getattr(lab_spec.narrative, field), f"narrative.{field}")
     for index, outcome in enumerate(lab_spec.narrative.leave_with):
-        check_voice(outcome, f"narrative.leave_with.{index}")
+        check_text(outcome, f"narrative.leave_with.{index}")
+    check_text(lab_spec.company.description, "company.description")
+    check_text(lab_spec.disclaimer, "disclaimer")
+    overview_fields = [("company.description", lab_spec.company.description)]
+    overview_fields.extend(
+        (f"narrative.{field}", getattr(lab_spec.narrative, field))
+        for field in ("role", "situation", "trigger", "deadline")
+    )
+    if lab_spec.through_line:
+        overview_fields.extend(
+            (f"through_line.{field}", getattr(lab_spec.through_line, field))
+            for field in ("name", "location", "description")
+        )
+    canonical_quotes = [(path, fact.text) for path, fact in typed_facts if fact.kind in {"quote", "clause"}]
+    for path, text in overview_fields:
+        for quote in _quoted_text(text):
+            if any(quote == canonical for _, canonical in canonical_quotes):
+                continue
+            for fact_path, canonical in canonical_quotes:
+                if SequenceMatcher(None, quote, canonical, autojunk=False).find_longest_match().size >= 25:
+                    issue(warnings, "quote_drift", path,
+                          f"The quote differs from the key fact at {fact_path}.text; copy that fact's text verbatim.")
+                    break
     if lab_spec.through_line:
         for field in ("name", "location", "description"):
-            check_voice(getattr(lab_spec.through_line, field), f"through_line.{field}")
+            check_text(getattr(lab_spec.through_line, field), f"through_line.{field}")
     for field in ("steps", "ground_rules"):
         for index, text in enumerate(getattr(lab_spec.setup, field)):
-            check_voice(text, f"setup.{field}.{index}")
+            check_text(text, f"setup.{field}.{index}")
+            check_files(text, f"setup.{field}.{index}")
     for index, mode in enumerate(lab_spec.setup.modes):
-        check_voice(mode.description, f"setup.modes.{index}.description")
+        check_text(mode.description, f"setup.modes.{index}.description")
 
     chapter_positions = {chapter.id: index for index, chapter in enumerate(lab_spec.chapters)}
     files = {file.id: file for file in lab_spec.files}
@@ -163,8 +284,8 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
     for index, file in enumerate(lab_spec.files):
         path = f"files.{index}"
         check_id(file.id, f"{path}.id")
-        check_voice(file.filename, f"{path}.filename")
-        check_voice(file.purpose, f"{path}.purpose")
+        check_text(file.filename, f"{path}.filename")
+        check_text(file.purpose, f"{path}.purpose")
         stats["files_by_kind"][file.kind] += 1
         if file.filename.casefold() in filenames:
             issue(errors, "duplicate_filename", f"{path}.filename", "File names must be unique (case-insensitive).")
@@ -182,7 +303,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         path = f"chapters.{index}"
         check_id(chapter.id, f"{path}.id")
         for field in ("title", "story_so_far", "you_will_add"):
-            check_voice(getattr(chapter, field), f"{path}.{field}")
+            check_text(getattr(chapter, field), f"{path}.{field}")
         for reference_index, chapter_id in enumerate(chapter.builds_on):
             reference_path = f"{path}.builds_on.{reference_index}"
             if chapter_id not in chapter_positions:
@@ -206,25 +327,28 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             step_path = f"{path}.steps.{step_index}"
             check_id(step.id, f"{step_path}.id")
             for field in ("title", "goal", "uses", "intro", "fallback", "carries_forward"):
-                check_voice(getattr(step, field), f"{step_path}.{field}")
+                check_text(getattr(step, field), f"{step_path}.{field}")
+            check_files(step.uses, f"{step_path}.uses")
+            if step.carries_forward:
+                check_destination(step.carries_forward, f"{step_path}.carries_forward")
             for check_index, text in enumerate(step.self_check):
-                check_voice(text, f"{step_path}.self_check.{check_index}")
+                check_text(text, f"{step_path}.self_check.{check_index}")
             for callout_index, callout in enumerate(step.callouts):
-                check_voice(callout.text, f"{step_path}.callouts.{callout_index}.text")
+                check_text(callout.text, f"{step_path}.callouts.{callout_index}.text")
             if step.expected:
-                check_voice(step.expected.summary, f"{step_path}.expected.summary")
+                check_text(step.expected.summary, f"{step_path}.expected.summary")
                 for fact_index, fact in enumerate(step.expected.key_facts):
                     fact_path = f"{step_path}.expected.key_facts.{fact_index}"
                     if isinstance(fact, str):
-                        check_voice(fact, fact_path)
+                        check_text(fact, fact_path)
                     else:
-                        check_voice(fact.text, f"{fact_path}.text")
+                        check_text(fact.text, f"{fact_path}.text")
                         if fact.kind == "clause" and _section_number(fact.section) is None:
                             issue(warnings, "clause_section", f"{fact_path}.section",
                                   "Add the clause's section number, for example 2.1.")
                         if fact.kind in {"quote", "clause"}:
                             source = fact.source_file.strip() if fact.source_file else ""
-                            if not source or (source not in files and source not in {file.filename for file in files.values()}):
+                            if source not in file_sources:
                                 issue(warnings, "key_fact_source", f"{fact_path}.source_file",
                                       "Set source_file to the ID or exact filename of a declared file.")
             if not step.prompts and step.challenge is None:
@@ -234,12 +358,13 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             if step.challenge:
                 stats["challenge_count"] += 1
                 for field in ("task", "hint", "answer"):
-                    check_voice(getattr(step.challenge, field), f"{step_path}.challenge.{field}")
+                    check_text(getattr(step.challenge, field), f"{step_path}.challenge.{field}")
+                    check_files(getattr(step.challenge, field), f"{step_path}.challenge.{field}")
             for prompt_index, prompt in enumerate(step.prompts):
                 stats["prompt_count"] += 1
                 prompt_path = f"{step_path}.prompts.{prompt_index}.text"
-                check_voice(prompt.text, prompt_path)
-                check_voice(prompt.label, f"{step_path}.prompts.{prompt_index}.label")
+                check_text(prompt.text, prompt_path)
+                check_text(prompt.label, f"{step_path}.prompts.{prompt_index}.label")
                 if len(prompt.text.strip()) < 60:
                     issue(warnings, "short_prompt", prompt_path, "Prompt is under 60 characters; add task, context, and output requirements.")
             # Challenge tasks already have a required answer instead of key facts.
@@ -251,6 +376,14 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
                 (f"{step_path}.prompts.{index}.text", prompt.text)
                 for index, prompt in enumerate(step.prompts)
             )
+            step_text = " ".join(text for _, text in evidence_fields if text)
+            if step.challenge:
+                step_text += " " + step.challenge.task
+            if (
+                _EXPERT.search(step_text) and re.search(r"\bquestions?\b", step_text, re.I)
+                and re.search(r"\b(?:interpretations?|interpret|inferences?|inferred|assumptions?|uncertainties|uncertainty)\b", step_text, re.I)
+            ):
+                has_expert_questions = True
             numerical_fields = [
                 path for path, text in evidence_fields if text is not None and _needs_numeric_evidence(text)
             ]
@@ -265,4 +398,19 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         issue(warnings, "real_brand_name", "company.name", "Company is marked fictional but matches a real-brand denylist; use an invented Zava-style name.")
     if abs(stats["total_minutes"] - lab_spec.duration_minutes) * 4 > lab_spec.duration_minutes:
         issue(warnings, "duration_mismatch", "duration_minutes", f"Chapter time ({stats['total_minutes']} minutes) differs from session duration ({lab_spec.duration_minutes} minutes) by more than 25%.")
+    if _SENSITIVE_DOMAIN.search(f"{lab_spec.functional_area} {lab_spec.audience}"):
+        safeguards = " ".join([lab_spec.disclaimer, *lab_spec.setup.ground_rules])
+        if "not professional advice" not in safeguards.casefold():
+            issue(warnings, "missing_advice_note", "disclaimer",
+                  "Add 'practice exercise, not professional advice' to the disclaimer or ground rules.")
+        if not has_expert_questions:
+            issue(warnings, "missing_expert_questions", "chapters",
+                  "Add a step that turns interpretations or uncertainty into questions for an expert, separate from the source text.")
+        fictional_text = f"{safeguards} {lab_spec.company.description}"
+        if not lab_spec.company.is_fictional or not re.search(
+            r"\b(?:all|every)\s+(?:named\s+)?(?:parties|party|people|person|organizations|organization)\s+(?:(?:are|is|must be)\s+)?fictional\b|"
+            r"\b(?:only fictional|fictional (?:parties|people|organizations) only)\b", fictional_text, re.I,
+        ):
+            issue(warnings, "missing_fictional_parties", "setup.ground_rules",
+                  "State that all parties are fictional and mark company.is_fictional true.")
     return {"valid": not errors, "errors": errors, "warnings": warnings, "stats": stats}

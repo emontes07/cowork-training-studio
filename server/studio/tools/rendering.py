@@ -46,7 +46,8 @@ def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> Render
     or unsupported themes return errors, stats, and warnings with NO html.
     theme_id overrides spec.theme_id; only microsoft is supported.
     All spec text is escaped, prompts stay paste-ready, and CSS/JS are inline.
-    File hrefs become links; absent hrefs are labeled Provided separately.
+    Learner hrefs become links; absent hrefs are labeled Provided separately.
+    Facilitator files appear under Answer keys without links.
     No files are created or saved; Cowork must save the returned HTML itself.
     """
     result = validate_lab_spec(spec)
@@ -80,7 +81,10 @@ def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> Render
         chapters_by_id={chapter.id: chapter for chapter in lab_spec.chapters},
         files_by_id={file.id: file for file in lab_spec.files},
         file_groups=[
-            (label, [file for file in lab_spec.files if file.kind == kind])
+            (label, [
+                file for file in lab_spec.files
+                if ("answer_key" if file.audience == "facilitator" else file.kind) == kind
+            ])
             for kind, label in _FILE_LABELS.items()
         ],
     )

@@ -174,8 +174,23 @@ def test_file_links_and_checkpoint_callouts(minimal_spec, href):
     else:
         assert len(downloads) == 2
         assert all(link["href"] == href and link["download"] == "checkpoint.xlsx" for link in downloads)
+        assert all(link["target"] == "_blank" and link["rel"] == "noopener noreferrer" for link in downloads)
         assert not any("provided-separately" in attrs.get("class", "").split() for _, attrs in page.tags)
     assert "Only if you fall behind" in result["html"]
+
+
+def test_facilitator_checkpoint_is_unlinked_everywhere_and_grouped_as_answer_key(minimal_spec):
+    minimal_spec["files"] = [{
+        "id": "facilitator-file", "filename": "facilitator.xlsx", "kind": "checkpoint",
+        "purpose": "Facilitator starting state", "used_in": ["chapter-2"],
+        "audience": "facilitator", "href": "https://example.test/private.xlsx",
+    }]
+    minimal_spec["chapters"][1]["checkpoint_file_id"] = "facilitator-file"
+    html = render_lab_page(minimal_spec)["html"]
+    assert "private.xlsx" not in html
+    assert html.count("Facilitator only") == 2
+    assert "Answer keys" in html
+    assert "Checkpoints - Only if you fall behind" not in html
 
 
 def test_agenda_uses_chapter_minutes_and_missing_optionals_omit_cleanly(minimal_spec):

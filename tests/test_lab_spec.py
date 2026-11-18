@@ -82,6 +82,33 @@ def test_legacy_file_schemes_remain_valid_only_in_2_0(minimal_spec, href):
     assert "LabSpec 2.1 allows only HTTPS" in result["errors"][0]["message"]
 
 
+def test_heading_and_container_references_are_warning_only(minimal_spec):
+    minimal_spec["through_line"]["headings"] = ["Evidence"]
+    step = minimal_spec["chapters"][0]["steps"][0]
+    for destination in ('Add this to the "Unknown" heading.', "Add this to your timeline."):
+        step["carries_forward"] = destination
+        result = validate_lab_spec(minimal_spec)
+        assert result["valid"]
+        assert len(result["warnings"]) == 1
+        assert result["warnings"][0]["path"] == "chapters.0.steps.0.carries_forward"
+    step["carries_forward"] = "Copy 'Keep the wording' into 'Evidence' in the Story sheet."
+    assert validate_lab_spec(minimal_spec)["warnings"] == []
+
+
+def test_file_reference_heuristics_do_not_flag_generic_or_declared_files(minimal_spec):
+    add_file(minimal_spec, filename="Repair log.txt", id="repair-log")
+    step = minimal_spec["chapters"][0]["steps"][0]
+    for uses in ("the repair log", "Repair log.txt", "the fictional source file", "The current Story sheet"):
+        step["uses"] = uses
+        assert validate_lab_spec(minimal_spec)["warnings"] == []
+    for uses in ("missing.xlsx", "the missing report"):
+        step["uses"] = uses
+        result = validate_lab_spec(minimal_spec)
+        assert result["valid"]
+        assert {item["code"] for item in result["warnings"]} == {"unknown_file"}
+        assert result["warnings"][0]["path"] == "chapters.0.steps.0.uses"
+
+
 @pytest.mark.parametrize("change", ["missing_version", "v1", "unknown", "missing_chapters", "wrong_type"])
 def test_strict_contract_rejects_v1_and_malformed_input(minimal_spec, change):
     if change == "missing_version":
@@ -318,7 +345,7 @@ def test_learner_voice_paths_include_file_and_checkpoint_text(minimal_spec, path
     target[parts[-1]] = "schema-notes.xlsx"
     result = validate_lab_spec(minimal_spec)
     assert result["valid"]
-    assert result["warnings"] == [{
+    assert [item for item in result["warnings"] if item["code"] == "learner_voice"] == [{
         "code": "learner_voice", "path": path,
         "message": "Use learner-facing wording instead of 'schema'.",
     }]
