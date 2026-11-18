@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "mode": "prompt_pack",
+  "title": "Fictional procurement decision",
+  "as_of_date": "2026-11-18",
+  "default_minutes": 15,
+  "audience": {"industry": "Procurement"},
+  "context": {
+    "business_model": ["An invented maker of reusable display stands."],
+    "kpis": ["Order readiness", "Supplier confirmation"],
+    "pressures": ["A near-term exhibition."],
+    "facts": [],
+    "assumptions": ["The practice team prefers a confirmed delivery over an unverified discount."]
+  },
+  "company": {"name": "Aster Lantern Works", "description": "An invented workshop preparing an exhibition. All parties are fictional."},
+  "presenter": {"role": "Procurement facilitator"},
+  "source_prompt": "  Compare the fictional supplier offers and prepare a checked procurement recommendation.\nDo not send an order.  ",
+  "cast": [
+    {"id": "buyer", "name": "Tero Vale", "role": "Buyer", "external": false, "executive": false},
+    {"id": "supplier", "name": "Leni Quill", "role": "External supplier coordinator", "external": true, "executive": false},
+    {"id": "director", "name": "Mavo Reed", "role": "Workshop director", "external": false, "executive": true},
+    {"id": "reviewer", "name": "Seli Moss", "role": "Evidence reviewer", "external": false, "executive": false},
+    {"id": "receiver", "name": "Oren Finch", "role": "Receiving coordinator", "external": false, "executive": false},
+    {"id": "exhibitor", "name": "Vela Alder", "role": "Exhibition planner", "external": false, "executive": false}
+  ],
+  "tensions": [
+    {"id": "offer-gap", "problem": "The offer summary omits a delivery condition.", "due_date": "2026-11-20", "slipping": true, "owner_cast_id": "buyer"},
+    {"id": "receipt-gap", "problem": "Receiving needs a confirmed slot.", "due_date": "2026-11-21", "slipping": false, "owner_cast_id": "receiver"},
+    {"id": "approval-gap", "problem": "The director needs an evidence-grounded recommendation.", "due_date": "2026-11-22", "slipping": false, "owner_cast_id": "director"}
+  ],
+  "payoffs": [
+    {"id": "delivery-condition", "finding": "The cheaper offer has no confirmed delivery window.", "scenario_id": "procurement", "evidence_file_id": "offer-note", "buried": true, "evidence": {"kind": "quote", "text": "Delivery remains provisional until the fictional receiving team confirms a slot.", "source_file": "offer-note", "section": "Offer note"}},
+    {"id": "price-difference", "finding": "The offer difference is $42, not a confirmed saving.", "scenario_id": "procurement", "evidence_file_id": "offer-table", "buried": true, "evidence": {"kind": "number", "text": "Offer A is $420 and offer B is $462; the difference is $42.", "source_file": "offer-table"}}
+  ],
+  "files": [
+    {"id": "offer-note", "filename": "offer-note.md", "format": "md", "purpose": "Invented supplier note with a provisional delivery clause.", "used_by": ["procurement"], "contains_payoffs": ["delivery-condition"]},
+    {"id": "offer-table", "filename": "offer-table.csv", "format": "csv", "purpose": "Invented offer figures for a checked comparison.", "used_by": ["procurement"], "contains_payoffs": ["price-difference"], "audience": "attendee", "href": "./inputs/offer-table.csv"}
+  ],
+  "scenarios": [
+    {
+      "id": "procurement", "function": "Operations", "title": "Compare price and readiness", "persona": "Buyer",
+      "business_context": "The exhibition needs a confirmed delivery, not merely the lowest quoted figure.",
+      "input_file_ids": ["offer-note", "offer-table"],
+      "prompt": "Compare offer-table.csv with offer-note.md for Aster Lantern Works. Calculate the offer difference, preserve the delivery condition verbatim and separate a possible saving from a confirmed outcome. Prepare procurement-review.docx with the evidence, open questions and next approval step. Do not place an order.",
+      "expected_outputs": [{"format": "docx", "filename": "procurement-review.docx"}],
+      "payoff_ids": ["delivery-condition", "price-difference"],
+      "talk_track": "Begin by showing the price comparison and ask which offer appears preferable before the audience sees the note. The small price difference makes the decision look straightforward, but the supplier condition changes what can responsibly be recommended. Open the fictional note and ask the assistant to keep the delivery sentence unchanged beside the calculation. The resulting brief should distinguish an arithmetic difference from a saving that has actually been achieved. It should also describe the next approval step without placing an order or pretending to confirm a receiving slot. Explain that the company, people and offers are entirely invented for this demonstration. Let the audience inspect how the source files support the recommendation and ask whether another fact could reverse it. Then use a follow-up to change the receiving constraint and compare the revised reasoning. Close by highlighting the deliberate disagreement between the tidy comparison table and the qualified note. Grounded assistance should expose that disagreement, not smooth it away for a more confident story.",
+      "follow_ups": ["What new evidence would make the cheaper offer ready to approve?", "Change the fictional receiving slot and compare the recommendation."]
+    }
+  ],
+  "seeded_items": [],
+  "run_of_show": [{"minutes": 3, "action": "Open the completed fictional input files."}, {"minutes": 10, "action": "Run the comparison and discuss the planted findings.", "scenario_id": "procurement"}, {"minutes": 2, "action": "Debrief and clean the presenter workspace."}],
+  "cleanup": ["Delete only the generated procurement practice materials.", "Confirm that no purchase order, message or meeting was created."],
+  "disclaimer": "All people and data are fictional. Real customer names are used only as context. This is a practice comparison, not a purchasing instruction."
+}

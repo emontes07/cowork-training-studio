@@ -27,8 +27,11 @@ mcp = FastMCP(
         "Provide consistent training formats and a spec-first lab pipeline for Cowork skills. "
         "Call get_blueprint if a workshop shape is needed. "
         "Call get_lab_spec_schema, draft a LabSpec, validate_lab_spec, then render_lab_page. "
-        "Use fictional Zava-style scenarios only; never submit tenant data, "
-        "real customer or person names, credentials, or secrets. "
+        "Demo-pack authors can call get_demo_pack_schema, validate_demo_pack and render_demo_guide; "
+        "demo_pack stays coming_soon until its skill ships. Build fictional inputs before prompts, never in parallel. "
+        "Use fictional Zava-style records only; never submit tenant data, real person names, credentials or secrets. "
+        "LabSpecs remain wholly fictional. In DemoPackSpec only, public customer names may appear "
+        "in audience/title/talk tracks and the filename prefix, never in seeded records. "
         "Skills write content; Cowork built-ins save and send it."
     ),
 )

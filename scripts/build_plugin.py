@@ -23,7 +23,14 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 PLACEHOLDER = "{{MCP_SERVER_URL}}"
 TOOL_FIELDS = {"name", "description", "inputSchema", "outputSchema", "annotations"}
-EXPECTED_TOOLS = {"list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
+EXPECTED_TOOLS = {
+    "list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec",
+    "render_lab_page", "get_demo_pack_schema", "validate_demo_pack", "render_demo_guide",
+}
+SPEC_SCHEMA_TOOLS = {
+    "validate_lab_spec": "get_lab_spec_schema", "render_lab_page": "get_lab_spec_schema",
+    "validate_demo_pack": "get_demo_pack_schema", "render_demo_guide": "get_demo_pack_schema",
+}
 # Only schema locations are traversed; property names and literal values stay intact.
 SCHEMA_MAP_KEYS = {"properties", "patternProperties", "dependentSchemas"}
 SCHEMA_LIST_KEYS = {"allOf", "anyOf", "oneOf", "prefixItems"}
@@ -99,13 +106,13 @@ def sanitize_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for tool in result:
         tool["inputSchema"] = sanitize_schema(tool["inputSchema"])
         tool["outputSchema"] = {"type": "object", "additionalProperties": True}
-        if tool["name"] in {"validate_lab_spec", "render_lab_page"}:
+        if tool["name"] in SPEC_SCHEMA_TOOLS:
             properties = tool["inputSchema"].get("properties", {})
             if "spec" not in properties:
                 raise ValueError(f"{tool['name']} is missing its spec parameter.")
             properties["spec"] = {
                 "type": "object", "additionalProperties": True,
-                "description": "Call get_lab_spec_schema first and follow it",
+                "description": f"Call {SPEC_SCHEMA_TOOLS[tool['name']]} first and follow it",
             }
     return result
 
@@ -254,7 +261,7 @@ def validate_package(files: dict[str, bytes]) -> dict[str, Any]:
     catalog = json.loads(files["mcp-tools.json"])
     tools = catalog["tools"]
     if not isinstance(tools, list) or len(tools) != len(EXPECTED_TOOLS) or {tool["name"] for tool in tools} != EXPECTED_TOOLS:
-        raise ValueError("Tool catalog must contain exactly the five Training Studio tools.")
+        raise ValueError("Tool catalog must contain exactly the eight Training Studio tools.")
     for tool in tools:
         if set(tool) - TOOL_FIELDS:
             raise ValueError("Tool catalog contains unsupported metadata fields.")

@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "mode": "function_pack",
+  "title": "Zava Athletic Supply audience: four fictional workflows",
+  "as_of_date": "2026-11-18",
+  "default_minutes": 20,
+  "audience": {"customer_name": "Zava Athletic Supply", "customer_website": "https://example.test/fictional-audience", "prefix": "ZAV", "industry": "Athletic equipment retail"},
+  "context": {
+    "business_model": ["An invented retailer serving local activity groups."],
+    "kpis": ["Order readiness", "Budget reconciliation", "Campaign approval"],
+    "pressures": ["A seasonal launch with a short review window."],
+    "facts": [{"text": "The fictional audience brief describes an athletic equipment retailer.", "source_url": "https://example.test/fictional-audience/brief"}],
+    "assumptions": ["The invented demonstration uses a small central operations team."]
+  },
+  "company": {"name": "Vellum Kite Outfitters", "description": "An invented supplier of recreational equipment. All parties are fictional."},
+  "presenter": {"role": "Workshop facilitator"},
+  "cast": [
+    {"id": "people-lead", "name": "Neri Vale", "role": "People lead", "external": false, "executive": false},
+    {"id": "controller", "name": "Tavi Quill", "role": "Controller", "external": false, "executive": false},
+    {"id": "campaign-lead", "name": "Orin Moss", "role": "Campaign lead", "external": false, "executive": false},
+    {"id": "account-lead", "name": "Luma Reed", "role": "Account lead", "external": false, "executive": false},
+    {"id": "executive", "name": "Sora Finch", "role": "Managing director", "external": false, "executive": true},
+    {"id": "vendor", "name": "Pax Alder", "role": "External delivery coordinator", "external": true, "executive": false},
+    {"id": "planner", "name": "Mira Venn", "role": "Launch planner", "external": false, "executive": false}
+  ],
+  "tensions": [
+    {"id": "training-gap", "problem": "A policy review is slipping while the launch roster is nearly ready.", "due_date": "2026-11-20", "slipping": true, "owner_cast_id": "people-lead"},
+    {"id": "invoice-review", "problem": "The budget summary and invoice ledger disagree.", "due_date": "2026-11-21", "slipping": false, "owner_cast_id": "controller"},
+    {"id": "campaign-review", "problem": "Campaign slides imply approval that a footnote still withholds.", "due_date": "2026-11-23", "slipping": false, "owner_cast_id": "campaign-lead"},
+    {"id": "deal-review", "problem": "The account forecast assumes a delivery confirmation that has not arrived.", "due_date": "2026-11-24", "slipping": false, "owner_cast_id": "account-lead"}
+  ],
+  "payoffs": [
+    {"id": "roster-gap", "finding": "The roster records 12 people awaiting the refresher.", "scenario_id": "hr", "evidence_file_id": "people-source", "buried": false, "evidence": {"kind": "number", "text": "The pending refresher count is 12.", "source_file": "people-source"}},
+    {"id": "policy-exception", "finding": "The appendix requires expert review before a provisional assignment.", "scenario_id": "hr", "evidence_file_id": "people-source", "buried": true, "evidence": {"kind": "clause", "text": "A provisional assignment requires review by the fictional people adviser.", "source_file": "people-source", "section": "2.1"}},
+    {"id": "budget-total", "finding": "The reviewed launch budget totals $4200.", "scenario_id": "finance", "evidence_file_id": "finance-source", "buried": false, "evidence": {"kind": "number", "text": "Approved entries total $4200.", "source_file": "finance-source"}},
+    {"id": "duplicate-entry", "finding": "A duplicate $600 invoice explains the apparent overspend.", "scenario_id": "finance", "evidence_file_id": "finance-source", "buried": true, "evidence": {"kind": "number", "text": "Invoice VK-17 appears twice for $600; the duplicate must not be added.", "source_file": "finance-source"}},
+    {"id": "campaign-gate", "finding": "The footnote says the revised claim is not yet approved.", "scenario_id": "marketing", "evidence_file_id": "marketing-source", "buried": false, "evidence": {"kind": "quote", "text": "The revised claim remains subject to the fictional review panel.", "source_file": "marketing-source", "section": "Slide 4"}},
+    {"id": "channel-limit", "finding": "The launch allocation includes 600 units for the pilot channel.", "scenario_id": "marketing", "evidence_file_id": "marketing-source", "buried": false, "evidence": {"kind": "number", "text": "The pilot channel has 600 units allocated.", "source_file": "marketing-source"}},
+    {"id": "deal-condition", "finding": "The purchase remains conditional on delivery confirmation.", "scenario_id": "sales", "evidence_file_id": "sales-source", "buried": false, "evidence": {"kind": "quote", "text": "The fictional buyer will confirm only after the delivery window is agreed.", "source_file": "sales-source", "section": "Row 3"}},
+    {"id": "forecast-risk", "finding": "The conditional opportunity contributes $1800 to the draft forecast.", "scenario_id": "sales", "evidence_file_id": "sales-source", "buried": false, "evidence": {"kind": "number", "text": "The unconfirmed opportunity value is $1800.", "source_file": "sales-source"}}
+  ],
+  "files": [
+    {"id": "people-source", "filename": "ZAV_people.docx", "format": "docx", "purpose": "Invented policy appendix and roster with a deliberate approval gap.", "used_by": ["hr"], "contains_payoffs": ["roster-gap", "policy-exception"], "href": "https://example.test/presenter/people.docx"},
+    {"id": "finance-source", "filename": "ZAV_finance.xlsx", "format": "xlsx", "purpose": "Invented ledger with an intentionally duplicated invoice.", "used_by": ["finance"], "contains_payoffs": ["budget-total", "duplicate-entry"], "href": "./learner/ZAV_finance.xlsx", "audience": "attendee"},
+    {"id": "marketing-source", "filename": "ZAV_marketing.pptx", "format": "pptx", "purpose": "Invented launch slides whose headline and review footnote disagree.", "used_by": ["marketing"], "contains_payoffs": ["campaign-gate", "channel-limit"]},
+    {"id": "sales-source", "filename": "ZAV_sales.csv", "format": "csv", "purpose": "Invented opportunity rows with an unconfirmed delivery assumption.", "used_by": ["sales"], "contains_payoffs": ["deal-condition", "forecast-risk"]}
+  ],
+  "scenarios": [
+    {
+      "id": "hr", "function": "HR", "title": "Spot the policy exception",
+      "persona": "People lead", "business_context": "The launch team needs a reviewed assignment plan rather than an inferred policy decision.",
+      "input_file_ids": ["people-source"],
+      "prompt": "Read ZAV_people.docx as the people lead for Vellum Kite Outfitters. Reconcile the pending refresher roster with Section 2.1, preserving its exact clause. Separate source text from interpretation and turn uncertainty into questions for an expert. Produce ZAV_hr.xlsx with the readiness table, ZAV_hr.docx with the escalation brief, ZAV_hr.pptx with the review slides, and ZAV_hr.html with a local readiness dashboard. Mark every output fictional and leave approval to the adviser.",
+      "expected_outputs": [{"format": "xlsx", "filename": "ZAV_hr.xlsx"}, {"format": "docx", "filename": "ZAV_hr.docx"}, {"format": "pptx", "filename": "ZAV_hr.pptx"}, {"format": "html", "filename": "ZAV_hr.html"}],
+      "payoff_ids": ["roster-gap", "policy-exception"],
+      "talk_track": "Start with the readiness table and ask the audience what they would trust before opening the source. The visible roster suggests a small training gap, but the useful finding is not merely the count. Open the fictional policy appendix and show the review condition beside the proposed assignment. This is where the demonstration changes from summarizing a document to preparing a responsible handoff. The assistant should preserve the clause, identify the unresolved interpretation, and ask the adviser a precise question rather than deciding that the assignment is allowed. Compare the workbook with the brief and slide summary. The same evidence should appear consistently in each output, while the dashboard makes the open review visible. Nothing here is an employee record or professional advice. All people and data are fictional. Pause before revealing the planted exception and let the audience explain the consequence in their own words. Finish by showing that a good output can make uncertainty easier to act on without pretending to remove it.",
+      "follow_ups": ["What question should the fictional adviser answer before assignment?", "How would the reviewed plan change with a different refresher roster?"]
+    },
+    {
+      "id": "finance", "function": "Finance", "title": "Reconcile the apparent overspend",
+      "persona": "Controller", "business_context": "A launch summary disagrees with the invoice detail and needs a traceable reconciliation.",
+      "input_file_ids": ["finance-source"],
+      "prompt": "Inspect the ledger in ZAV_finance.xlsx. As the fictional controller, identify repeated invoice identifiers before adding approved entries, explain the difference between the draft summary and the checked total, and preserve the original rows. Build ZAV_finance_review.xlsx as a reconciled workbook, ZAV_finance_review.docx as a concise variance brief, ZAV_finance_review.pptx for the launch review, and ZAV_finance_review.html as an offline exception dashboard. Show the calculation and flag unresolved entries instead of inventing approvals.",
+      "expected_outputs": [{"format": "xlsx", "filename": "ZAV_finance_review.xlsx"}, {"format": "docx", "filename": "ZAV_finance_review.docx"}, {"format": "pptx", "filename": "ZAV_finance_review.pptx"}, {"format": "html", "filename": "ZAV_finance_review.html"}],
+      "payoff_ids": ["budget-total", "duplicate-entry"],
+      "talk_track": "Begin with the draft budget summary and invite the audience to describe the apparent problem. Do not reveal the duplicate immediately. Instead, follow the assistant into the invoice detail and ask which row identifiers should be unique. The planted repeated entry gives the demonstration a concrete turning point: a plausible headline can be wrong even when every individual amount looks ordinary. Show how the reviewed workbook preserves the source rows while making the exclusion explicit. Then compare the brief, slides, and local dashboard against that checked view. They should communicate the same conclusion without copying an unexplained total into every format. The aim is not to automate financial judgment; it is to make the reasoning easier to inspect. Explain that these figures belong only to the invented company and are not a customer ledger. Ask the audience what evidence would be needed if the repeated entry represented a legitimate second charge. Close by distinguishing a verified calculation from a business decision that still needs a reviewer.",
+      "follow_ups": ["What evidence would justify treating the repeated invoice as a separate charge?", "Recalculate with a fresh fictional amount and preserve the audit trail."]
+    },
+    {
+      "id": "marketing", "function": "Marketing", "title": "Find the launch approval gap",
+      "persona": "Campaign lead", "business_context": "A confident headline conflicts with a review footnote in the fictional campaign slides.",
+      "input_file_ids": ["marketing-source"],
+      "prompt": "Compare the headline, allocation table and review footnote in ZAV_marketing.pptx. Prepare a launch decision for the invented campaign team without treating the headline as approval. Keep the review-panel sentence unchanged. Deliver a channel workbook named ZAV_campaign.xlsx, a recommendation in ZAV_campaign.docx, corrected presentation slides in ZAV_campaign.pptx, and a self-contained status dashboard in ZAV_campaign.html. Distinguish approved wording, proposed wording and unanswered questions.",
+      "expected_outputs": [{"format": "xlsx", "filename": "ZAV_campaign.xlsx"}, {"format": "docx", "filename": "ZAV_campaign.docx"}, {"format": "pptx", "filename": "ZAV_campaign.pptx"}, {"format": "html", "filename": "ZAV_campaign.html"}],
+      "payoff_ids": ["campaign-gate", "channel-limit"],
+      "talk_track": "Show the audience the attractive launch headline first, then ask what it leaves unstated. A confident slide can make a proposal sound like a decision. The demonstration uses a small disagreement between that headline and the review footnote to expose the difference. Open the source note and keep its wording visible while the assistant prepares the recommendation. Next, inspect the channel workbook so the allocation is not separated from the approval status. The corrected slides should communicate a useful next action, not merely replace a strong claim with vague caution. The local dashboard should make the unresolved review easy to see. Ask participants which output they would bring to a launch meeting and which evidence they would keep beside it. All materials describe an invented business, so the exercise makes no claim about a real campaign. Finish by comparing the original and revised messages and explaining how grounded assistance can improve clarity while leaving ownership of approval with the human review panel.",
+      "follow_ups": ["How should the message change if the review panel rejects the revised claim?", "Try a different fictional channel allocation and explain the effect."]
+    },
+    {
+      "id": "sales", "function": "Sales", "title": "Separate forecast from commitment",
+      "persona": "Account lead", "business_context": "A draft forecast treats a conditional opportunity as committed despite an unresolved delivery window.",
+      "input_file_ids": ["sales-source"],
+      "prompt": "Use ZAV_sales.csv to prepare a fictional account review. Locate the buyer condition and distinguish opportunity value from confirmed business. Create ZAV_deal.xlsx with a conditional-versus-confirmed view, ZAV_deal.docx with the account handoff, ZAV_deal.pptx with a decision-focused review, and ZAV_deal.html with a local deal-risk dashboard. Quote the buyer sentence exactly and propose a next conversation; do not send a message or assert that delivery is confirmed.",
+      "expected_outputs": [{"format": "xlsx", "filename": "ZAV_deal.xlsx"}, {"format": "docx", "filename": "ZAV_deal.docx"}, {"format": "pptx", "filename": "ZAV_deal.pptx"}, {"format": "html", "filename": "ZAV_deal.html"}],
+      "payoff_ids": ["deal-condition", "forecast-risk"],
+      "talk_track": "Open the forecast view and ask the audience whether the opportunity should be described as committed. The amount is not the central surprise; the condition attached to it is. Reveal the fictional buyer sentence and compare it with the confidence implied by the draft forecast. A useful assistant should preserve that sentence, separate confirmed business from conditional value, and prepare a next conversation without claiming that the delivery question has been settled. Move across the workbook, handoff brief, slides, and dashboard to show how the same distinction survives different formats. Keep the source row available so a reviewer can trace the recommendation. Emphasize that the pack contains invented people and an invented account, and no mail is sent by the server. Invite the audience to suggest the smallest new fact that would change the decision. End with the proposed handoff and show that the assistant can make an uncertain deal easier to discuss without turning an assumption into a commitment.",
+      "follow_ups": ["Which fictional confirmation would move the opportunity into the committed view?", "Change the delivery window and reassess the next conversation."]
+    }
+  ],
+  "seeded_items": [
+    {"id": "people-email", "kind": "email", "from_cast_id": "people-lead", "subject": "Fictional roster review", "day_offset": 0, "importance": "high", "body": "[Demo scenario message \u2014 from Neri Vale, People lead]\nThe provisional assignment still needs the adviser review described in Section 2.1."},
+    {"id": "finance-email", "kind": "email", "from_cast_id": "controller", "subject": "Fictional ledger question", "day_offset": 1, "importance": "normal", "body": "[Demo scenario message \u2014 from Tavi Quill, Controller]\nPlease inspect the repeated invoice identifier before accepting the summary."},
+    {"id": "vendor-email", "kind": "email", "from_cast_id": "vendor", "subject": "Fictional delivery window", "day_offset": 2, "body": "[Demo scenario message \u2014 from Pax Alder, External delivery coordinator]\nThe proposed delivery window is still awaiting review."},
+    {"id": "review-meeting", "kind": "meeting", "from_cast_id": "executive", "subject": "Fictional launch review", "day_offset": 3, "body": "[Demo scenario message \u2014 from Sora Finch, Managing director]\nBring the checked evidence and separate open questions from decisions."}
+  ],
+  "run_of_show": [
+    {"minutes": 2, "action": "Introduce the invented world and confirm all input files are complete."},
+    {"minutes": 4, "action": "Review the policy exception.", "scenario_id": "hr"},
+    {"minutes": 4, "action": "Reconcile the ledger.", "scenario_id": "finance"},
+    {"minutes": 4, "action": "Check the campaign approval.", "scenario_id": "marketing"},
+    {"minutes": 4, "action": "Review the conditional deal.", "scenario_id": "sales"},
+    {"minutes": 2, "action": "Debrief and complete presenter cleanup."}
+  ],
+  "cleanup": ["Delete the generated practice outputs from the presenter workspace.", "Remove only the presenter-owned demo emails and meeting created with permission.", "Retain no real customer or employee data."],
+  "disclaimer": "All people and data are fictional. Real customer names are used only as context. Practice exercise, not professional advice."
+}

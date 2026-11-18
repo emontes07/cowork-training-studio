@@ -22,7 +22,7 @@ def tools():
         "name": name, "description": f"Fictional test description for {name}.",
         "inputSchema": {
             "type": "object",
-            "properties": {"spec": {"type": "object"}} if name in {"validate_lab_spec", "render_lab_page"} else {},
+            "properties": {"spec": {"type": "object"}} if name in builder.SPEC_SCHEMA_TOOLS else {},
         },
         "outputSchema": {"type": "object", "x-test": True},
         "annotations": {"readOnlyHint": True},
@@ -262,7 +262,7 @@ def test_sanitizer_rejects_unresolvable_references(reference, definitions, messa
 def test_tool_sanitizer_keeps_metadata_and_simplifies_spec_and_outputs(tools):
     original = deepcopy(tools)
     result = builder.sanitize_tools(tools)
-    assert len(result) == 5
+    assert len(result) == 8
     assert tools == original
     for before, after in zip(tools, result):
         for field in ("name", "description", "annotations"):
@@ -271,10 +271,10 @@ def test_tool_sanitizer_keeps_metadata_and_simplifies_spec_and_outputs(tools):
         for field in ("inputSchema", "outputSchema"):
             Draft202012Validator.check_schema(after[field])
             assert not any(term in json.dumps(after[field]) for term in ('"$ref"', '"$defs"', '"x-'))
-        if after["name"] in {"validate_lab_spec", "render_lab_page"}:
+        if after["name"] in builder.SPEC_SCHEMA_TOOLS:
             assert after["inputSchema"]["properties"]["spec"] == {
                 "type": "object", "additionalProperties": True,
-                "description": "Call get_lab_spec_schema first and follow it",
+                "description": f"Call {builder.SPEC_SCHEMA_TOOLS[after['name']]} first and follow it",
             }
 
 
