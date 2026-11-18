@@ -125,14 +125,14 @@ def test_invalid_manifest_and_skill_cases(package_files, failure):
         builder.validate_package(package_files)
 
 
-@pytest.mark.parametrize("line_count", [140, 141])
+@pytest.mark.parametrize("line_count", [150, 151])
 def test_skill_line_limit(package_files, line_count):
     lines = package_files[SKILL].decode().splitlines()
     package_files[SKILL] = ("\n".join(lines + ["Practice detail."] * (line_count - len(lines))) + "\n").encode()
-    if line_count == 140:
+    if line_count == 150:
         builder.validate_package(package_files)
     else:
-        with pytest.raises(ValueError, match="exceeds 140 lines"):
+        with pytest.raises(ValueError, match="exceeds 150 lines"):
             builder.validate_package(package_files)
 
 
@@ -205,7 +205,7 @@ def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools, raw_s
         assert all(content == (out / name).read_bytes() for name, content in files.items())
         builder.validate_package(files)
     assert calls == ["https://mcp.example.test/mcp"]
-    assert archive_path.name == "cowork-training-studio-0.1.2.zip"
+    assert archive_path.name == "cowork-training-studio-0.1.3.zip"
 
 
 def test_sanitizer_resolves_nested_refs_and_preserves_constraints():
@@ -262,7 +262,7 @@ def test_sanitizer_rejects_unresolvable_references(reference, definitions, messa
 def test_tool_sanitizer_keeps_metadata_and_simplifies_spec_and_outputs(tools):
     original = deepcopy(tools)
     result = builder.sanitize_tools(tools)
-    assert len(result) == 4
+    assert len(result) == 5
     assert tools == original
     for before, after in zip(tools, result):
         for field in ("name", "description", "annotations"):

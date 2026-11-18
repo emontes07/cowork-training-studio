@@ -4,7 +4,7 @@ description: "Build a training lab, create a hands-on workshop, or make a story-
 license: MIT
 metadata:
   author: Cowork Training Studio
-  version: "0.1.2"
+  version: "0.1.3"
 ---
 
 # Build a training lab
@@ -18,10 +18,21 @@ or "make a story-driven Copilot lab".
 1. Call `list_session_formats`. For a hands-on HTML guide, choose `html_lab`.
    Ask for the audience, products, time available, and what learners should
    leave with. Ask about missing choices that would change what the lab teaches.
+   If the learner has no shape in mind, call `get_blueprint` without an ID.
+   Offer its three choices in one line each, then call it with the chosen
+   `blueprint_id` and follow `chapter_outline`, `quality_bar` and `ends_with`.
+   For `domain_super_day`, use `chapter_outline` as the day agenda, breaks included.
+   Follow each `lab_id` to `lab_outlines` and build each separately as `html_lab`.
+   The prompt-challenge close is also `html_lab` until `prompt_a_thon` ships.
+   Keep the same invented company across the day; never invent available formats.
 2. Call `get_lab_spec_schema` and use the returned contract, not a remembered
-   version. Write a complete LabSpec using fictional practice content.
+   version. Write `schema_version: "2.1"` using fictional practice content.
+   Use typed `expected.key_facts`: `quote` or `clause` for document quotations,
+   with `source_file` naming a declared file ID and `section` matching its source.
+   Use `number` for checked figures and `fact` for other evidence.
 3. Give learners one role, one situation, a deadline, and a useful outcome.
    Keep one running Story sheet or equivalent artifact across the chapters.
+   Declare `through_line.headings`; only carry forward into those headings.
    Follow the Close-to-Deck pattern without copying another lab's text or data:
    - Open each chapter with `story_so_far`, `builds_on`, and `you_will_add`.
    - Have each later step use something an earlier step produced.
@@ -36,28 +47,20 @@ or "make a story-driven Copilot lab".
      If skill creation is unavailable, reuse the saved prompt manually.
    Keep the work and chapter timings realistic for the requested duration.
 
-## Check and render
+## Check the spec
 
-4. Call `validate_lab_spec` with the complete spec. Fix every error and validate
-   again. Address warnings by improving the content; explain any intentional
-   remaining warning to the learner rather than hiding it.
-5. Once valid, call `render_lab_page` with that same spec. If it returns errors,
-   correct the spec and validate again before retrying.
+4. Call `validate_lab_spec` with the complete spec. Fix EVERY error and warning
+   and validate again until both counts are zero, before rendering.
+   If a warning cannot be resolved, explain the blocker; do not hide or waive it.
 
-## Save the exact page
+## Build the facilitator pack
 
-6. Use Cowork's file tools to save the **exact returned `html` string** using
-   the returned `filename`. Pass the tool result directly as file content:
-   do not retype, summarize, reconstruct, wrap in Markdown, or alter the HTML.
-   Keep inline styles and scripts so the guide works offline.
-7. Confirm the save succeeded, then tell the learner the file name and provide
-   the file link returned by the saving tool. If file saving is unavailable,
-   say the page was rendered but not saved; do not invent a saved file or link.
-
-## Offer the practice files
-
-8. After saving the page, offer to create the practice files it lists.
-   If the learner agrees, use Cowork's own file tools to create and save them:
+5. After clean validation, use Cowork's own file tools, with learner permission,
+   to build the practice files from the key facts. Save in the output location:
+   - `<lab-slug>/learner/`: sources, fresh test data, worksheets and checkpoints.
+   - `<lab-slug>/facilitator/`: answer keys and `facilitator-notes.md`.
+   - The notes give a run of show by chapter, what to hand out, dates and
+     expected answers; mark them and the keys "Facilitator only".
    - Write the source files from the expected key facts, not the other way round.
      Use the same fictional numbers so the checked calculations reproduce the
      expected results. Make the "next" or test-data file use different input
@@ -66,18 +69,58 @@ or "make a story-driven Copilot lab".
      VERBATIM in the practice file that step uses, with the same section number.
      Preserve required quotes even when preparing fresh numerical test inputs.
    - If the overview or story quotes the same sentence differently, use the
-     key-fact version in the practice file and tell the learner about the
-     difference. Do not silently rewrite the saved lab.
+     key-fact version and tell the learner about the difference. Correct the
+     draft before validation; never silently rewrite an already saved lab.
    - Make each checkpoint contain exactly the state at the START of its chapter:
      carry forward earlier reviewed work, but not that chapter's new answers.
    - Keep answer keys clearly marked for facilitators, separate from learner
      source files and starting checkpoints.
-9. Re-read every created file with Cowork's file tools. Confirm that every
-   quoted key fact appears exactly: same words, same section number. Report
-   any mismatch and fix the FILE, not the lab, then re-read it to confirm.
-   Also check the fictional numbers and checkpoint states. If you cannot
-   re-read a file, say its contents are unverified rather than claiming success.
-   Confirm which files were saved and share the links returned by Cowork.
+6. Only after saving the files, set learner `files[].href` to `learner/<filename>`
+   and `audience: "learner"`. Set keys and notes to `audience: "facilitator"`
+   with NO `href`; list the notes with `kind: "answer_key"`. Keep source IDs stable.
+   Never invent links to unsaved files or link facilitator material from the page.
+7. Validate the updated complete spec again to zero errors AND zero warnings,
+   then call `render_lab_page` with that same spec. If it returns errors, correct
+   the spec and validate again before retrying.
+
+## Save and verify the exact page
+
+8. Use Cowork's file tools to save the **exact returned `html` string** using
+   the returned `filename` at `<lab-slug>/<lab-slug>.html`. Align the pack folder
+   name with the returned filename's stem; keep learner/facilitator paths relative.
+   Pass the tool result directly as file content: do not retype, summarize,
+   reconstruct, wrap in Markdown, or alter HTML. Keep inline styles and scripts.
+   Share or publish the folder together, not the HTML alone, so its links work.
+9. Re-read EVERY saved file, including the HTML, with Cowork's file tools.
+   Confirm every quoted key fact appears word for word with the same section
+   number in each practice file that uses it. Report mismatches and fix the FILE,
+   not the lab's canonical facts, then re-read it. Check checkpoint starting states.
+   Check every date and number calculation with code, using the fictional inputs
+   and stated date conventions; do not claim a mental estimate as verification.
+   Confirm the saved HTML equals the tool output and every learner link resolves
+   within the pack. Fix packaging paths, not the returned HTML.
+   Report counts of saved/re-read files, quote/clause placements checked, date
+   and number calculations checked, and anything fixed. If a tool cannot save,
+   re-read or calculate, name what is unsaved/unverified instead of claiming success.
+10. Confirm saves succeeded and share only links returned by Cowork's tools.
+    If saving is unavailable, say the page was rendered but not saved (if true);
+    never invent a saved file or link. Offer to zip the complete folder.
+    Keep the complete pack for facilitators; share only the guide and learner
+    subtree with learners. Folder labels and absent hrefs are not access control.
+
+## Department notes
+
+- **Legal:** deliver a clause-and-notice review note. Quote clauses with sections,
+  include a notice/deadline trap and questions for counsel. Test the personal
+  skill on a new fictional notice date or revised clause with its own key facts.
+- **HR:** deliver a policy-based case and escalation brief, with no real employee
+  data and an explicit escalation path. Test a new fictional case or policy date.
+- **Finance:** deliver a reconciled variance brief with a variance challenge.
+  Test a fresh fictional period with different figures and checked control totals.
+- **Sales:** deliver a fictional account plan with a deal-risk challenge.
+  Test a new invented account or changed deal figures against fresh expected facts.
+- **Operations:** deliver a stock or schedule plan with checked maths and a
+  "what-if" challenge. Test different stock, lead-time or capacity inputs.
 
 ## Practice-data boundaries
 
@@ -88,4 +131,7 @@ or "make a story-driven Copilot lab".
   workbook; provide links only to practice files that actually exist.
 - The service checks and renders content. Cowork handles saving with the
   learner's permission. This is a demo build, not a production deployment.
-- For legal, HR and compliance topics, include "practice exercise, not professional advice", use fictional parties only, and keep a "questions for an expert" step that separates interpretation from plain text.
+- The server never creates files, mail or calendar items.
+- For legal, HR, compliance, privacy and medical topics, include "practice exercise,
+  not professional advice", use fictional parties only, and keep a "questions for
+  an expert" step that separates interpretation from plain text.

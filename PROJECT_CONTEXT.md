@@ -12,7 +12,7 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M4a
+## Current checkpoint: M4b
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
@@ -31,8 +31,20 @@ learner-facing golden sample ending in a personal Cowork skill creation/reuse
 activity. Skill creation stays in Cowork, with a saved-prompt fallback.
 M3c-M3f added Cowork packaging, Azure hosting, flat structured tool results and
 safe request metadata logging. M4a adds **LabSpec 2.1**, retaining 2.0 compatibility
-and the exact 84,022-byte golden page. The plugin stays at 0.1.2; M4a does not
-deploy or build a release. The skill update and redeployment belong to M4b.
+and the exact 84,022-byte golden page. M4b adds the read-only `get_blueprint` tool,
+deploys 2.1 to Azure and releases plugin **0.1.3** with the same manifest ID.
+The 137-line skill now fixes every warning, builds checked learner/facilitator
+packs with Cowork's own tools, and offers a ZIP after saving the exact HTML.
+Local tests: 254 before M4b, 268 after. Both fixtures validate with zero issues.
+
+`get_blueprint()` returns `{blueprints: [...]}` summaries; an exact
+`blueprint_id` returns detail fields directly, never under `result`. Unknown IDs
+fail explicitly. Shapes are `app_deep_dive` (60 minutes),
+`prompt_to_agent_ladder` (90), and `domain_super_day` (300 including breaks).
+The super-day's `chapter_outline` is its agenda; lab slots reference matching
+`lab_outlines` IDs, titles and durations. Build all five labs separately as
+`html_lab`; the closing challenge moves to `prompt_a_thon` only when it ships.
+Blueprints are generic metadata, not ready-to-render specs or created assets.
 
 The reference implementation is
 [inventory-mcp-copilot](https://github.com/emontes07/inventory-mcp-copilot).
@@ -64,9 +76,15 @@ The spec-first workflow is:
 
 1. A model, guided by a skill, writes **LabSpec JSON** using fictional data.
 2. The server validates the spec and returns actionable validation results.
-3. The skill corrects the spec until it passes.
-4. The server renders deterministic, self-contained HTML from that valid spec.
-5. Cowork uses its built-in tools to save or share the result.
+3. The skill corrects the spec until it has zero errors and warnings.
+4. Cowork uses its built-in tools to create practice files from the key facts,
+   under `<lab-slug>/learner/` and `<lab-slug>/facilitator/` (keys and notes).
+5. The skill sets relative learner hrefs and facilitator audiences and validates
+   again to zero issues. The server renders deterministic, self-contained HTML.
+6. Cowork saves `<lab-slug>/<lab-slug>.html` unchanged, re-reads the files and
+   checks quotes, dates and numbers with tools.
+   The guide and learner subtree travel together; the full pack stays with
+   facilitators. Directory labels are not access control.
 
 The server is not an autonomous author and does not make editorial or business
 judgments. Validation and rendering must remain separate, testable operations.
@@ -152,9 +170,9 @@ judgments. Validation and rendering must remain separate, testable operations.
 | M3a | Implemented: LabSpec 2.0 story model, narrative renderer, and original connected QBR sample. |
 | M3b | Implemented: learner-voice sample, personal Cowork skill activity, voice lint, and summary plurals. |
 | M3c-M3f | Implemented: Cowork connector/package, Azure hosting, and first-run polish. |
-| M3 remaining | Themes, blueprints, and a prompt library. |
+| M3 remaining | Themes and a prompt library; blueprints shipped in M4b. |
 | M4a | Implemented: additive LabSpec 2.1, typed facts, consistency warnings, and file links. |
-| M4b | Skill update, plugin release and Azure redeployment; not part of M4a. |
+| M4b | Implemented: five-tool server, tested blueprint agendas, facilitator-pack skill, plugin 0.1.3 and Azure redeployment. |
 | M4 remaining | ThreadScript schema. |
 | M5 | Cowork plugin packaging with [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
 

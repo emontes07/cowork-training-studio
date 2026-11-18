@@ -440,6 +440,20 @@ def test_heading_matching_is_optional_and_named_artifacts_are_not_missing_files(
     assert validate_lab_spec(legal_spec)["warnings"] == []
 
 
+def test_same_heading_reference_warns_only_with_declared_headings(legal_spec):
+    step = legal_spec["chapters"][0]["steps"][0]
+    step["carries_forward"] = 'Add the decision to "Timeline".'
+    assert legal_spec["through_line"]["headings"] == ["Source wording", "Questions for counsel"]
+    result = validate_lab_spec(legal_spec)
+    assert result["valid"]
+    assert [(item["code"], item["path"]) for item in result["warnings"]] == [
+        ("unknown_heading", "chapters.0.steps.0.carries_forward"),
+    ]
+    del legal_spec["through_line"]["headings"]
+    result = validate_lab_spec(legal_spec)
+    assert result["valid"] and result["errors"] == [] and result["warnings"] == []
+
+
 @pytest.mark.parametrize("domain", ["Legal", "HR", "Compliance", "Privacy", "Medical"])
 def test_sensitive_domains_require_expert_questions_and_fictional_parties(legal_spec, domain):
     legal_spec["functional_area"] = domain

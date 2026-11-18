@@ -1,0 +1,118 @@
+[
+  {
+    "id": "app_deep_dive",
+    "title": "One workflow, from input to deliverable",
+    "default_minutes": 60,
+    "best_for": ["One role learning a focused app workflow", "A reviewed deliverable and reusable personal skill"],
+    "required_inputs": ["Learner role", "Cowork or Microsoft 365 workflow", "Fictional source inputs", "Finished deliverable", "Available modes and skill permissions"],
+    "chapter_outline": [
+      {"title": "Start from the source", "minutes": 15, "purpose": "Take one role from raw fictional inputs to a first result in a running document.", "step_patterns": ["inspect the source", "first result"]},
+      {"title": "Refine the deliverable", "minutes": 15, "purpose": "Improve the first result using the same evidence and declared headings.", "step_patterns": ["refine", "check against the source"]},
+      {"title": "Challenge the result", "minutes": 10, "purpose": "Find and repair a planted unsupported claim without a supplied prompt.", "step_patterns": ["challenge without a prompt", "review the answer"]},
+      {"title": "Make it repeatable", "minutes": 20, "purpose": "Turn reviewed prompts into a personal skill, approve its draft, then test on fresh fictional inputs.", "step_patterns": ["create a personal skill", "test on new data"]}
+    ],
+    "quality_bar": [
+      "Use one fictional role, one workflow and one running deliverable; later steps use earlier outputs.",
+      "Declare running-document headings; copy quote and clause key facts verbatim with source files and sections.",
+      "Check numerical results with code and separate interpretation from source text.",
+      "Provide a prompt-free challenge, checked expected facts, chapter-start checkpoints and a manual-paste fallback.",
+      "Fix every validation warning; package learner files separately from facilitator answers.",
+      "Use different test-input numbers with their own expected facts; reuse a saved prompt if personal skills are unavailable."
+    ],
+    "ends_with": "A finished deliverable and a reviewed personal skill tested on new fictional data, or the saved-prompt fallback."
+  },
+  {
+    "id": "prompt_to_agent_ladder",
+    "title": "From one prompt to a reusable workflow",
+    "default_minutes": 90,
+    "best_for": ["Learners ready to move beyond single prompts", "A presenter-led path from evidence to reusable skills"],
+    "required_inputs": ["Learner role", "One fictional task carried across every rung", "Practice files", "Available Cowork capabilities", "Personal and shared skill or agent permissions"],
+    "chapter_outline": [
+      {"title": "One prompt, one result", "minutes": 10, "purpose": "Create a first result that later rungs will improve, not replace.", "step_patterns": ["first result", "review the gaps"]},
+      {"title": "Ground the prompt in files", "minutes": 20, "purpose": "Rework the first result using fictional sources and traceable evidence.", "step_patterns": ["ground in files", "refine"]},
+      {"title": "Connect a multi-step task", "minutes": 25, "purpose": "Use the grounded result in a planned Cowork task with explicit review points.", "step_patterns": ["plan a multi-step task", "review before acting", "challenge without a prompt"]},
+      {"title": "Make a personal skill", "minutes": 25, "purpose": "Capture the reviewed multi-step approach and test it on fresh fictional inputs.", "step_patterns": ["create a personal skill", "test on new data"]},
+      {"title": "Explore shared reuse", "minutes": 10, "purpose": "Optionally watch a presenter adapt the personal skill to a shared skill or agent; otherwise review a sharing plan in the same slot.", "step_patterns": ["presenter-led shared skill or agent", "review permissions and ownership"]}
+    ],
+    "quality_bar": [
+      "Each rung uses the prior rung's output and the same fictional story.",
+      "A grounded prompt names its source and checked expected facts, not an invented reference.",
+      "Use chapter-start checkpoints from chapter three onward and separate learner files from facilitator keys.",
+      "Use a prompt-free challenge and review permissions before any Cowork saving or sharing.",
+      "Personal skills require learner review; saved prompts are the fallback when unavailable.",
+      "The shared skill or agent rung is optional and presenter-led, not a promise of tenant capabilities.",
+      "Fix all validation warnings and check quotes, sections, dates and calculations."
+    ],
+    "ends_with": "A tested personal skill, plus an optional presenter-led shared skill or agent demonstration or a reviewed sharing plan."
+  },
+  {
+    "id": "domain_super_day",
+    "title": "One department, one fictional day",
+    "default_minutes": 300,
+    "best_for": ["A department learning together across roles", "A connected day with separately buildable hands-on labs"],
+    "required_inputs": ["Department", "One invented company", "Three learner roles", "Shared fictional source facts", "Department safeguards", "Available apps and skill permissions"],
+    "chapter_outline": [
+      {"title": "Foundations lab", "minutes": 60, "purpose": "Establish a common fictional story and source-grounded workflow.", "step_patterns": ["first result", "refine", "test on new data"], "lab_id": "foundations"},
+      {"title": "Morning break", "minutes": 15, "purpose": "Pause and reset the practice workspace.", "step_patterns": ["break"]},
+      {"title": "Role one: prepare the evidence", "minutes": 50, "purpose": "Build the first role's reviewed evidence handoff.", "step_patterns": ["first result", "challenge without a prompt"], "lab_id": "role-one"},
+      {"title": "Role two: compare decisions", "minutes": 50, "purpose": "Use the evidence handoff to compare decisions from another role.", "step_patterns": ["refine", "challenge without a prompt"], "lab_id": "role-two"},
+      {"title": "Lunch break", "minutes": 30, "purpose": "Pause before the afternoon role lab.", "step_patterns": ["break"]},
+      {"title": "Role three: plan the handoff", "minutes": 50, "purpose": "Turn the reviewed decision into a checked delivery plan.", "step_patterns": ["first result", "questions for an expert"], "lab_id": "role-three"},
+      {"title": "Afternoon break", "minutes": 10, "purpose": "Reset before the independent closing challenge.", "step_patterns": ["break"]},
+      {"title": "Prompt-challenge close", "minutes": 35, "purpose": "Build separately as html_lab for now; move to prompt_a_thon when that format ships.", "step_patterns": ["challenge without a prompt", "test on new data"], "lab_id": "challenge-close"}
+    ],
+    "lab_outlines": [
+      {
+        "id": "foundations", "title": "Foundations lab", "format_id": "html_lab", "default_minutes": 60,
+        "chapter_outline": [
+          {"title": "Find the evidence", "minutes": 15, "purpose": "Start the shared fictional story and inspect its sources.", "step_patterns": ["inspect the source", "first result"]},
+          {"title": "Check and refine", "minutes": 20, "purpose": "Build a reviewed common baseline for the role labs.", "step_patterns": ["refine", "challenge without a prompt"]},
+          {"title": "Keep the workflow", "minutes": 25, "purpose": "Make a reusable starting skill and verify it on fresh inputs.", "step_patterns": ["create a personal skill", "test on new data"]}
+        ]
+      },
+      {
+        "id": "role-one", "title": "Role one: prepare the evidence", "format_id": "html_lab", "default_minutes": 50,
+        "chapter_outline": [
+          {"title": "Create the role's first result", "minutes": 15, "purpose": "Use the morning baseline to create an evidence brief.", "step_patterns": ["first result", "check against the source"]},
+          {"title": "Challenge the evidence", "minutes": 20, "purpose": "Correct a planted gap and prepare a traceable handoff.", "step_patterns": ["refine", "challenge without a prompt"]},
+          {"title": "Reuse the evidence workflow", "minutes": 15, "purpose": "Save a reviewed personal skill and test a different input set.", "step_patterns": ["create a personal skill", "test on new data"]}
+        ]
+      },
+      {
+        "id": "role-two", "title": "Role two: compare decisions", "format_id": "html_lab", "default_minutes": 50,
+        "chapter_outline": [
+          {"title": "Read the evidence handoff", "minutes": 15, "purpose": "Use role one's checked output to frame a decision note.", "step_patterns": ["first result", "refine"]},
+          {"title": "Compare and challenge", "minutes": 20, "purpose": "Separate supported options from unsupported interpretation.", "step_patterns": ["challenge without a prompt", "questions for an expert"]},
+          {"title": "Reuse the decision workflow", "minutes": 15, "purpose": "Capture the reviewed prompts and test a new fictional case.", "step_patterns": ["create a personal skill", "test on new data"]}
+        ]
+      },
+      {
+        "id": "role-three", "title": "Role three: plan the handoff", "format_id": "html_lab", "default_minutes": 50,
+        "chapter_outline": [
+          {"title": "Plan from the reviewed decision", "minutes": 15, "purpose": "Use role two's decision note in a practical delivery plan.", "step_patterns": ["first result", "refine"]},
+          {"title": "Test the handoff", "minutes": 20, "purpose": "Find a planted handoff risk and escalate uncertain interpretations.", "step_patterns": ["challenge without a prompt", "questions for an expert"]},
+          {"title": "Reuse the planning workflow", "minutes": 15, "purpose": "Review a personal skill and test a changed deadline or quantity.", "step_patterns": ["create a personal skill", "test on new data"]}
+        ]
+      },
+      {
+        "id": "challenge-close", "title": "Prompt-challenge close", "format_id": "html_lab", "default_minutes": 35,
+        "chapter_outline": [
+          {"title": "Frame the independent challenge", "minutes": 10, "purpose": "Choose a fresh fictional case using the department's common evidence rules.", "step_patterns": ["inspect the source", "first result"]},
+          {"title": "Solve and compare", "minutes": 15, "purpose": "Attempt a prompt-free challenge and compare against a facilitator answer.", "step_patterns": ["challenge without a prompt", "review the answer"]},
+          {"title": "Keep and test the best approach", "minutes": 10, "purpose": "Refine the existing personal skill and test it on new inputs.", "step_patterns": ["create a personal skill", "test on new data"]}
+        ]
+      }
+    ],
+    "quality_bar": [
+      "Use one department and one invented company across every lab; never use customer data.",
+      "The day agenda includes breaks and totals 300 minutes; each lab slot matches its named outline's duration.",
+      "Build and validate each lab separately as html_lab, not the whole day as one LabSpec.",
+      "The prompt-challenge close stays html_lab until prompt_a_thon is available.",
+      "Pass reviewed outputs between role labs and provide starting checkpoints so each can also run independently.",
+      "Give each lab its own learner and facilitator folders, expected facts, headings and manual fallback.",
+      "Fix all validation warnings; check verbatim quotes, sections, dates and calculations with appropriate tools.",
+      "For sensitive domains include an advice disclaimer, fictional parties and questions for an expert."
+    ],
+    "ends_with": "Five independently shareable HTML lab packs, a connected departmental handoff and a prompt-challenge close using fresh fictional data."
+  }
+]

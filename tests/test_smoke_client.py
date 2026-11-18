@@ -8,6 +8,7 @@ import httpx
 import pytest
 
 from studio.tools.formats import list_session_formats
+from studio.tools.blueprints import get_blueprint
 from studio.tools.rendering import render_lab_page
 from studio.tools.validation import get_lab_spec_schema, validate_lab_spec
 
@@ -22,6 +23,7 @@ def test_smoke_redirects_streamed_requests_and_checks_results(monkeypatch, capsy
     expected_wire_bytes = []
     tools = {
         "list_session_formats": list_session_formats,
+        "get_blueprint": get_blueprint,
         "get_lab_spec_schema": get_lab_spec_schema,
         "validate_lab_spec": validate_lab_spec,
         "render_lab_page": render_lab_page,

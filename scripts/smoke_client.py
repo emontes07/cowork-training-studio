@@ -54,7 +54,7 @@ async def smoke(url: str) -> None:
         assert initialized, "Initialize response was not observed"
         print("initialize: succeeded; no mcp-session-id")
         names = {tool.name for tool in await client.list_tools()}
-        expected = {"list_session_formats", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
+        expected = {"list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
         assert names == expected, f"Unexpected tools: {names}"
         print("tools/list:", ", ".join(sorted(names)))
         schema = (await client.call_tool("get_lab_spec_schema", {})).structured_content
@@ -64,6 +64,16 @@ async def smoke(url: str) -> None:
         formats = (await client.call_tool("list_session_formats", {})).data
         assert len(formats) == 4
         print("list_session_formats: 4 formats")
+        catalog = (await client.call_tool("get_blueprint", {})).structured_content
+        assert catalog is not None and set(catalog) == {"blueprints"}, "Blueprint list must be top-level"
+        assert {item["id"] for item in catalog["blueprints"]} == {
+            "app_deep_dive", "prompt_to_agent_ladder", "domain_super_day",
+        }
+        for item in catalog["blueprints"]:
+            blueprint = (await client.call_tool("get_blueprint", {"blueprint_id": item["id"]})).structured_content
+            assert blueprint is not None and blueprint["id"] == item["id"] and "result" not in blueprint
+            assert sum(chapter["minutes"] for chapter in blueprint["chapter_outline"]) == blueprint["default_minutes"]
+        print("get_blueprint: 3 summaries and 3 detail results; top-level structured content")
         validation = (await client.call_tool("validate_lab_spec", {"spec": spec})).structured_content
         assert validation is not None
         assert validation["valid"] and not validation["errors"] and not validation["warnings"], validation

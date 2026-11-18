@@ -6,10 +6,12 @@ from time import perf_counter
 
 import fastmcp
 from fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 from starlette.middleware import Middleware
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from studio.tools.formats import list_session_formats
+from studio.tools.blueprints import get_blueprint
 from studio.tools.rendering import render_lab_page
 from studio.tools.validation import get_lab_spec_schema, validate_lab_spec
 
@@ -21,6 +23,7 @@ mcp = FastMCP(
     tasks=False,
     instructions=(
         "Provide consistent training formats and a spec-first lab pipeline for Cowork skills. "
+        "Call get_blueprint if a workshop shape is needed. "
         "Call get_lab_spec_schema, draft a LabSpec, validate_lab_spec, then render_lab_page. "
         "Use fictional Zava-style scenarios only; never submit tenant data, "
         "real customer or person names, credentials, or secrets. "
@@ -28,6 +31,7 @@ mcp = FastMCP(
     ),
 )
 mcp.tool(list_session_formats, task=False)
+mcp.tool(get_blueprint, task=False, annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False))
 mcp.tool(get_lab_spec_schema, task=False)
 mcp.tool(validate_lab_spec, task=False)
 mcp.tool(render_lab_page, task=False)
