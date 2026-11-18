@@ -14,12 +14,11 @@ class SessionFormat(TypedDict):
     id: str
     name: str
     description: str
+    status: Literal["available", "coming_soon"]
     best_for: list[str]
     required_inputs: list[RequiredInput]
     default_duration_minutes: int
-    produced_by_skill: Literal[
-        "html-training-lab", "training-guide", "cowork-demo-pack"
-    ] | None
+    produced_by_skill: Literal["build-training-lab"] | None
 
 
 _DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "session_formats.json"
@@ -28,14 +27,15 @@ with _DATA_PATH.open(encoding="utf-8") as data_file:
 
 
 def list_session_formats(id: str | None = None) -> list[SessionFormat]:
-    """Return a JSON list of available Cowork training session formats.
+    """Return a JSON list of available and planned Cowork training formats.
 
     Call before choosing a format or gathering inputs for a training skill.
     Each item includes id, name, description, best_for, required_inputs
-    (name, description, example), default_duration_minutes, and produced_by_skill.
+    (name, description, example), default_duration_minutes, status, and produced_by_skill.
+    Only html_lab is available, through the shipped build-training-lab skill.
+    Other formats are coming_soon with no skill; do not offer them as available.
     Omit id to return all formats. Supply an exact, case-sensitive id to return
-    a one-item list. An unknown id raises an error. A null produced_by_skill
-    means no dedicated skill is assigned yet. This tool returns metadata only;
+    a one-item list. An unknown id raises an error. This tool returns metadata only;
     it does not write content, create files, or save or send anything.
     """
     formats = _SESSION_FORMATS

@@ -36,8 +36,24 @@ with (Path(__file__).resolve().parent.parent / "data" / "real_brand_denylist.jso
 ) as data_file:
     _REAL_BRANDS: frozenset[str] = frozenset(name.casefold() for name in json.load(data_file))
 
-_NUMBERS = re.compile(r"\d|\b(?:numbers?|totals?)\b", re.I)
-_RISK_WORDS = re.compile(r"\d|\b(?:numbers?|totals?|forecasts?|variances?|contracts?)\b", re.I)
+_DIGITS = r"\b\d+(?:[.,]\d+)*\b"
+_UNITS = (
+    r"units?|items?|orders?|packs?|cases?|products?|sales|dollars?|euros?|pounds?|"
+    r"USD|EUR|GBP|CAD|AUD|kg|g|mg|km|cm|mm|lbs?|liters?|litres?|"
+    r"hours?|days?|weeks?|months?|minutes?|seconds?"
+)
+_QUANTITIES = re.compile(
+    rf"[$\u00a3\u20ac]\s*\d|\b(?:USD|EUR|GBP|CAD|AUD)\s*\d|"
+    rf"{_DIGITS}\s*(?:%|\b(?:percent|percentage|{_UNITS})\b)", re.I,
+)
+_NUMBER_VALUES = re.compile(
+    rf"{_DIGITS}|\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|"
+    r"eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
+    r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion)\b", re.I,
+)
+_CALCULATIONS = re.compile(r"\b(?:calculate|divide|multiply|sum|total|cost|rate)\b", re.I)
+_MEASURES = re.compile(rf"\b(?:{_UNITS}|revenue|profit|margin|balance|inventory|quantity|amount|values?)\b", re.I)
+_RISK_WORDS = re.compile(r"\b(?:forecasts?|variances?|contracts?)\b", re.I)
 # Literal, case-insensitive authoring hints; the space in "consume " avoids "consumer".
 _LEARNER_VOICE_TERMS = (
     "MCP server", "consume ", "tenant path", "do not claim", "if supplied", "JSON", "schema",
@@ -46,6 +62,14 @@ _RESERVED_IDS = frozenset({
     "overview", "setup", "capstone", "agenda", "files", "story-map", "troubleshooting",
     "glossary", "disclaimer",
 })
+
+
+def _needs_numeric_evidence(text: str) -> bool:
+    # Named operands also count: "divide on-hand units by weekly sales".
+    return bool(
+        _QUANTITIES.search(text)
+        or (_CALCULATIONS.search(text) and (_NUMBER_VALUES.search(text) or _MEASURES.search(text)))
+    )
 
 
 def get_lab_spec_schema() -> dict[str, Any]:
@@ -197,9 +221,22 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
                 check_voice(prompt.label, f"{step_path}.prompts.{prompt_index}.label")
                 if len(prompt.text.strip()) < 60:
                     issue(warnings, "short_prompt", prompt_path, "Prompt is under 60 characters; add task, context, and output requirements.")
-                if _NUMBERS.search(prompt.text) and (step.expected is None or not step.expected.key_facts):
-                    issue(warnings, "missing_key_facts", prompt_path, f"Step '{step.id}' mentions numbers or totals but supplies no expected key facts.")
-            if any(_RISK_WORDS.search(prompt.text) for prompt in step.prompts) and not any(
+            # Challenge tasks already have a required answer instead of key facts.
+            evidence_fields = [
+                (f"{step_path}.{field}", getattr(step, field))
+                for field in ("title", "goal", "uses", "intro", "fallback", "carries_forward")
+            ]
+            evidence_fields.extend(
+                (f"{step_path}.prompts.{index}.text", prompt.text)
+                for index, prompt in enumerate(step.prompts)
+            )
+            numerical_fields = [
+                path for path, text in evidence_fields if text is not None and _needs_numeric_evidence(text)
+            ]
+            if step.expected is None or not step.expected.key_facts:
+                for field_path in numerical_fields:
+                    issue(warnings, "missing_key_facts", field_path, f"Step '{step.id}' uses quantities or calculations but supplies no expected key facts.")
+            if (numerical_fields or any(_RISK_WORDS.search(prompt.text) for prompt in step.prompts)) and not any(
                 callout.type in {"warning", "important"} for callout in step.callouts
             ):
                 issue(warnings, "missing_risk_callout", f"{step_path}.callouts", f"Step '{step.id}' discusses numerical or financial details; add a warning or important callout.")

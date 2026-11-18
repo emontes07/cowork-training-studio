@@ -154,7 +154,7 @@ In the existing server virtual environment, install the separate, pinned
 ```
 
 Build against the **Azure URL**, not an expiring tunnel.
-The ZIP lands at `dist/cowork-training-studio-0.1.1.zip`; `--out <directory>`
+The ZIP lands at `dist/cowork-training-studio-0.1.2.zip`; `--out <directory>`
 changes the output directory. The script prints its SHA-256 and root-level file
 list, fetches the live server's four tool descriptions/schemas, and generates
 the original TS icons with Pillow. No tool catalog is hand-written.
@@ -179,11 +179,17 @@ not prove tenant upload permission or successful Cowork execution.
 The manifest uses `/mcp` without a trailing slash; either endpoint now works
 without redirecting. Keep the same manifest ID when rebuilding.
 
+The [build-training-lab skill](../plugin/skills/build-training-lab/SKILL.md)
+offers practice files after saving the exact returned HTML. Cowork creates and
+re-reads those files, checking fictional numbers, verbatim quoted key facts
+and section numbers, chapter-start checkpoints, and separate facilitator keys.
+The server does not create or save those files.
+
 ## Cowork checklist
 
 | Test | Prompt/action | Pass condition |
 | --- | --- | --- |
-| A | "List the session formats you support" | Four formats returned: HTML lab, Word guide, demo pack, prompt-a-thon. |
+| A | "List the session formats you support" | Four formats returned; only HTML lab is available via build-training-lab. Word guide, demo pack and prompt-a-thon are marked coming soon. |
 | B | "Build me a 30-minute, 2-chapter story lab for Copilot in Excel for a fictional bakery chain; validate it, then render it and save the page to my files" | Zero validation errors; Cowork saves the page; the saved HTML opens offline. |
 | C | During B, inspect the save step and record how Cowork handles the HTML. | Record whether it writes the tool result directly, retypes/reconstructs the HTML, or the behavior cannot be determined. Do not infer this from MCP smoke success. |
 
@@ -191,9 +197,12 @@ Observed: tunnel and Azure remote MCP smoke passed; golden HTML matched at
 84,022 bytes. The 0.1.0 tunnel plugin installed and its connector showed
 "available", but Cowork loaded none of its tools. Logs contained redirect-only
 requests, but without timestamps/user-agent they cannot establish Cowork
-attribution. Version 0.1.1 uses Azure, redirect-free endpoints and simplified
-schemas; **Cowork A/B/C must still be retested**. Direct-write versus retyping
-is pending the learner's Cowork run; no content-saving code was added.
+attribution. Version 0.1.1 completed a real 60-minute Cowork lab run:
+specification, three validation rounds ending at zero errors/warnings, render
+and save. Cowork had to parse the render result as text. Version 0.1.2 exposes
+render fields at the top level of structured content while retaining a text
+fallback. **Retest direct-write behavior and the practice-file offer with 0.1.2**;
+no server-side content-saving code was added.
 
 ## Stop
 

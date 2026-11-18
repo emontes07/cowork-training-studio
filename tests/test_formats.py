@@ -30,6 +30,7 @@ def test_catalog_is_complete_and_json_serializable():
             "id",
             "name",
             "description",
+            "status",
             "best_for",
             "required_inputs",
             "default_duration_minutes",
@@ -39,18 +40,45 @@ def test_catalog_is_complete_and_json_serializable():
         assert item["best_for"] and all(item["best_for"])
         assert isinstance(item["default_duration_minutes"], int)
         assert item["default_duration_minutes"] > 0
-        assert item["produced_by_skill"] in {
-            "html-training-lab",
-            "training-guide",
-            "cowork-demo-pack",
-            None,
-        }
+        assert item["status"] in {"available", "coming_soon"}
+        assert item["produced_by_skill"] in {"build-training-lab", None}
         assert item["required_inputs"]
         input_names = [field["name"] for field in item["required_inputs"]]
         assert len(input_names) == len(set(input_names))
         for field in item["required_inputs"]:
             assert set(field) == {"name", "description", "example"}
             assert all(isinstance(value, str) and value for value in field.values())
+
+
+def test_format_skills_are_shipped_and_planned_formats_are_unavailable():
+    skills = Path(__file__).resolve().parents[1] / "plugin" / "skills"
+    for item in list_session_formats():
+        skill = item["produced_by_skill"]
+        if skill is not None:
+            assert (skills / skill / "SKILL.md").is_file(), f"Unshipped skill: {skill}"
+            assert item["status"] == "available"
+        else:
+            assert item["status"] == "coming_soon"
+            assert "not available yet; planned" in item["description"].casefold()
+    assert list_session_formats("html_lab")[0]["produced_by_skill"] == "build-training-lab"
+    assert all(
+        list_session_formats(identifier)[0]["produced_by_skill"] is None
+        for identifier in ("word_guide", "demo_pack", "prompt_a_thon")
+    )
+
+
+@pytest.mark.parametrize("id", [None, "html_lab"])
+def test_format_catalog_satisfies_live_mcp_output_schema(id):
+    from fastmcp import Client
+    from main import mcp
+
+    async def check():
+        async with Client(mcp) as client:
+            result = await client.call_tool_mcp("list_session_formats", {"id": id})
+            assert result.isError is False
+            assert result.structuredContent == {"result": list_session_formats(id)}
+
+    asyncio.run(check())
 
 
 @pytest.mark.parametrize("id", ["html_lab", "word_guide", "demo_pack", "prompt_a_thon"])
@@ -162,8 +190,7 @@ def test_http_aliases_use_stateless_transport(monkeypatch, transport, port):
     server.main()
 
     middleware = calls[0].pop("middleware")
-    assert len(middleware) == 1
-    assert middleware[0].cls is server.MCPPathAlias
+    assert [item.cls for item in middleware] == [server.RequestLogging, server.MCPPathAlias]
     assert calls == [
         {
             "transport": "streamable-http",
@@ -171,7 +198,7 @@ def test_http_aliases_use_stateless_transport(monkeypatch, transport, port):
             "port": 8000 if port is None else int(port),
             "path": "/mcp",
             "stateless_http": True,
-            "uvicorn_config": {"timeout_graceful_shutdown": 5},
+            "uvicorn_config": {"timeout_graceful_shutdown": 5, "access_log": False},
         }
     ]
 

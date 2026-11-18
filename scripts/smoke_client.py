@@ -69,11 +69,10 @@ async def smoke(url: str) -> None:
         assert validation["valid"] and not validation["errors"] and not validation["warnings"], validation
         print("validate_lab_spec:", json.dumps(validation["stats"], sort_keys=True))
         started = perf_counter()
-        envelope = (await client.call_tool("render_lab_page", {"spec": spec})).structured_content
+        rendered = (await client.call_tool("render_lab_page", {"spec": spec})).structured_content
         elapsed = perf_counter() - started
-        assert envelope is not None
-        # FastMCP wraps union return schemas in a structured-content result field.
-        rendered = envelope["result"]
+        assert rendered is not None
+        assert {"html", "filename", "stats", "warnings"} == set(rendered), "Render result must be top-level"
         assert rendered["html"].count("<html") == 1
         assert rendered["stats"] == validation["stats"]
         html_bytes = rendered["html"].encode("utf-8")
@@ -87,9 +86,8 @@ async def smoke(url: str) -> None:
         print(f"Render HTTP body: {wire_bytes:,} wire bytes (MCP/SSE included; headers/TLS excluded)")
         invalid = deepcopy(spec)
         del invalid["chapters"]
-        envelope = (await client.call_tool("render_lab_page", {"spec": invalid})).structured_content
-        assert envelope is not None
-        rejected = envelope["result"]
+        rejected = (await client.call_tool("render_lab_page", {"spec": invalid})).structured_content
+        assert rejected is not None
         assert rejected["errors"] and "html" not in rejected
         print("Invalid spec: rejected without HTML")
         print("PASS")
