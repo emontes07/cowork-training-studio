@@ -11,6 +11,13 @@ Never put real customer or tenant data, real person names, credentials, or
 secrets in specs, fixtures, examples, logs, or issue reports. Use wholly fictional
 Zava-style brands and generic role labels instead.
 
+DemoPackSpec 1.0 has one narrow exception: public audience context may be supplied,
+with customer names only in audience/title/talk tracks and the filename prefix.
+The operating company and every seeded record must still be fictional; lab specs,
+fixtures, examples and issue reports remain wholly fictional. The server does
+not fetch public sources, and its name-matching warnings are not data-loss
+prevention or anonymization.
+
 Skills write content; Cowork's own tools handle saving and sending with the
 user's permissions. This server does not save generated content or access
 tenant services.

@@ -11,6 +11,10 @@ saved by the server. Plugin **0.1.3** adds three workshop blueprints and a check
 learner/facilitator pack workflow, backed by the five-tool Azure server.
 Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
 
+M5a adds the server-only **DemoPackSpec 1.0** pipeline below: eight tools locally,
+but Azure and plugin 0.1.3 still expose the five M4b tools. `demo_pack` remains
+`coming_soon` until the M5b skill/release; this checkpoint is not deployed.
+
 No authentication, secrets, Microsoft Graph calls, telemetry integration,
 tenant-data access, or generated-content storage. Use fictional Zava-style
 scenarios only. This unauthenticated scaffold is for local/trusted testing,
@@ -146,6 +150,55 @@ breaks, and each lab's chapters total its own duration. Build each as a separate
 `html_lab`; the closing challenge moves to `prompt_a_thon` only once that format
 ships. The optional shared-skill/agent rung has a sharing-plan fallback; no
 tenant capabilities are assumed.
+
+## Demo-pack pipeline (M5a, local only)
+
+1. Call `get_demo_pack_schema` and draft `schema_version: "1.0"` with
+   `mode: "function_pack"` or `"prompt_pack"`.
+2. Call `validate_demo_pack(spec)`: `{valid, errors, warnings, stats}`.
+3. Call `render_demo_guide(spec)`: `{html, filename, readme_md, stats, warnings}`.
+   Invalid specs return `{errors, stats, warnings}` without output assets.
+
+All three tools return top-level structured content and equivalent JSON text.
+`readme_md` is content for `00_DEMO_README.md`; the HTML filename is
+`<prefix>-demo-guide.html`, or a title slug when no prefix is present.
+The server saves nothing, fetches no public sources, and creates/sends no files,
+email, chats or calendar items. Inputs must be built fully before the prompt
+pack, never in parallel; the future skill owns those operations.
+
+The strict contract reuses LabSpec's typed `KeyFact`, safe relative/HTTPS hrefs,
+voice lint, numeric-evidence heuristic, sensitive-domain predicates and escaped
+templates. Structural errors cover all ID references, duplicate IDs, unsafe URLs,
+conditional prefixes/source prompts, function-pack filename prefixes, scenario
+counts and the four required output formats. `scenario_count` is optional;
+function packs default to four. Prefixes are required for function packs or a
+named audience, otherwise optional. A prompt pack retains `source_prompt`
+verbatim. Missing fact URLs/evidence are permitted so quality warnings can explain
+the gap; supplied URLs and references must be valid.
+
+Warnings cover talk tracks outside 150-300 words, missing/unburied payoffs,
+unused/evidence-free files, cast/tension quality and dates, ungrounded or repeated
+context, customer names in invented records, repeated functions/prompts, seeded
+item limits/labels, learner voice, sensitive domains, numeric evidence, duration
+totals and disclaimers. Each includes a field path and one-line fix; warnings do
+not block rendering. Customer matching normalizes punctuation/case and checks
+close spellings, not acronyms, affiliations or semantic identity. These checks
+are authoring heuristics, not data-loss prevention or verification of file contents.
+
+All people and seeded data must be fictional, including the operating company.
+Only public customer names in audience/title/talk tracks and the filename prefix
+are permitted; a customer name plus "(demo data)" is not a fictional stand-in.
+LabSpec's fictional-only rules are unchanged. Public context facts and assumptions
+are shown separately. Seeded messages require a fictional sender label and are
+plans for the presenter's own mailbox/calendar only, never cross-user chat relay.
+
+The offline guide reuses lab styles/copy controls and keeps planted payoffs
+collapsed even under Expand all. **Printing includes presenter notes**; hidden
+content is not access control. Only attendee file hrefs become links; presenter
+files never link. Source files are not bundled or fetched.
+The [function fixture](tests/fixtures/demo_pack_function.json) and
+[prompt fixture](tests/fixtures/demo_pack_prompt.json) both validate at 0/0.
+Approaches are credited in [CREDITS.md](CREDITS.md) and every returned README.
 
 ## Spec-first lab pipeline
 
@@ -359,8 +412,11 @@ With the HTTP server running in another terminal:
 python scripts/smoke_client.py
 ```
 
-This lists and calls all five tools, checks blueprint summaries/details, retrieves the v2 schema, validates/renders the golden
-spec, and verifies invalid input returns no HTML. It never saves the response.
+This lists and calls all eight local tools, checks blueprint summaries/details,
+validates/renders the golden lab and both demo fixtures, and verifies invalid
+lab input returns no HTML. It never saves the response. This checkout's smoke
+client and catalog builder expect eight tools; the five-tool M4b Azure deployment
+will not satisfy them until M5b. Do not rebuild plugin 0.1.3 from this checkout.
 
 Docker must be installed with a running engine for the build. To run the image:
 

@@ -12,7 +12,7 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M4b
+## Current checkpoint: M5a
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
@@ -36,6 +36,14 @@ deploys 2.1 to Azure and releases plugin **0.1.3** with the same manifest ID.
 The 137-line skill now fixes every warning, builds checked learner/facilitator
 packs with Cowork's own tools, and offers a ZIP after saving the exact HTML.
 Local tests: 254 before M4b, 268 after. Both fixtures validate with zero issues.
+
+M5a adds **DemoPackSpec 1.0**, `get_demo_pack_schema`, `validate_demo_pack` and
+`render_demo_guide`: eight tools locally, still five on Azure revision `0000004`.
+Tests: 268 before, 352 after; both lab and both demo fixtures are 0/0, and the
+lab golden remains byte-identical. Demo results are top-level objects with
+matching JSON text; rendering returns HTML and `readme_md`, never saved assets.
+`demo_pack` remains `coming_soon`; no deployment or plugin 0.1.3 change in M5a.
+See [credits](CREDITS.md) for the approved source-approach attribution.
 
 `get_blueprint()` returns `{blueprints: [...]}` summaries; an exact
 `blueprint_id` returns detail fields directly, never under `result`. Unknown IDs
@@ -148,8 +156,11 @@ judgments. Validation and rendering must remain separate, testable operations.
   records, generated file storage, or persisted request content. Ephemeral
   in-process memory is allowed; nothing from requests survives a restart.
   The packaged format catalog is read-only application data, not customer storage.
-- No tenant data: never submit real documents, mail, calendar content, customer
-  names, person names, credentials, or secrets.
+- No tenant data: never submit real documents, mail, calendar content, person
+  names, credentials, or secrets. LabSpecs remain wholly fictional.
+  DemoPackSpec alone permits public customer names in audience/title/talk tracks
+  and the filename prefix, never seeded records; its company must be a fictional
+  stand-in. Public context is author-supplied metadata, not fetched by the server.
 - Fictional data only: use invented Zava-style brands and generic role labels.
   Do not disguise real customer or personal data as a fictional scenario.
 - No Microsoft Graph calls, outbound business-service calls, secrets, telemetry,
@@ -174,7 +185,9 @@ judgments. Validation and rendering must remain separate, testable operations.
 | M4a | Implemented: additive LabSpec 2.1, typed facts, consistency warnings, and file links. |
 | M4b | Implemented: five-tool server, tested blueprint agendas, facilitator-pack skill, plugin 0.1.3 and Azure redeployment. |
 | M4 remaining | ThreadScript schema. |
-| M5 | Cowork plugin packaging with [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
+| M5a | Implemented locally: DemoPackSpec 1.0, structural/quality validator, presenter HTML/README, fictional fixtures and eight-tool catalog. No deployment/release. |
+| M5b | Planned: demo-pack skill, availability switch, deployment and plugin release. |
+| Future | [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
 
 ## Layout
 

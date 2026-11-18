@@ -48,6 +48,13 @@ implemented alongside the format catalog and the M4b read-only blueprint tool.
 | `get_lab_spec_schema` | M4a, v2.1 | None | JSON Schema for drafting fictional LabSpec 2.0/2.1; v1 is rejected. |
 | `validate_lab_spec` | M3a, v2 | `spec` object | `{valid, errors, warnings, stats}`; call before rendering. |
 | `render_lab_page` | M3a, v2 | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
+| `get_demo_pack_schema` | M5a, local only | None | DemoPackSpec 1.0 JSON Schema for fictional function/prompt packs. |
+| `validate_demo_pack` | M5a, local only | `spec` object | `{valid, errors, warnings, stats}` with paths and one-line fixes. |
+| `render_demo_guide` | M5a, local only | `spec` object | `{html, filename, readme_md, stats, warnings}`; failures return `{errors, stats, warnings}` without assets. |
+
+M5a has eight local tools, with top-level demo objects plus matching JSON text.
+Azure revision `0000004` and plugin 0.1.3 remain at five tools; no M5a deployment
+or release has occurred.
 
 Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
 (each with `name`, `description`, and `example`), `default_duration_minutes`,
@@ -150,6 +157,27 @@ skill. A saved-prompt fallback covers environments without skill creation.
 
 ## Runtime
 
+### Demo-pack boundary
+
+[DemoPackSpec](../server/studio/schemas/demo_pack.py) reuses the strict LabSpec
+contract, typed facts and URL policy. [Demo validation](../server/studio/tools/demo_validation.py)
+checks references and mode-dependent requirements, then emits nonblocking quality
+warnings using shared voice/numeric/sensitive-domain predicates. Public-context
+URLs are metadata only; no source is fetched or fact verified.
+
+[The demo renderer](../server/studio/tools/demo_rendering.py) overlays a new
+template on the existing autoescaped Jinja environment, theme and copy/navigation
+script. HTML is self-contained; README text escapes Markdown/HTML. Only attendee
+files link. Payoffs are collapsed, remain hidden under Expand all and appear in
+print; this is presentation, not access control. Seeded items are inert lists
+with offsets relative to `as_of_date`, intended only for the presenter's own
+mailbox/calendar if a future skill receives permission. There is no chat kind.
+Cowork must finish inputs before building prompts, never in parallel.
+See [contract/check scope](../README.md#demo-pack-pipeline-m5a-local-only) and
+[credits](../CREDITS.md).
+
+### Transport and process
+
 [The entrypoint](../server/main.py) registers an ordinary, directly importable
 [tool function](../server/studio/tools/formats.py). The bundled JSON catalog loads
 once per process using a module-relative path. Each call returns a deep copy so
@@ -188,8 +216,11 @@ the metadata log records a 500 if no response status was sent.
   Returned copies are not retained. Ephemeral in-process framework bookkeeping
   is allowed; no request data survives a restart and no runtime disk, database,
   or external storage backend is used.
-- Do not submit tenant documents, real customer/person names, emails, calendars,
-  credentials, or other sensitive material. The pipeline accepts author-supplied fictional
+- Do not submit tenant documents, real person names, emails, calendars,
+  credentials, or other sensitive material. LabSpecs permit no real customer names.
+  DemoPackSpec permits public customer names only in audience/title/talk tracks
+  and the filename prefix, never seeded records or the operating company.
+  The pipeline accepts author-supplied fictional
   specs; neither the schema nor the small brand denylist is a data-loss-prevention
   or anonymization service.
 - All examples and future demo material must be fictional and use Zava-style
