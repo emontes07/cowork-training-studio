@@ -7,7 +7,6 @@ from typing import Literal, TypedDict
 class RequiredInput(TypedDict):
     name: str
     description: str
-    status: Literal["available", "coming_soon"]
     example: str
 
 
@@ -15,6 +14,7 @@ class SessionFormat(TypedDict):
     id: str
     name: str
     description: str
+    status: Literal["available", "coming_soon"]
     best_for: list[str]
     required_inputs: list[RequiredInput]
     default_duration_minutes: int

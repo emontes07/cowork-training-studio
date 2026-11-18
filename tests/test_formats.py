@@ -67,6 +67,20 @@ def test_format_skills_are_shipped_and_planned_formats_are_unavailable():
     )
 
 
+@pytest.mark.parametrize("id", [None, "html_lab"])
+def test_format_catalog_satisfies_live_mcp_output_schema(id):
+    from fastmcp import Client
+    from main import mcp
+
+    async def check():
+        async with Client(mcp) as client:
+            result = await client.call_tool_mcp("list_session_formats", {"id": id})
+            assert result.isError is False
+            assert result.structuredContent == {"result": list_session_formats(id)}
+
+    asyncio.run(check())
+
+
 @pytest.mark.parametrize("id", ["html_lab", "word_guide", "demo_pack", "prompt_a_thon"])
 def test_filter_returns_one_item_list(id):
     assert list_session_formats(id) == [
