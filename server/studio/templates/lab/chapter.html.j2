@@ -9,7 +9,7 @@
     <dl class="story">
       <div><dt>The story so far</dt><dd>{{ chapter.story_so_far }}</dd></div>
       <div><dt>Builds on</dt><dd>
-        {% for chapter_id in chapter.builds_on %}<a href="#{{ chapter_id }}">{{ chapters_by_id[chapter_id].title }}</a>{% if not loop.last %}; {% endif %}{% else %}{{ "Start of the story" if chapter_number == 1 else "No earlier chapter listed" }}{% endfor %}
+        {% for chapter_id in chapter.builds_on %}<a href="#{{ chapter_id }}">{{ chapters_by_id[chapter_id].title }}</a>{% if not loop.last %}, {% endif %}{% else %}{{ "Start of the story" if chapter_number == 1 else "No earlier chapter listed" }}{% endfor %}
       </dd></div>
       <div><dt>You will add</dt><dd>{{ chapter.you_will_add }}</dd></div>
     </dl>

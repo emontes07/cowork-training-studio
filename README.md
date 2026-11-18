@@ -153,8 +153,15 @@ is declared, chapters with fewer than two steps, numerical prompts without
 expected key facts, missing checkpoints from chapter three onward in sessions
 of at least 90 minutes, unused checkpoint/answer-key files, and chapter budgets
 more than 25% away from session duration. Short prompts, missing risk callouts,
-and the real-brand denylist remain quality warnings. Numeric rules also detect
-digits. These heuristics do not detect or anonymize customer data.
+and the real-brand denylist remain quality warnings. Numeric evidence rules
+look for digits with units/currency, percentages, or calculation words
+(`calculate`, `divide`, `multiply`, `sum`, `total`, `cost`, `rate`) alongside
+numbers or named quantities. Explicit arithmetic such as "divide on-hand units
+by weekly sales" counts even without a written number. Number words or output
+counts alone ("two questions", "one sentence", "3 questions") do not count.
+Checks cover prompts and step instructions. Challenge tasks have their own
+required answer; forecast/variance/contract risk callouts remain separate. These heuristics do
+not detect or anonymize customer data.
 
 The nonblocking `learner_voice` warning flags system wording using the single
 `_LEARNER_VOICE_TERMS` constant in [validation.py](server/studio/tools/validation.py):

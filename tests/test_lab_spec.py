@@ -151,18 +151,45 @@ def test_chapter_quality_warnings(minimal_spec, rule):
     assert codes(minimal_spec, "warnings") == {rule}
 
 
-@pytest.mark.parametrize("word", ["numbers", "totals", "730", "forecast", "variance", "contract"])
-def test_numeric_expected_and_risk_warnings(minimal_spec, word):
+@pytest.mark.parametrize("word", ["forecast", "variance", "contract"])
+def test_financial_risk_warnings(minimal_spec, word):
     step = minimal_spec["chapters"][0]["steps"][0]
     step["prompts"][0]["text"] += f" Review the {word}."
-    expected_codes = {"missing_risk_callout"}
-    if word in {"numbers", "totals", "730"}:
-        expected_codes.add("missing_key_facts")
-    assert codes(minimal_spec, "warnings") == expected_codes
-    step["expected"]["key_facts"] = ["The source is fictional; compare against the supplied evidence."]
+    assert codes(minimal_spec, "warnings") == {"missing_risk_callout"}
     for kind in ("warning", "important"):
         step["callouts"] = [{"type": kind, "text": "Verify source figures before using them."}]
         assert not codes(minimal_spec, "warnings")
+
+
+@pytest.mark.parametrize(("field", "text", "warns"), [
+    ("prompt", "what two questions should I ask", False),
+    ("prompt", "Summarize the result in one sentence.", False),
+    ("intro", "Review step 2 and suggest 3 questions about the numbers.", False),
+    ("prompt", "divide on-hand units by weekly sales", True),
+    ("intro", "Divide on-hand units by weekly sales.", True),
+    ("prompt", "Compare 40 units with the checked inventory.", True),
+    ("prompt", "Check the $250 budget and the 12.5% rate.", True),
+    ("prompt", "Calculate 12 divided by 3.", True),
+    ("prompt", "Calculate the sum of two values.", True),
+])
+def test_numeric_evidence_uses_quantities_and_calculations(minimal_spec, field, text, warns):
+    step = minimal_spec["chapters"][0]["steps"][0]
+    text += " Use the fictional practice workbook and explain the result clearly."
+    if field == "prompt":
+        step["prompts"][0]["text"] = text
+        path = "chapters.0.steps.0.prompts.0.text"
+    else:
+        step["intro"] = text
+        path = "chapters.0.steps.0.intro"
+    warnings = validate_lab_spec(minimal_spec)["warnings"]
+    assert {item["code"] for item in warnings} == (
+        {"missing_key_facts", "missing_risk_callout"} if warns else set()
+    )
+    if warns:
+        assert [item["path"] for item in warnings if item["code"] == "missing_key_facts"] == [path]
+        step["expected"]["key_facts"] = ["Check the result against the fictional source quantities."]
+        step["callouts"] = [{"type": "important", "text": "Verify the source and denominator."}]
+        assert not validate_lab_spec(minimal_spec)["warnings"]
 
 
 @pytest.mark.parametrize(("duration", "warns"), [(89, False), (90, True)])

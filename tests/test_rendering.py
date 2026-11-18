@@ -4,6 +4,7 @@ from copy import deepcopy
 from html.parser import HTMLParser
 import io
 import os
+import re
 import tempfile
 
 import pytest
@@ -93,6 +94,21 @@ def test_summary_counters_pluralize_singular_and_zero(minimal_spec):
     assert "2 steps / 1 prompt / 1 challenge" in html
     assert html.count("1 step / select to expand or collapse") == 2
     assert "1 steps" not in html and "1 prompts" not in html and "1 challenges" not in html
+
+
+def test_multiple_builds_on_links_have_only_comma_separators(minimal_spec):
+    chapter = deepcopy(minimal_spec["chapters"][1])
+    chapter["id"] = "chapter-3"
+    chapter["builds_on"] = ["chapter-1", "chapter-2"]
+    for index, step in enumerate(chapter["steps"]):
+        step["id"] = f"step-3-{index}"
+    minimal_spec["chapters"].append(chapter)
+    minimal_spec["chapters"][0]["title"] = "Start & review"
+    html = render_lab_page(minimal_spec)["html"]
+    builds_on = re.findall(r"<dt>Builds on</dt><dd>(.*?)</dd>", html, re.S)
+    assert builds_on[-1].strip() == (
+        '<a href="#chapter-1">Start &amp; review</a>, <a href="#chapter-2">Chapter 2</a>'
+    )
 
 
 def test_all_prompt_text_and_story_content_are_escaped(minimal_spec):
