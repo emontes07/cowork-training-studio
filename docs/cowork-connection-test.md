@@ -158,7 +158,7 @@ In the existing server virtual environment, install the separate, pinned
 ```
 
 Build against the **Azure URL**, not an expiring tunnel.
-The ZIP lands at `dist/cowork-training-studio-0.1.4.zip`; `--out <directory>`
+The ZIP lands at `dist/cowork-training-studio-0.1.5.zip`; `--out <directory>`
 changes the output directory. The script prints its SHA-256 and root-level file
 list, fetches the live server's eight tool descriptions/schemas, and generates
 the original TS icons with Pillow. No tool catalog is hand-written.
@@ -185,7 +185,7 @@ The manifest uses `/mcp` without a trailing slash; either endpoint now works
 without redirecting. Keep the same manifest ID when rebuilding.
 
 The [build-training-lab skill](../plugin/skills/build-training-lab/SKILL.md) is
-141 lines (limit 150). It offers blueprint choices, writes LabSpec 2.1 and fixes
+143 lines (limit 150). It offers blueprint choices, writes LabSpec 2.1 and fixes
 all validation warnings. Cowork builds `learner/` sources/checkpoints and
 `facilitator/` keys/run-of-show notes, then adds learner-relative hrefs, validates
 and renders again, and saves the exact returned HTML at the pack root. It
@@ -193,21 +193,25 @@ re-reads every file, checks quote/clause placements and sections, verifies dates
 and calculations with code, reports counts/fixes and offers a ZIP.
 The server does not create files, mail, calendar items or ZIPs.
 
-The [build-demo-pack skill](../plugin/skills/build-demo-pack/SKILL.md) is 126 lines.
+The [build-demo-pack skill](../plugin/skills/build-demo-pack/SKILL.md) is 128 lines.
 It gathers inputs once, separates public facts/assumptions, requires 0/0, builds
 Office sources before the prompt pack, and saves the exact guide and README.
 Only `files/` is shared; guide/README/payoffs and `presenter/` stay private.
 Optional email/meeting seeding requires confirmation, targets only the presenter
 and never creates chats or sends to others. Both skills use discovered connector
-tool names exactly, verify saved files with code and offer a ZIP.
+tool names exactly, verify saved files with code and offer a ZIP. Both set
+`locale` from the content language (`es` for Spanish) and avoid numbered titles.
 
-M5b release verification: revision `0000005` serves 100% of traffic with all
-settings unchanged from `0000004` except the image/revision. The built 0.1.4 ZIP
-is **15,236 bytes**, SHA-256
-`161ec3012f47a3883b6efc6a508beb68219cbf67ba4b5e6a2b90b159fd6a85b8`.
+M5c release verification: revision `0000006` serves 100% of traffic with all
+settings unchanged from `0000005` except the image/revision. The built 0.1.5 ZIP
+is **15,370 bytes**, SHA-256
+`11e675eb7d77d6e847c7f8dec1e1ec0fe3cd329296f3148b70af2e5a25cfd581`.
 It has four root files (manifest, catalog and two icons) plus the two skill files.
 The manifest validates against the official Teams 1.28 schema; eight tools are
-sanitized and all four spec parameters remain plain objects. Local tests: 359.
+sanitized and all four spec parameters remain plain objects. Local tests: 395.
+Live checks cover Spanish rendering and title-numbering warnings. Browser checks
+cover Spanish copy success, reset, manual fallback and hidden presenter answers.
+The existing 0.1.4 ZIP remains unchanged.
 
 ## Cowork checklist
 
@@ -233,8 +237,10 @@ fallback. M4b's 0.1.3 release adds five-tool discovery, blueprints and the pack
 workflow; local and Azure smoke checks pass with the same golden bytes.
 M5b's 0.1.4 adds the demo skill and eight-tool deployment; local and live checks
 pass with all four fixtures at 0/0 and the same golden bytes.
+M5c's 0.1.5 adds Spanish labels and title-numbering guidance, preserving English
+lab/demo HTML and README bytes.
 **Test both skills' Office-file, direct-write, pack/ZIP and optional seeding
-workflows in Cowork with 0.1.4**; protocol and package checks do not prove those
+workflows in Cowork with 0.1.5**; protocol and package checks do not prove those
 live Cowork actions.
 
 ## Stop
