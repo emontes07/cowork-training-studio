@@ -14,6 +14,7 @@ from scripts import build_plugin as builder
 
 SOURCE = Path(__file__).resolve().parents[1] / "plugin"
 SKILL = "skills/build-training-lab/SKILL.md"
+DEMO_SKILL = "skills/build-demo-pack/SKILL.md"
 
 
 @pytest.fixture
@@ -37,6 +38,7 @@ def package_files(tools):
         "manifest.json": json.dumps(manifest).encode(),
         "mcp-tools.json": json.dumps({"tools": tools}).encode(),
         SKILL: (SOURCE / SKILL).read_bytes(),
+        DEMO_SKILL: (SOURCE / DEMO_SKILL).read_bytes(),
         **builder.generate_icons(),
     }
 
@@ -93,7 +95,7 @@ def test_manifest_text_length_boundaries(package_files, section, field, limit):
 
 @pytest.mark.parametrize("failure", [
     "json", "guid", "version", "connector_id", "connector_name",
-    "skill_path", "missing_skill", "front_matter", "skill_name", "skill_description", "long_skill",
+    "skill_path", "missing_skill", "missing_demo_skill", "front_matter", "skill_name", "skill_description", "long_skill",
 ])
 def test_invalid_manifest_and_skill_cases(package_files, failure):
     manifest = json.loads(package_files["manifest.json"])
@@ -111,6 +113,8 @@ def test_invalid_manifest_and_skill_cases(package_files, failure):
         manifest["agentSkills"][0]["folder"] = "../outside"
     elif failure == "missing_skill":
         del package_files[SKILL]
+    elif failure == "missing_demo_skill":
+        del package_files[DEMO_SKILL]
     elif failure == "front_matter":
         package_files[SKILL] = b"# No front matter\n"
     elif failure == "skill_name":
@@ -126,9 +130,10 @@ def test_invalid_manifest_and_skill_cases(package_files, failure):
 
 
 @pytest.mark.parametrize("line_count", [150, 151])
-def test_skill_line_limit(package_files, line_count):
-    lines = package_files[SKILL].decode().splitlines()
-    package_files[SKILL] = ("\n".join(lines + ["Practice detail."] * (line_count - len(lines))) + "\n").encode()
+@pytest.mark.parametrize("skill", [SKILL, DEMO_SKILL])
+def test_skill_line_limit(package_files, line_count, skill):
+    lines = package_files[skill].decode().splitlines()
+    package_files[skill] = ("\n".join(lines + ["Practice detail."] * (line_count - len(lines))) + "\n").encode()
     if line_count == 150:
         builder.validate_package(package_files)
     else:
@@ -197,7 +202,7 @@ def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools, raw_s
     out = tmp_path / "dist"
     archive_path = asyncio.run(builder.build_plugin("https://mcp.example.test", out, raw_schemas=raw_schemas))
     with ZipFile(archive_path) as archive:
-        assert set(archive.namelist()) == {"manifest.json", "mcp-tools.json", "color.png", "outline.png", SKILL}
+        assert set(archive.namelist()) == {"manifest.json", "mcp-tools.json", "color.png", "outline.png", SKILL, DEMO_SKILL}
         assert json.loads(archive.read("mcp-tools.json")) == {
             "tools": tools if raw_schemas else builder.sanitize_tools(tools),
         }
@@ -205,7 +210,7 @@ def test_zip_root_layout_and_stubbed_catalog(monkeypatch, tmp_path, tools, raw_s
         assert all(content == (out / name).read_bytes() for name, content in files.items())
         builder.validate_package(files)
     assert calls == ["https://mcp.example.test/mcp"]
-    assert archive_path.name == "cowork-training-studio-0.1.3.zip"
+    assert archive_path.name == "cowork-training-studio-0.1.4.zip"
 
 
 def test_sanitizer_resolves_nested_refs_and_preserves_constraints():
