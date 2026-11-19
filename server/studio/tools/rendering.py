@@ -7,6 +7,7 @@ import unicodedata
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from studio.schemas.lab_spec import LabSpec
+from studio.strings import STRINGS
 from studio.tools.validation import Issue, Stats, validate_lab_spec
 
 
@@ -30,13 +31,7 @@ _TEMPLATES = Environment(
     lstrip_blocks=True,
     keep_trailing_newline=True,
 )
-_FILE_LABELS = {
-    "source": "Source files",
-    "checkpoint": "Checkpoints - Only if you fall behind",
-    "answer_key": "Answer keys",
-    "worksheet": "Worksheets",
-    "extra": "Extra references",
-}
+_FILE_KINDS = ("source", "checkpoint", "answer_key", "worksheet", "extra")
 
 
 def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> RenderResult:
@@ -57,6 +52,7 @@ def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> Render
             "warnings": result["warnings"],
         }
     lab_spec = LabSpec.model_validate(spec)
+    ui = STRINGS[lab_spec.locale]
     chosen_theme = lab_spec.theme_id if theme_id is None else theme_id
     if chosen_theme not in _THEMES:
         return {
@@ -75,17 +71,18 @@ def render_lab_page(spec: dict[str, Any], theme_id: str | None = None) -> Render
         elapsed += chapter.minutes
     html = _TEMPLATES.get_template("base.html.j2").render(
         spec=lab_spec,
+        ui=ui,
         theme=_THEMES[chosen_theme],
         stats=result["stats"],
         time_ranges=time_ranges,
         chapters_by_id={chapter.id: chapter for chapter in lab_spec.chapters},
         files_by_id={file.id: file for file in lab_spec.files},
         file_groups=[
-            (label, [
+            (ui[f"file_{kind}"], [
                 file for file in lab_spec.files
                 if ("answer_key" if file.audience == "facilitator" else file.kind) == kind
             ])
-            for kind, label in _FILE_LABELS.items()
+            for kind in _FILE_KINDS
         ],
     )
     return {

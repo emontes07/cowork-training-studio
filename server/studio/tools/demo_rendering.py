@@ -7,6 +7,7 @@ import unicodedata
 from jinja2 import FileSystemLoader
 
 from studio.schemas.demo_pack import DemoPackSpec
+from studio.strings import STRINGS
 from studio.tools.demo_validation import DemoStats, talk_track_words, validate_demo_pack
 from studio.tools.rendering import _TEMPLATES, _THEMES
 from studio.tools.validation import Issue
@@ -25,7 +26,6 @@ _TEMPLATE_ROOT = Path(__file__).resolve().parent.parent / "templates"
 _DEMO_TEMPLATES = _TEMPLATES.overlay(loader=FileSystemLoader([
     _TEMPLATE_ROOT / "demo", _TEMPLATE_ROOT / "lab",
 ]))
-_CREDITS = "Demo pack approach adapted from work by Shailesh Mittal and Giovanna; see CREDITS.md"
 
 
 def _md(text: str) -> str:
@@ -34,55 +34,62 @@ def _md(text: str) -> str:
 
 
 def _readme(pack: DemoPackSpec) -> str:
+    ui = STRINGS[pack.locale]
     cast = {member.id: member for member in pack.cast}
     lines = [
         f"# {_md(pack.title)}",
         "",
-        f"Scenario: {_md(pack.company.name)} - {_md(pack.company.description)}",
+        f"{ui['scenario_label']} {_md(pack.company.name)} - {_md(pack.company.description)}",
         "",
-        "## Files",
+        f"## {ui['files']}",
         "",
-        "| File | Purpose | Audience |",
+        f"| {ui['file']} | {ui['purpose']} | {ui['audience']} |",
         "| --- | --- | --- |",
-        *[f"| {_md(file.filename)} | {_md(file.purpose)} | {file.audience} |" for file in pack.files],
+        *[f"| {_md(file.filename)} | {_md(file.purpose)} | {ui[f'audience_{file.audience}']} |" for file in pack.files],
         "",
-        "## Seeded items (presenter mailbox/calendar only; not created or sent)",
+        f"## {ui['readme_seeded']}",
         "",
         *[
-            f"- {item.kind}: {_md(item.subject)}; fictional sender {_md(cast[item.from_cast_id].name)}, "
-            f"{_md(cast[item.from_cast_id].role)}; day offset {item.day_offset} from {pack.as_of_date}."
+            f"- {ui[f'kind_{item.kind}']}: {_md(item.subject)}; {ui['fictional_sender']} {_md(cast[item.from_cast_id].name)}, "
+            f"{_md(cast[item.from_cast_id].role)}; {ui['day_offset']} {item.day_offset} {ui['from']} {pack.as_of_date}."
             for item in pack.seeded_items
         ],
         "",
-        "## Fictional cast",
+        f"## {ui['fictional_cast']}",
         "",
-        *[f"- {_md(member.name)}: {_md(member.role)} (external: {member.external}; executive: {member.executive})." for member in pack.cast],
+        *[
+            f"- {_md(member.name)}: {_md(member.role)} "
+            f"({ui['external_lower']}: {ui['bool_true'] if member.external else ui['bool_false']}; "
+            f"{ui['executive_lower']}: {ui['bool_true'] if member.executive else ui['bool_false']})."
+            for member in pack.cast
+        ],
         "",
-        "## Presenter-only planted payoffs",
+        f"## {ui['readme_payoffs']}",
         "",
         *[
             f"- {_md(payoff.id)} / {_md(payoff.scenario_id)}: {_md(payoff.finding)} "
-            f"(evidence file: {_md(payoff.evidence_file_id)}; buried: {payoff.buried})."
+            f"({ui['evidence_file']}: {_md(payoff.evidence_file_id)}; "
+            f"{ui['buried']}: {ui['bool_true'] if payoff.buried else ui['bool_false']})."
             for payoff in pack.payoffs
         ],
         "",
-        "## Three-step demo flow",
+        f"## {ui['demo_flow']}",
         "",
-        "1. With presenter permission, build and check all fictional input files fully before the prompt pack; never in parallel.",
-        "2. Follow the run of show, run each scenario prompt, and compare outputs with the planted evidence.",
-        "3. Use the follow-ups, debrief the findings, then complete cleanup in the presenter workspace.",
+        f"1. {ui['flow_prepare']}",
+        f"2. {ui['flow_run']}",
+        f"3. {ui['flow_finish']}",
         "",
-        "## Cleanup",
+        f"## {ui['cleanup']}",
         "",
         *[f"- [ ] {_md(action)}" for action in pack.cleanup],
         "",
-        "## Disclaimer",
+        f"## {ui['disclaimer']}",
         "",
         _md(pack.disclaimer),
         "",
-        "## Credits",
+        f"## {ui['credits']}",
         "",
-        _CREDITS,
+        ui["credits_line"],
         "",
     ]
     return "\n".join(lines)
@@ -106,7 +113,7 @@ def render_demo_guide(spec: dict[str, Any]) -> DemoRenderResult:
     slug = re.sub(r"[^a-z0-9]+", "-", title_ascii.lower()).strip("-") or "demo"
     words = {scenario.id: talk_track_words(scenario.talk_track) for scenario in pack.scenarios}
     page = _DEMO_TEMPLATES.get_template("guide.html.j2").render(
-        spec=pack, theme=_THEMES["microsoft"], stats=validation["stats"],
+        spec=pack, ui=STRINGS[pack.locale], theme=_THEMES["microsoft"], stats=validation["stats"],
         words=words, seconds={identifier: round(count * 60 / 150, 1) for identifier, count in words.items()},
         files={file.id: file for file in pack.files},
         cast={member.id: member for member in pack.cast},

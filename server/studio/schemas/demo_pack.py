@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 from pydantic import AfterValidator, Field
 
-from studio.schemas.lab_spec import Contract, KeyFact, LabFile, Minutes, PromptText, SafeURL, Slug, Text
+from studio.schemas.lab_spec import Contract, KeyFact, LabFile, Locale, Minutes, PromptText, SafeURL, Slug, Text
 
 
 def iso_date(value: str) -> str:
@@ -140,6 +140,7 @@ class DemoPackSpec(Contract):
     """DemoPackSpec 1.0; fictional records with separate audience context."""
 
     schema_version: Literal["1.0"]
+    locale: Locale = "en"
     mode: Literal["function_pack", "prompt_pack"]
     title: Text
     as_of_date: DateText
