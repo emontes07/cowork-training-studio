@@ -4,16 +4,17 @@ A stateless MCP server for Microsoft 365 Copilot Cowork training workflows.
 **Skills own judgment, MCP owns consistency.** Skills write content; Cowork's
 own tools save and send it.
 
-M4b ships LabSpec **2.1**, retaining **2.0** support:
+LabSpec **2.1** retains **2.0** support:
 `get_lab_spec_schema` -> `validate_lab_spec` -> `render_lab_page`.
 The result is one self-contained HTML page, returned to Cowork rather than
-saved by the server. Plugin **0.1.3** adds three workshop blueprints and a checked
-learner/facilitator pack workflow, backed by the five-tool Azure server.
+saved by the server. Plugin **0.1.4** includes three workshop blueprints, the
+checked learner/facilitator lab workflow, and the new demo-pack skill.
 Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
 
-M5a adds the server-only **DemoPackSpec 1.0** pipeline below: eight tools locally,
-but Azure and plugin 0.1.3 still expose the five M4b tools. `demo_pack` remains
-`coming_soon` until the M5b skill/release; this checkpoint is not deployed.
+M5b deploys the **DemoPackSpec 1.0** pipeline below: eight tools locally and on
+Azure revision `0000005`. `demo_pack` is available via `build-demo-pack`, with
+fictional Office inputs, checked payoffs, a presenter guide and optional self-only
+seeding. The server never performs the skill's file or mailbox operations.
 
 No authentication, secrets, Microsoft Graph calls, telemetry integration,
 tenant-data access, or generated-content storage. Use fictional Zava-style
@@ -114,7 +115,8 @@ Each entry includes `id`, `name`, `description`, `best_for`,
 `required_inputs` (a list of `name`, `description`, `example` objects),
 `default_duration_minutes`, `status`, and `produced_by_skill`.
 `html_lab` is `available` through the shipped `build-training-lab` skill.
-`word_guide`, `demo_pack`, and `prompt_a_thon` are `coming_soon`, not available
+`demo_pack` is `available` through `build-demo-pack`. The existing MCP `result`
+wrapper is retained for older plugins. `word_guide` and `prompt_a_thon` are `coming_soon`, not available
 yet, with `produced_by_skill: null`. Planned formats remain discoverable but
 must not be offered as ready-to-use capabilities.
 
@@ -151,7 +153,7 @@ breaks, and each lab's chapters total its own duration. Build each as a separate
 ships. The optional shared-skill/agent rung has a sharing-plan fallback; no
 tenant capabilities are assumed.
 
-## Demo-pack pipeline (M5a, local only)
+## Demo-pack pipeline
 
 1. Call `get_demo_pack_schema` and draft `schema_version: "1.0"` with
    `mode: "function_pack"` or `"prompt_pack"`.
@@ -160,11 +162,22 @@ tenant capabilities are assumed.
    Invalid specs return `{errors, stats, warnings}` without output assets.
 
 All three tools return top-level structured content and equivalent JSON text.
-`readme_md` is content for `00_DEMO_README.md`; the HTML filename is
+The skill saves `readme_md` unchanged as `README.md`; the HTML filename is
 `<prefix>-demo-guide.html`, or a title slug when no prefix is present.
 The server saves nothing, fetches no public sources, and creates/sends no files,
 email, chats or calendar items. Inputs must be built fully before the prompt
-pack, never in parallel; the future skill owns those operations.
+pack, never in parallel; `build-demo-pack` owns those operations with permission.
+
+The [126-line skill](plugin/skills/build-demo-pack/SKILL.md) asks for inputs in
+one round with defaults, researches public sources separately from assumptions,
+validates to 0/0, and creates real .xlsx/.docx inputs rather than Markdown
+substitutes. It saves the exact guide and README at `<PREFIX>-demo-pack/`, with
+shareable inputs under `files/` and other presenter-only material under
+`presenter/`. Re-reading and code checks verify payoffs, figures, dates and links.
+Share **only `files/`**, not the guide, README, payoffs or full ZIP.
+Email/meeting seeding is off by default, requires confirmation, and targets only
+the presenter's own mailbox/calendar; no other recipients or Teams chats.
+Unavailable tools must be reported honestly. The skill ends with a ZIP offer.
 
 The strict contract reuses LabSpec's typed `KeyFact`, safe relative/HTTPS hrefs,
 voice lint, numeric-evidence heuristic, sensitive-domain predicates and escaped
@@ -321,10 +334,11 @@ checkpoint callouts. This presentation rule is not access control on the URL.
 Files and checkpoint states are produced later by the learner or Cowork skills,
 not by this server. Links are inert until clicked; no remote assets are embedded.
 
-### Facilitator pack workflow (plugin 0.1.3)
+### Facilitator pack workflow (plugin 0.1.4)
 
 After clean validation, Cowork builds the practice files from the typed key facts,
-with learner permission. It saves sources, fresh test inputs and chapter-start
+with learner permission. Use real .docx/.xlsx where learners would receive Word
+or Excel; Markdown is only for plain notes. It saves sources, fresh test inputs and chapter-start
 checkpoints under `<lab-slug>/learner/`, and answer keys plus
 `facilitator-notes.md` under `<lab-slug>/facilitator/`. The notes contain a
 chapter run of show, handouts, dates and expected answers.
@@ -417,8 +431,7 @@ python scripts/smoke_client.py
 This lists and calls all eight local tools, checks blueprint summaries/details,
 validates/renders the golden lab and both demo fixtures, and verifies invalid
 lab input returns no HTML. It never saves the response. This checkout's smoke
-client and catalog builder expect eight tools; the five-tool M4b Azure deployment
-will not satisfy them until M5b. Do not rebuild plugin 0.1.3 from this checkout.
+client and plugin 0.1.4 catalog builder expect the eight-tool M5b deployment.
 
 Docker must be installed with a running engine for the build. To run the image:
 

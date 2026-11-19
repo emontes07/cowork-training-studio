@@ -2,7 +2,7 @@
 
 ```text
 +-----------------------------------------------------------+
-| Cowork plugin: build-training-lab                          |
+| Cowork plugin: lab and demo-pack skills                    |
 | Write content, choose the scenario, own editorial judgment |
 +-----------------------------+-----------------------------+
                               |
@@ -48,18 +48,17 @@ implemented alongside the format catalog and the M4b read-only blueprint tool.
 | `get_lab_spec_schema` | M4a, v2.1 | None | JSON Schema for drafting fictional LabSpec 2.0/2.1; v1 is rejected. |
 | `validate_lab_spec` | M3a, v2 | `spec` object | `{valid, errors, warnings, stats}`; call before rendering. |
 | `render_lab_page` | M3a, v2 | `spec`, optional `theme_id` | `{html, filename, stats, warnings}` on success; `{errors, stats, warnings}` with no HTML on failure. |
-| `get_demo_pack_schema` | M5a, local only | None | DemoPackSpec 1.0 JSON Schema for fictional function/prompt packs. |
-| `validate_demo_pack` | M5a, local only | `spec` object | `{valid, errors, warnings, stats}` with paths and one-line fixes. |
-| `render_demo_guide` | M5a, local only | `spec` object | `{html, filename, readme_md, stats, warnings}`; failures return `{errors, stats, warnings}` without assets. |
+| `get_demo_pack_schema` | M5a; deployed M5b | None | DemoPackSpec 1.0 JSON Schema for fictional function/prompt packs. |
+| `validate_demo_pack` | M5a; deployed M5b | `spec` object | `{valid, errors, warnings, stats}` with paths and one-line fixes. |
+| `render_demo_guide` | M5a; deployed M5b | `spec` object | `{html, filename, readme_md, stats, warnings}`; failures return `{errors, stats, warnings}` without assets. |
 
-M5a has eight local tools, with top-level demo objects plus matching JSON text.
-Azure revision `0000004` and plugin 0.1.3 remain at five tools; no M5a deployment
-or release has occurred.
+M5b deploys all eight tools on Azure revision `0000005` and ships plugin 0.1.4.
+Demo objects stay at the top level, with matching JSON text.
 
 Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
 (each with `name`, `description`, and `example`), `default_duration_minutes`,
-`status`, and `produced_by_skill`. Only `html_lab` is `available`, routed to the
-shipped `build-training-lab` skill. Word guides, demo packs and prompt-a-thons
+`status`, and `produced_by_skill`. `html_lab` and `demo_pack` are `available`,
+routed to `build-training-lab` and `build-demo-pack`. Word guides and prompt-a-thons
 are planned, `coming_soon`, with no assigned skill (`null`).
 
 Blueprint JSON is loaded once and copied for each response, like the format
@@ -126,7 +125,7 @@ Learner links open in a new tab with `noopener noreferrer`. Optional file
 marked "Facilitator only", and never linked. Existing default/no-href markup
 and the 84,022-byte golden page are unchanged.
 
-Plugin 0.1.3's skill uses 2.1 typed facts/headings, requires zero warnings, and
+Plugin 0.1.4's lab skill uses 2.1 typed facts/headings, requires zero warnings, and
 builds the pack with Cowork tools before the final render. Learner files live in
 `learner/`; keys and run-of-show notes live in `facilitator/`. It sets relative
 hrefs only after saves, validates/re-renders, writes exact HTML, re-reads files,
@@ -171,9 +170,9 @@ script. HTML is self-contained; README text escapes Markdown/HTML. Only attendee
 files link. Payoffs are collapsed, remain hidden under Expand all and appear in
 print; this is presentation, not access control. Seeded items are inert lists
 with offsets relative to `as_of_date`, intended only for the presenter's own
-mailbox/calendar if a future skill receives permission. There is no chat kind.
+mailbox/calendar if `build-demo-pack` receives explicit permission. There is no chat kind.
 Cowork must finish inputs before building prompts, never in parallel.
-See [contract/check scope](../README.md#demo-pack-pipeline-m5a-local-only) and
+See [contract/check scope](../README.md#demo-pack-pipeline) and
 [credits](../CREDITS.md).
 
 ### Transport and process

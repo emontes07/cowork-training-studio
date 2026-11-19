@@ -12,13 +12,13 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M5a
+## Current checkpoint: M5b
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
 It returns a JSON list, optionally filtered by an exact ID, and raises an error
-for an unknown ID. Only `html_lab` is available, routed to the shipped
-`build-training-lab` skill; the other formats are planned.
+for an unknown ID. `html_lab` and `demo_pack` are available through the shipped
+`build-training-lab` and `build-demo-pack` skills; the other two formats are planned.
 M2 added `get_lab_spec_schema`, `validate_lab_spec`, and `render_lab_page`.
 M3a replaces the v1 scenario/lab model with **LabSpec 2.0**: one narrative,
 an optional through-line artifact, linked chapters and steps, checkpoints,
@@ -38,14 +38,25 @@ packs with Cowork's own tools, and offers a ZIP after saving the exact HTML.
 Local tests: 254 before M4b, 268 after. Both fixtures validate with zero issues.
 
 M5a adds **DemoPackSpec 1.0**, `get_demo_pack_schema`, `validate_demo_pack` and
-`render_demo_guide`: eight tools locally, still five on Azure revision `0000004`.
+`render_demo_guide`: eight tools, with deployment deferred until M5b.
 Tests: 268 before, 355 after; both lab and both demo fixtures are 0/0, and the
 lab golden remains byte-identical. Demo results are top-level objects with
 matching JSON text; rendering returns HTML and `readme_md`, never saved assets.
-`demo_pack` remains `coming_soon`; no deployment or plugin 0.1.3 change in M5a.
+`demo_pack` remained `coming_soon`; M5a did not deploy or change plugin 0.1.3.
 The customer-context disclaimer sentence is required only for a named audience;
 the fictional-people/data sentence remains mandatory for every pack.
 See [credits](CREDITS.md) for the approved source-approach attribution.
+
+M5b makes `demo_pack` available via the 126-line `build-demo-pack` skill and
+releases plugin **0.1.4** with the same manifest ID and eight sanitized tools.
+The lab skill is 141 lines; both require real Office inputs where appropriate,
+exact connector tool names, checked files and a ZIP offer. Demo seeding is
+optional, confirmed, presenter-owned only, with no chats or other recipients.
+Azure revision **`cowork-training-studio-mcp--0000005`** serves 100% of traffic;
+identity/registry/environment/ingress are unchanged, with 0.25 CPU, 0.5Gi,
+min 1/max 2 and zero secrets. Tests: **355 -> 359**; all four fixtures are 0/0
+and the golden remains 84,022 identical bytes. Live smoke and package checks pass;
+actual Cowork Office-file creation, ZIP and seeding remain to be tested in Cowork.
 
 `get_blueprint()` returns `{blueprints: [...]}` summaries; an exact
 `blueprint_id` returns detail fields directly, never under `result`. Unknown IDs
@@ -188,7 +199,7 @@ judgments. Validation and rendering must remain separate, testable operations.
 | M4b | Implemented: five-tool server, tested blueprint agendas, facilitator-pack skill, plugin 0.1.3 and Azure redeployment. |
 | M4 remaining | ThreadScript schema. |
 | M5a | Implemented locally: DemoPackSpec 1.0, structural/quality validator, presenter HTML/README, fictional fixtures and eight-tool catalog. No deployment/release. |
-| M5b | Planned: demo-pack skill, availability switch, deployment and plugin release. |
+| M5b | Implemented: demo-pack skill/availability, Office-file lab guidance, Azure revision 0000005 and plugin 0.1.4. |
 | Future | [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
 
 ## Layout

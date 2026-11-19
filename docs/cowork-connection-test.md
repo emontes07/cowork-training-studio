@@ -140,10 +140,10 @@ for either the tunnel or Azure; server host/origin settings remain unchanged.
 .venv/bin/python -m scripts.smoke_client --url 'https://<tunnel-host>/mcp/'
 ```
 
-Pass: initialize has no session ID, all five tools are available, blueprint
+Pass: initialize has no session ID, all eight tools are available, blueprint
 summaries and details return top-level objects, the golden
 spec has zero errors/warnings, and rendered HTML matches the committed example
-byte-for-byte. The client prints render round-trip time and actual downloaded
+byte-for-byte, and both demo fixtures validate/render at 0/0. The client prints render round-trip time and actual downloaded
 HTTP-body bytes (MCP/SSE included; headers/TLS excluded), not a JSON-size estimate.
 
 ## Plugin package
@@ -158,14 +158,15 @@ In the existing server virtual environment, install the separate, pinned
 ```
 
 Build against the **Azure URL**, not an expiring tunnel.
-The ZIP lands at `dist/cowork-training-studio-0.1.3.zip`; `--out <directory>`
+The ZIP lands at `dist/cowork-training-studio-0.1.4.zip`; `--out <directory>`
 changes the output directory. The script prints its SHA-256 and root-level file
-list, fetches the live server's five tool descriptions/schemas, and generates
+list, fetches the live server's eight tool descriptions/schemas, and generates
 the original TS icons with Pillow. No tool catalog is hand-written.
 Names and descriptions are unchanged. By default, local schema references are
 inlined, definitions/extensions/nonstandard keywords and titles are removed,
-outputs are generic objects, and the two `spec` inputs direct the caller to
-`get_lab_spec_schema`. The server still enforces the full LabSpec.
+outputs are generic objects, and the four `spec` inputs direct the caller to
+`get_lab_spec_schema` or `get_demo_pack_schema` as appropriate. The server still
+enforces the full contracts.
 Unsupported, unresolved or cyclic input references fail the build explicitly.
 For raw-schema comparison without overwriting the deployable package:
 
@@ -184,7 +185,7 @@ The manifest uses `/mcp` without a trailing slash; either endpoint now works
 without redirecting. Keep the same manifest ID when rebuilding.
 
 The [build-training-lab skill](../plugin/skills/build-training-lab/SKILL.md) is
-137 lines (limit 150). It offers blueprint choices, writes LabSpec 2.1 and fixes
+141 lines (limit 150). It offers blueprint choices, writes LabSpec 2.1 and fixes
 all validation warnings. Cowork builds `learner/` sources/checkpoints and
 `facilitator/` keys/run-of-show notes, then adds learner-relative hrefs, validates
 and renders again, and saves the exact returned HTML at the pack root. It
@@ -192,15 +193,33 @@ re-reads every file, checks quote/clause placements and sections, verifies dates
 and calculations with code, reports counts/fixes and offers a ZIP.
 The server does not create files, mail, calendar items or ZIPs.
 
+The [build-demo-pack skill](../plugin/skills/build-demo-pack/SKILL.md) is 126 lines.
+It gathers inputs once, separates public facts/assumptions, requires 0/0, builds
+Office sources before the prompt pack, and saves the exact guide and README.
+Only `files/` is shared; guide/README/payoffs and `presenter/` stay private.
+Optional email/meeting seeding requires confirmation, targets only the presenter
+and never creates chats or sends to others. Both skills use discovered connector
+tool names exactly, verify saved files with code and offer a ZIP.
+
+M5b release verification: revision `0000005` serves 100% of traffic with all
+settings unchanged from `0000004` except the image/revision. The built 0.1.4 ZIP
+is **15,236 bytes**, SHA-256
+`161ec3012f47a3883b6efc6a508beb68219cbf67ba4b5e6a2b90b159fd6a85b8`.
+It has four root files (manifest, catalog and two icons) plus the two skill files.
+The manifest validates against the official Teams 1.28 schema; eight tools are
+sanitized and all four spec parameters remain plain objects. Local tests: 359.
+
 ## Cowork checklist
 
 | Test | Prompt/action | Pass condition |
 | --- | --- | --- |
-| A | "List the session formats you support" | Four formats returned; only HTML lab is available via build-training-lab. Word guide, demo pack and prompt-a-thon are marked coming soon. |
+| A | "List the session formats you support" | Four formats returned; HTML lab and demo pack are available via their shipped skills. Word guide and prompt-a-thon remain coming soon. |
 | A2 | "Help me choose a workshop shape" | Three blueprint choices; selected outline has the declared duration. Build super-day lab outlines as five separate HTML labs. |
 | B | "Build me a 30-minute, 2-chapter story lab for Copilot in Excel for a fictional bakery chain; validate it, then render it and save the page to my files" | Zero validation errors; Cowork saves the page; the saved HTML opens offline. |
 | C | During B, inspect the save step and record how Cowork handles the HTML. | Record whether it writes the tool result directly, retypes/reconstructs the HTML, or the behavior cannot be determined. Do not infer this from MCP smoke success. |
 | D | "Create the practice pack and zip it" | Learner links resolve relative to the guide, facilitator keys/notes stay separate and unlinked, quote/calculation checks report counts, and the ZIP comes from Cowork's tools. |
+| E | "Set up a Copilot demo with fictional inputs" | One input round with defaults; real Office files; 0/0 validation; exact HTML/README; payoff/date/number/link checks; share only files/. |
+| F | Opt in to presenter-only demo seeding. | Explicit confirmation; correct fictional label/date; own mailbox/calendar only; no other recipients or chats; cleanup limited to created demo items. |
 
 Observed: tunnel and Azure remote MCP smoke passed; golden HTML matched at
 84,022 bytes. The 0.1.0 tunnel plugin installed and its connector showed
@@ -212,8 +231,11 @@ and save. Cowork had to parse the render result as text. Version 0.1.2 exposes
 render fields at the top level of structured content while retaining a text
 fallback. M4b's 0.1.3 release adds five-tool discovery, blueprints and the pack
 workflow; local and Azure smoke checks pass with the same golden bytes.
-**Retest direct-write and full pack/ZIP behavior in Cowork with 0.1.3**; protocol
-and package validation do not prove a live Cowork file workflow.
+M5b's 0.1.4 adds the demo skill and eight-tool deployment; local and live checks
+pass with all four fixtures at 0/0 and the same golden bytes.
+**Test both skills' Office-file, direct-write, pack/ZIP and optional seeding
+workflows in Cowork with 0.1.4**; protocol and package checks do not prove those
+live Cowork actions.
 
 ## Stop
 
