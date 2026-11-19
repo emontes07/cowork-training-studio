@@ -101,7 +101,7 @@ def test_mcp_blueprints_are_top_level_with_equivalent_text_and_sanitized_catalog
                 tool.model_dump(mode="json", by_alias=True, include=TOOL_FIELDS, exclude_none=True)
                 for tool in tools
             ])
-            assert len(sanitized) == 5
+            assert len(sanitized) == 8
             for tool in sanitized:
                 for key in ("inputSchema", "outputSchema"):
                     Draft202012Validator.check_schema(tool[key])

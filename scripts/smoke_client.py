@@ -54,7 +54,10 @@ async def smoke(url: str) -> None:
         assert initialized, "Initialize response was not observed"
         print("initialize: succeeded; no mcp-session-id")
         names = {tool.name for tool in await client.list_tools()}
-        expected = {"list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page"}
+        expected = {
+            "list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec",
+            "render_lab_page", "get_demo_pack_schema", "validate_demo_pack", "render_demo_guide",
+        }
         assert names == expected, f"Unexpected tools: {names}"
         print("tools/list:", ", ".join(sorted(names)))
         schema = (await client.call_tool("get_lab_spec_schema", {})).structured_content
@@ -100,6 +103,17 @@ async def smoke(url: str) -> None:
         assert rejected is not None
         assert rejected["errors"] and "html" not in rejected
         print("Invalid spec: rejected without HTML")
+        demo_schema = (await client.call_tool("get_demo_pack_schema", {})).structured_content
+        assert demo_schema is not None and demo_schema["properties"]["schema_version"]["const"] == "1.0"
+        for name in ("demo_pack_function.json", "demo_pack_prompt.json"):
+            demo = json.loads((root / "tests" / "fixtures" / name).read_text(encoding="utf-8"))
+            checked = (await client.call_tool("validate_demo_pack", {"spec": demo})).structured_content
+            assert checked is not None and checked["valid"] and not checked["errors"] and not checked["warnings"], checked
+            guide = (await client.call_tool("render_demo_guide", {"spec": demo})).structured_content
+            assert guide is not None and set(guide) == {"html", "filename", "readme_md", "stats", "warnings"}
+            assert guide["stats"] == checked["stats"] and not guide["warnings"]
+            assert "Demo pack approach adapted from work by Shailesh Mittal and Giovanna; see CREDITS.md" in guide["readme_md"]
+            print(f"{name}: 0 errors / 0 warnings; guide {len(guide['html'].encode('utf-8')):,} bytes")
         print("PASS")
 
 

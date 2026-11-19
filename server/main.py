@@ -12,6 +12,8 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from studio.tools.formats import list_session_formats
 from studio.tools.blueprints import get_blueprint
+from studio.tools.demo_validation import get_demo_pack_schema, validate_demo_pack
+from studio.tools.demo_rendering import render_demo_guide
 from studio.tools.rendering import render_lab_page
 from studio.tools.validation import get_lab_spec_schema, validate_lab_spec
 
@@ -25,16 +27,22 @@ mcp = FastMCP(
         "Provide consistent training formats and a spec-first lab pipeline for Cowork skills. "
         "Call get_blueprint if a workshop shape is needed. "
         "Call get_lab_spec_schema, draft a LabSpec, validate_lab_spec, then render_lab_page. "
-        "Use fictional Zava-style scenarios only; never submit tenant data, "
-        "real customer or person names, credentials, or secrets. "
+        "Demo-pack authors can call get_demo_pack_schema, validate_demo_pack and render_demo_guide; "
+        "demo_pack stays coming_soon until its skill ships. Build fictional inputs before prompts, never in parallel. "
+        "Use fictional Zava-style records only; never submit tenant data, real person names, credentials or secrets. "
+        "LabSpecs remain wholly fictional. In DemoPackSpec only, public customer names may appear "
+        "in audience/title/talk tracks and the filename prefix, never in seeded records. "
         "Skills write content; Cowork built-ins save and send it."
     ),
 )
 mcp.tool(list_session_formats, task=False)
 mcp.tool(get_blueprint, task=False, annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False))
 mcp.tool(get_lab_spec_schema, task=False)
+mcp.tool(get_demo_pack_schema, task=False, annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False))
 mcp.tool(validate_lab_spec, task=False)
+mcp.tool(validate_demo_pack, task=False, annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False))
 mcp.tool(render_lab_page, task=False)
+mcp.tool(render_demo_guide, task=False, annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False))
 
 _REQUEST_LOG = logging.getLogger("uvicorn.error.studio.requests")
 

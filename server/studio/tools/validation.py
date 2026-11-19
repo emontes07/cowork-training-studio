@@ -111,6 +111,27 @@ def _needs_numeric_evidence(text: str) -> bool:
     )
 
 
+def learner_voice_issues(text: str, path: str) -> list[Issue]:
+    return [
+        {"code": "learner_voice", "path": path, "message": f"Use learner-facing wording instead of {term!r}."}
+        for term in _LEARNER_VOICE_TERMS if term.casefold() in text.casefold()
+    ]
+
+
+def has_expert_questions(text: str) -> bool:
+    return bool(
+        _EXPERT.search(text) and re.search(r"\bquestions?\b", text, re.I)
+        and re.search(r"\b(?:interpretations?|interpret|inferences?|inferred|assumptions?|uncertainties|uncertainty)\b", text, re.I)
+    )
+
+
+def has_fictional_parties(text: str) -> bool:
+    return bool(re.search(
+        r"\b(?:all|every)\s+(?:named\s+)?(?:parties|party|people|person|organizations|organization)\s+(?:(?:are|is|must be)\s+)?fictional\b|"
+        r"\b(?:only fictional|fictional (?:parties|people|organizations) only)\b", text, re.I,
+    ))
+
+
 def get_lab_spec_schema() -> dict[str, Any]:
     """Return the LabSpec 2.1 JSON Schema before drafting a fictional story lab.
 
@@ -169,7 +190,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         artifact_names.extend(_name_words(value) for value in (
             lab_spec.through_line.name, lab_spec.through_line.location,
         ))
-    has_expert_questions = False
+    expert_questions_present = False
 
     def issue(target: list[Issue], code: str, path: str, message: str) -> None:
         target.append({"code": code, "path": path, "message": message})
@@ -184,10 +205,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
     def check_text(text: str | None, path: str) -> None:
         if text is None:
             return
-        folded = text.casefold()
-        for term in _LEARNER_VOICE_TERMS:
-            if term.casefold() in folded:
-                issue(warnings, "learner_voice", path, f"Use learner-facing wording instead of {term!r}.")
+        warnings.extend(learner_voice_issues(text, path))
         for number in dict.fromkeys(_SECTION_REFERENCE.findall(text)):
             if number.casefold() not in sections:
                 issue(warnings, "unknown_section", path,
@@ -379,11 +397,8 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             step_text = " ".join(text for _, text in evidence_fields if text)
             if step.challenge:
                 step_text += " " + step.challenge.task
-            if (
-                _EXPERT.search(step_text) and re.search(r"\bquestions?\b", step_text, re.I)
-                and re.search(r"\b(?:interpretations?|interpret|inferences?|inferred|assumptions?|uncertainties|uncertainty)\b", step_text, re.I)
-            ):
-                has_expert_questions = True
+            if has_expert_questions(step_text):
+                expert_questions_present = True
             numerical_fields = [
                 path for path, text in evidence_fields if text is not None and _needs_numeric_evidence(text)
             ]
@@ -403,14 +418,11 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         if "not professional advice" not in safeguards.casefold():
             issue(warnings, "missing_advice_note", "disclaimer",
                   "Add 'practice exercise, not professional advice' to the disclaimer or ground rules.")
-        if not has_expert_questions:
+        if not expert_questions_present:
             issue(warnings, "missing_expert_questions", "chapters",
                   "Add a step that turns interpretations or uncertainty into questions for an expert, separate from the source text.")
         fictional_text = f"{safeguards} {lab_spec.company.description}"
-        if not lab_spec.company.is_fictional or not re.search(
-            r"\b(?:all|every)\s+(?:named\s+)?(?:parties|party|people|person|organizations|organization)\s+(?:(?:are|is|must be)\s+)?fictional\b|"
-            r"\b(?:only fictional|fictional (?:parties|people|organizations) only)\b", fictional_text, re.I,
-        ):
+        if not lab_spec.company.is_fictional or not has_fictional_parties(fictional_text):
             issue(warnings, "missing_fictional_parties", "setup.ground_rules",
                   "State that all parties are fictional and mark company.is_fictional true.")
     return {"valid": not errors, "errors": errors, "warnings": warnings, "stats": stats}

@@ -293,5 +293,6 @@ def test_all_registered_tools_forbid_background_tasks():
     tools = asyncio.run(mcp.get_tools())
     assert set(tools) == {
         "list_session_formats", "get_blueprint", "get_lab_spec_schema", "validate_lab_spec", "render_lab_page",
+        "get_demo_pack_schema", "validate_demo_pack", "render_demo_guide",
     }
     assert all(tool.task_config.mode == "forbidden" for tool in tools.values())

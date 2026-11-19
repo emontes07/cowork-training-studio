@@ -1,0 +1,103 @@
+{% from "prompt.html.j2" import prompt_block %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ spec.title }}</title>
+  <style>
+{% include "styles.css.j2" %}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#studio--content">Skip to content</a>
+  <header class="hero"><div class="hero-inner">
+    <p class="eyebrow">Fictional demo / Presenter guide</p>
+    <h1>{{ spec.title }}</h1>
+    <p class="subtitle">Audience: {{ spec.audience.customer_name or spec.audience.industry }} / Fictional company: {{ spec.company.name }}</p>
+    <ul class="tags"><li>{{ spec.default_minutes }} minutes</li><li>As of {{ spec.as_of_date }}</li><li>{{ spec.presenter.role }}</li></ul>
+  </div></header>
+  <div class="layout">
+    <aside class="sidebar">
+      <button type="button" id="studio--nav-toggle" aria-expanded="false" aria-controls="studio--navigation">Guide navigation</button>
+      <nav id="studio--navigation" aria-label="Guide navigation">
+        {% for id, title in [("context", "Public context"), ("cast", "Fictional cast"), ("tensions", "Tensions"), ("files", "Input files")] %}
+        <a class="nav-link" href="#{{ id }}">{{ title }}</a>
+        {% endfor %}
+        {% for scenario in spec.scenarios %}<a class="nav-link chapter-link" href="#scenario--{{ scenario.id }}">{{ scenario.title }}</a>{% endfor %}
+        {% for id, title in [("run-of-show", "Run of show"), ("seeded-items", "Seeded items"), ("cleanup", "Cleanup"), ("disclaimer", "Disclaimer")] %}
+        <a class="nav-link" href="#{{ id }}">{{ title }}</a>
+        {% endfor %}
+      </nav>
+    </aside>
+    <main id="studio--content" tabindex="-1">
+      <div class="toolbar"><span>{{ stats.scenario_count }} scenarios / {{ stats.file_count }} input files</span>
+        <div><button type="button" id="studio--expand">Expand all</button><button type="button" id="studio--collapse">Collapse all</button><button type="button" id="studio--print">Print guide</button></div>
+      </div>
+      <p class="callout callout-important">Presenter-only guide: collapsed payoffs are not access control and are included when printing. Build all input files fully before the prompt pack, never in parallel. The server creates or sends nothing.</p>
+      <section id="context" class="card anchor">
+        <h2>Public context</h2>
+        {% if spec.audience.customer_website %}<p><a href="{{ spec.audience.customer_website }}" target="_blank" rel="noopener noreferrer">Public audience website</a></p>{% endif %}
+        {% for field, title in [("business_model", "Business model"), ("kpis", "KPIs"), ("pressures", "Pressures")] %}
+        <h3>{{ title }}</h3><ul>{% for text in spec.context[field] %}<li>{{ text }}</li>{% endfor %}</ul>
+        {% endfor %}
+        <section id="context--facts"><h3>Facts</h3><ul>
+          {% for fact in spec.context.facts %}<li>{{ fact.text }} {% if fact.source_url %}<a href="{{ fact.source_url }}" target="_blank" rel="noopener noreferrer">Source</a>{% else %}<span class="muted">Source needed</span>{% endif %}</li>{% endfor %}
+        </ul></section>
+        <section id="context--assumptions"><h3>Assumptions</h3><ul>{% for text in spec.context.assumptions %}<li>{{ text }}</li>{% endfor %}</ul></section>
+      </section>
+      <section id="cast" class="card anchor"><h2>Fictional cast</h2><p>{{ spec.company.name }}: {{ spec.company.description }}</p>
+        <div class="table-scroll"><table><thead><tr><th>Name</th><th>Role</th><th>External</th><th>Executive</th></tr></thead><tbody>
+          {% for member in spec.cast %}<tr><th>{{ member.name }}</th><td>{{ member.role }}</td><td>{{ "Yes" if member.external else "No" }}</td><td>{{ "Yes" if member.executive else "No" }}</td></tr>{% endfor %}
+        </tbody></table></div>
+      </section>
+      <section id="tensions" class="card anchor"><h2>Tensions timeline</h2><ol>
+        {% for tension in spec.tensions | sort(attribute="due_date") %}<li><strong>{{ tension.due_date }}</strong>: {{ tension.problem }} / {{ "Slipping" if tension.slipping else "On track" }}{% if tension.owner_cast_id %} / {{ cast[tension.owner_cast_id].name }}{% endif %}</li>{% endfor %}
+      </ol></section>
+      <section id="files" class="card anchor"><h2>Input files</h2><div class="table-scroll"><table>
+        <thead><tr><th>File</th><th>Purpose</th><th>Audience</th></tr></thead><tbody>
+          {% for file in spec.files %}<tr><th>
+            {% if file.audience == "attendee" and file.href %}<a href="{{ file.href }}" download="{{ file.filename }}" target="_blank" rel="noopener noreferrer">{{ file.filename }}</a>{% else %}<span class="file-name">{{ file.filename }}</span>{% endif %}
+          </th><td>{{ file.purpose }}</td><td>{{ "Presenter only" if file.audience == "presenter" else "Attendee" }}</td></tr>{% endfor %}
+        </tbody></table></div></section>
+      {% for scenario in spec.scenarios %}
+      <details class="chapter card anchor" id="scenario--{{ scenario.id }}" open>
+        <summary><span class="eyebrow">{{ scenario.function }}</span><h2>{{ scenario.title }}</h2></summary>
+        <div class="chapter-body">
+          <dl class="story"><div><dt>Persona</dt><dd>{{ scenario.persona }}</dd></div><div><dt>Business context</dt><dd>{{ scenario.business_context }}</dd></div></dl>
+          <h3>Input files</h3><ul>{% for id in scenario.input_file_ids %}<li>{{ files[id].filename }}</li>{% endfor %}</ul>
+          {{ prompt_block({"label": scenario.title, "mode": "cowork", "text": scenario.prompt}, "scenario--" ~ scenario.id ~ "--prompt") }}
+          <h3>Expected outputs</h3><ul>{% for output in scenario.expected_outputs %}<li>{{ output.format }}: {{ output.filename }}</li>{% endfor %}</ul>
+          <h3>Talk track</h3><p class="muted">{{ words[scenario.id] }} words / {{ seconds[scenario.id] }} estimated seconds at 150 words/minute</p>
+          <p>{{ scenario.talk_track }}</p>
+          <h3>Follow-ups</h3><ol>{% for follow_up in scenario.follow_ups %}<li>{{ follow_up }}</li>{% endfor %}</ol>
+          <details class="answer presenter-payoffs"><summary>Presenter notes: planted payoffs</summary><ul>
+            {% for id in scenario.payoff_ids %}
+            {% set payoff = payoffs[id] %}
+            <li><strong>{{ payoff.finding }}</strong> / {{ "Buried finding" if payoff.buried else "Visible finding" }} / Evidence: {{ files[payoff.evidence_file_id].filename }}
+              {% if payoff.evidence %}<p>{{ payoff.evidence.text }}{% if payoff.evidence.section %} (Section {{ payoff.evidence.section }}){% endif %}</p>{% endif %}
+            </li>
+            {% endfor %}
+          </ul></details>
+        </div>
+      </details>
+      {% endfor %}
+      <section id="run-of-show" class="card anchor"><h2>Run of show</h2><ol>
+        {% for item in spec.run_of_show %}<li>{{ item.minutes }} minutes: {{ item.action }}{% if item.scenario_id %} / <a href="#scenario--{{ item.scenario_id }}">Open scenario</a>{% endif %}</li>{% endfor %}
+      </ol></section>
+      <section id="seeded-items" class="card anchor"><h2>Seeded items - plan only</h2>
+        <p>For the presenter's own mailbox and calendar only, with permission. Nothing here is created or sent; no cross-user chat relay.</p>
+        <ul>{% for item in spec.seeded_items %}<li><strong>{{ item.kind }}: {{ item.subject }}</strong> / {{ cast[item.from_cast_id].name }}, {{ cast[item.from_cast_id].role }} / day offset {{ item.day_offset }} from {{ spec.as_of_date }}<pre>{{ item.body }}</pre></li>{% endfor %}</ul>
+      </section>
+      <section id="cleanup" class="card anchor"><h2>Cleanup checklist</h2><ul class="self-check">
+        {% for action in spec.cleanup %}<li><label><input type="checkbox"> {{ action }}</label></li>{% endfor %}
+      </ul></section>
+      <footer id="disclaimer" class="page-footer"><h2>Disclaimer</h2><p>{{ spec.disclaimer }}</p><p>Works offline; source links and Cowork may require internet access.</p></footer>
+    </main>
+  </div>
+  <p id="studio--copy-status" class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
+  <script>
+{% include "behavior.js.j2" %}
+  </script>
+</body>
+</html>
