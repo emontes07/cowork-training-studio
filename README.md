@@ -180,7 +180,9 @@ Warnings cover talk tracks outside 150-300 words, missing/unburied payoffs,
 unused/evidence-free files, cast/tension quality and dates, ungrounded or repeated
 context, customer names in invented records, repeated functions/prompts, seeded
 item limits/labels, learner voice, sensitive domains, numeric evidence, duration
-totals and disclaimers. Each includes a field path and one-line fix; warnings do
+totals and disclaimers. The fictional-people/data sentence is always required;
+the real-customer-context sentence is required only when `audience.customer_name`
+is present. Each warning includes a field path and one-line fix; warnings do
 not block rendering. Customer matching normalizes punctuation/case and checks
 close spellings, not acronyms, affiliations or semantic identity. These checks
 are authoring heuristics, not data-loss prevention or verification of file contents.

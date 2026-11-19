@@ -314,6 +314,34 @@ def test_customer_names_only_in_approved_context_and_close_variants_warn(functio
     assert validate_demo_pack(function_demo)["warnings"] == []
 
 
+@pytest.mark.parametrize(("disclaimer", "warns"), [
+    ("All people and data are fictional.", False),
+    ("A demonstration.", True),
+])
+def test_unnamed_prompt_pack_requires_only_fictional_disclaimer(prompt_demo, disclaimer, warns):
+    assert not prompt_demo["audience"].get("customer_name")
+    prompt_demo["disclaimer"] = disclaimer
+    result = validate_demo_pack(prompt_demo)
+    assert result["valid"] and result["errors"] == []
+    assert result["warnings"] == ([{
+        "code": "demo_disclaimer", "path": "disclaimer",
+        "message": "State 'All people and data are fictional.'",
+    }] if warns else [])
+
+
+def test_named_function_pack_still_requires_customer_context_disclaimer(function_demo):
+    assert function_demo["audience"]["customer_name"]
+    function_demo["disclaimer"] = function_demo["disclaimer"].replace(
+        "Real customer names are used only as context.", ""
+    ).strip()
+    result = validate_demo_pack(function_demo)
+    assert result["valid"] and result["errors"] == []
+    assert result["warnings"] == [{
+        "code": "demo_disclaimer", "path": "disclaimer",
+        "message": "State 'All people and data are fictional. Real customer names are used only as context.'",
+    }]
+
+
 def test_demo_guide_links_only_attendee_files_and_readme_is_escaped(function_demo):
     from test_rendering import parse
     function_demo["company"]["description"] += " <script>unsafe</script> [link](javascript:bad)"

@@ -39,10 +39,12 @@ Local tests: 254 before M4b, 268 after. Both fixtures validate with zero issues.
 
 M5a adds **DemoPackSpec 1.0**, `get_demo_pack_schema`, `validate_demo_pack` and
 `render_demo_guide`: eight tools locally, still five on Azure revision `0000004`.
-Tests: 268 before, 352 after; both lab and both demo fixtures are 0/0, and the
+Tests: 268 before, 355 after; both lab and both demo fixtures are 0/0, and the
 lab golden remains byte-identical. Demo results are top-level objects with
 matching JSON text; rendering returns HTML and `readme_md`, never saved assets.
 `demo_pack` remains `coming_soon`; no deployment or plugin 0.1.3 change in M5a.
+The customer-context disclaimer sentence is required only for a named audience;
+the fictional-people/data sentence remains mandatory for every pack.
 See [credits](CREDITS.md) for the approved source-approach attribution.
 
 `get_blueprint()` returns `{blueprints: [...]}` summaries; an exact

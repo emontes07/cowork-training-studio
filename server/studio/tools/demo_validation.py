@@ -277,8 +277,10 @@ def validate_demo_pack(spec: dict[str, Any]) -> DemoValidationResult:
     disclaimer = _normalized(pack.disclaimer)
     if not (
         re.search(r"\ball people and data are fictional\b", disclaimer)
-        and re.search(r"\breal customer names are used only (?:as|for) context\b", disclaimer)
+        and (not customer or re.search(r"\breal customer names are used only (?:as|for) context\b", disclaimer))
     ):
-        issue(warnings, "demo_disclaimer", "disclaimer",
-              "State 'All people and data are fictional. Real customer names are used only as context.'")
+        required_disclaimer = "All people and data are fictional."
+        if customer:
+            required_disclaimer += " Real customer names are used only as context."
+        issue(warnings, "demo_disclaimer", "disclaimer", f"State '{required_disclaimer}'")
     return {"valid": not errors, "errors": errors, "warnings": warnings, "stats": stats}
