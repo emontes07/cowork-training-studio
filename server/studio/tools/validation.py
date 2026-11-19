@@ -86,6 +86,10 @@ _DESTINATION_QUOTE = re.compile(
 _CONTAINER = re.compile(r"\byour\s+((?:[\w-]+\s+){0,2}(?:timeline|log|report|tracker|register|sheet|workbook|document))\b", re.I)
 _SENSITIVE_DOMAIN = re.compile(r"\b(?:legal|HR|human resources|compliance|privacy|medical)\b", re.I)
 _EXPERT = re.compile(r"\b(?:expert|counsel|lawyer|clinician|doctor|specialist|HR adviser|HR advisor)\b", re.I)
+_NUMBERED_TITLE = re.compile(
+    r"^\s*(?:(?:chapter|step|cap[i\u00ed]tulo|paso)\s+\d+\b|"
+    r"\d+\s*[.):\-\u2013\u2014](?:\s+|$))", re.I,
+)
 
 
 def _quoted_text(text: str) -> list[str]:
@@ -211,6 +215,11 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
                 issue(warnings, "unknown_section", path,
                       f"Section {number} has no clause key fact; add a clause fact with that section or correct the reference.")
 
+    def check_title(title: str, path: str) -> None:
+        if _NUMBERED_TITLE.search(title):
+            issue(warnings, "numbered_title", path,
+                  "the guide numbers chapters automatically; remove the prefix")
+
     def declared_artifact(name: str) -> bool:
         words = _name_words(name)
         return any(f" {words} " in f" {artifact} " for artifact in artifact_names)
@@ -320,6 +329,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
         stats["total_minutes"] += chapter.minutes
         path = f"chapters.{index}"
         check_id(chapter.id, f"{path}.id")
+        check_title(chapter.title, f"{path}.title")
         for field in ("title", "story_so_far", "you_will_add"):
             check_text(getattr(chapter, field), f"{path}.{field}")
         for reference_index, chapter_id in enumerate(chapter.builds_on):
@@ -344,6 +354,7 @@ def validate_lab_spec(spec: dict[str, Any]) -> ValidationResult:
             stats["step_count"] += 1
             step_path = f"{path}.steps.{step_index}"
             check_id(step.id, f"{step_path}.id")
+            check_title(step.title, f"{step_path}.title")
             for field in ("title", "goal", "uses", "intro", "fallback", "carries_forward"):
                 check_text(getattr(step, field), f"{step_path}.{field}")
             check_files(step.uses, f"{step_path}.uses")

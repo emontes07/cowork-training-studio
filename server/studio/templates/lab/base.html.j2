@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ spec.locale }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,21 +10,21 @@
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#studio--content">Skip to content</a>
+  <a class="skip-link" href="#studio--content">{{ ui.skip_content }}</a>
   <header class="hero">
     <div class="hero-inner">
       <p class="eyebrow">{{ spec.company.name }} / {{ spec.functional_area }}</p>
       <h1>{{ spec.title }}</h1>
       <p class="subtitle">{{ spec.subtitle }}</p>
-      <ul class="tags" aria-label="Session details">
+      <ul class="tags" aria-label="{{ ui.session_details }}">
         {% for product in spec.products %}<li>{{ product }}</li>{% endfor %}
         <li>{{ spec.audience }}</li>
-        <li>{{ spec.skill_level | capitalize }}</li>
-        <li>{{ spec.duration_minutes }} minutes</li>
-        <li>{{ stats.chapter_count }} connected chapters</li>
+        <li>{{ ui["level_" ~ spec.skill_level] }}</li>
+        <li>{{ spec.duration_minutes }} {{ ui.minutes }}</li>
+        <li>{{ stats.chapter_count }} {{ ui.connected_chapters }}</li>
       </ul>
       <div class="leave-with">
-        <h2>What you leave with</h2>
+        <h2>{{ ui.leave_with }}</h2>
         <ul>{% for outcome in spec.narrative.leave_with %}<li>{{ outcome }}</li>{% endfor %}</ul>
       </div>
     </div>
@@ -32,15 +32,15 @@
   <div class="layout">
     {% include "navigation.html.j2" %}
     <main id="studio--content" tabindex="-1">
-      <div class="toolbar" aria-label="Lab controls">
-        <span>{{ stats.step_count }} {{ "step" if stats.step_count == 1 else "steps" }} / {{ stats.prompt_count }} {{ "prompt" if stats.prompt_count == 1 else "prompts" }} / {{ stats.challenge_count }} {{ "challenge" if stats.challenge_count == 1 else "challenges" }}</span>
+      <div class="toolbar" aria-label="{{ ui.lab_controls }}">
+        <span>{{ stats.step_count }} {{ ui.step if stats.step_count == 1 else ui.steps }} / {{ stats.prompt_count }} {{ ui.prompt if stats.prompt_count == 1 else ui.prompts }} / {{ stats.challenge_count }} {{ ui.challenge if stats.challenge_count == 1 else ui.challenges }}</span>
         <div>
-          <button type="button" id="studio--expand">Expand all</button>
-          <button type="button" id="studio--collapse">Collapse all</button>
-          <button type="button" id="studio--print">Print guide</button>
+          <button type="button" id="studio--expand">{{ ui.expand_all }}</button>
+          <button type="button" id="studio--collapse">{{ ui.collapse_all }}</button>
+          <button type="button" id="studio--print">{{ ui.print_guide }}</button>
         </div>
       </div>
-      <div class="story-strip">One story, {{ stats.chapter_count }} chapters{% if spec.through_line %} / <strong>{{ spec.through_line.name }}</strong>{% endif %}</div>
+      <div class="story-strip">{{ ui.one_story }} {{ stats.chapter_count }} {{ ui.chapters }}{% if spec.through_line %} / <strong>{{ spec.through_line.name }}</strong>{% endif %}</div>
       {% include "overview.html.j2" %}
       {% include "agenda.html.j2" %}
       {% include "files.html.j2" %}
@@ -51,9 +51,9 @@
       {% endfor %}
       {% include "reference.html.j2" %}
       <footer id="disclaimer" class="page-footer">
-        <h2>Disclaimer</h2>
+        <h2>{{ ui.disclaimer }}</h2>
         <p>{{ spec.disclaimer }}</p>
-        <p>This guide works offline. Linked resources and Copilot itself may require internet access.</p>
+        <p>{{ ui.lab_offline }}</p>
       </footer>
     </main>
   </div>

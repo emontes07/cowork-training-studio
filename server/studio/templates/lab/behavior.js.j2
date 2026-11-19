@@ -105,7 +105,7 @@
     document.body.appendChild(field);
     try {
       field.select();
-      if (!document.execCommand("copy")) throw new Error("Clipboard unavailable");
+      if (!document.execCommand("copy")) throw new Error({{ ui.clipboard_unavailable | tojson }});
     } finally {
       field.remove();
     }
@@ -121,21 +121,21 @@
         } else {
           legacyCopy(text);
         }
-        button.textContent = "Copied";
-        status.textContent = "Copied prompt to clipboard.";
+        button.textContent = {{ ui.copied | tojson }};
+        status.textContent = {{ ui.copy_success | tojson }};
       } catch {
         const range = document.createRange();
         range.selectNodeContents(prompt);
         const selection = getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-        button.textContent = "Select and copy";
-        status.textContent = "Clipboard unavailable. Prompt selected; press Ctrl+C or Command+C.";
+        button.textContent = {{ ui.select_copy | tojson }};
+        status.textContent = {{ ui.copy_failure | tojson }};
       } finally {
         button.focus({ preventScroll: true });
         clearTimeout(statusTimer);
         statusTimer = setTimeout(() => { status.textContent = ""; }, 6000);
-        setTimeout(() => { button.textContent = "Copy prompt"; }, 2500);
+        setTimeout(() => { button.textContent = {{ ui.copy_prompt | tojson }}; }, 2500);
       }
     });
   });

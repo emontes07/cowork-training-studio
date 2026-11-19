@@ -1,21 +1,21 @@
 <aside class="sidebar">
   <button type="button" id="studio--nav-toggle" aria-expanded="false" aria-controls="studio--navigation">
-    Session navigation
+    {{ ui.session_navigation }}
   </button>
-  <nav id="studio--navigation" aria-label="Session navigation">
-    <p class="nav-title">Your story journey</p>
-    <a class="nav-link active" aria-current="location" href="#overview">Overview</a>
-    <a class="nav-link" href="#setup">Setup</a>
-    <a class="nav-link" href="#agenda">Agenda</a>
-    <a class="nav-link" href="#files">Files</a>
+  <nav id="studio--navigation" aria-label="{{ ui.session_navigation }}">
+    <p class="nav-title">{{ ui.story_journey }}</p>
+    <a class="nav-link active" aria-current="location" href="#overview">{{ ui.overview }}</a>
+    <a class="nav-link" href="#setup">{{ ui.setup }}</a>
+    <a class="nav-link" href="#agenda">{{ ui.agenda }}</a>
+    <a class="nav-link" href="#files">{{ ui.files }}</a>
     {% for chapter in spec.chapters %}
     <a class="nav-link chapter-link" href="#{{ chapter.id }}">{{ loop.index }}. {{ chapter.title }}</a>
     {% for step in chapter.steps %}
-    <a class="nav-link step-link" href="#{{ step.id }}">{{ step.title }} <span>{{ step.minutes }}m</span></a>
+    <a class="nav-link step-link" href="#{{ step.id }}">{{ step.title }} <span>{{ step.minutes }}{{ ui.minute_nav }}</span></a>
     {% endfor %}
     {% endfor %}
-    <a class="nav-link" href="#story-map">The story in one table</a>
-    <a class="nav-link" href="#troubleshooting">Troubleshooting</a>
-    <a class="nav-link" href="#glossary">Glossary</a>
+    <a class="nav-link" href="#story-map">{{ ui.story_table }}</a>
+    <a class="nav-link" href="#troubleshooting">{{ ui.troubleshooting }}</a>
+    <a class="nav-link" href="#glossary">{{ ui.glossary }}</a>
   </nav>
 </aside>

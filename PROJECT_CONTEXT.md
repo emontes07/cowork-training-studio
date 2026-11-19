@@ -12,7 +12,7 @@ Cowork skills write and refine content. The MCP server returns reusable
 templates, schemas, validation results, and rendered HTML as capabilities are
 added. Cowork's own tools save files and send messages; this server never does.
 
-## Current checkpoint: M5b
+## Current checkpoint: M5c
 
 The M1 tool is `list_session_formats`, backed by a bundled JSON catalog:
 `html_lab`, `word_guide`, `demo_pack`, and `prompt_a_thon`.
@@ -52,11 +52,22 @@ releases plugin **0.1.4** with the same manifest ID and eight sanitized tools.
 The lab skill is 141 lines; both require real Office inputs where appropriate,
 exact connector tool names, checked files and a ZIP offer. Demo seeding is
 optional, confirmed, presenter-owned only, with no chats or other recipients.
-Azure revision **`cowork-training-studio-mcp--0000005`** serves 100% of traffic;
+Azure revision **`cowork-training-studio-mcp--0000005`** served 100% of traffic;
 identity/registry/environment/ingress are unchanged, with 0.25 CPU, 0.5Gi,
 min 1/max 2 and zero secrets. Tests: **355 -> 359**; all four fixtures are 0/0
 and the golden remains 84,022 identical bytes. Live smoke and package checks pass;
 actual Cowork Office-file creation, ZIP and seeding remain to be tested in Cowork.
+
+M5c adds optional `locale` (`en` by default, or `es`) to both LabSpec versions and
+DemoPackSpec. One [UI string table](server/studio/data/ui_strings.json) supplies
+page labels, accessibility/copy feedback and demo README labels; authored text
+is never translated. English HTML/README bytes are unchanged. Numbered chapter
+or step titles now warn without rewriting content; ordinary number-led titles
+do not. Plugin **0.1.5** keeps the same ID; its skills are 143/128 lines and set
+locale without numbering titles. Azure **`cowork-training-studio-mcp--0000006`**
+is the sole active revision at 100%, with settings unchanged except image/revision.
+Tests: **359 -> 395**; four fixtures are 0/0, the golden is 84,022 identical bytes,
+and live eight-tool smoke, Spanish browser copy checks and package checks pass.
 
 `get_blueprint()` returns `{blueprints: [...]}` summaries; an exact
 `blueprint_id` returns detail fields directly, never under `result`. Unknown IDs
@@ -200,6 +211,7 @@ judgments. Validation and rendering must remain separate, testable operations.
 | M4 remaining | ThreadScript schema. |
 | M5a | Implemented locally: DemoPackSpec 1.0, structural/quality validator, presenter HTML/README, fictional fixtures and eight-tool catalog. No deployment/release. |
 | M5b | Implemented: demo-pack skill/availability, Office-file lab guidance, Azure revision 0000005 and plugin 0.1.4. |
+| M5c | Implemented: English/Spanish page locale, title-numbering warnings, Azure revision 0000006 and plugin 0.1.5. |
 | Future | [Microsoft Learn MCP](https://learn.microsoft.com/api/mcp) as a second, independent connection. |
 
 ## Layout

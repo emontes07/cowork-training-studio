@@ -38,7 +38,7 @@ def minimal_spec():
         },
         "chapters": [
             {
-                "id": f"chapter-{chapter}", "title": f"Chapter {chapter}", "minutes": 20,
+                "id": f"chapter-{chapter}", "title": "Open the story" if chapter == 1 else "Extend the story", "minutes": 20,
                 "format": "guided", "story_so_far": "The fictional workshop plan needs a review.",
                 "builds_on": [] if chapter == 1 else ["chapter-1"],
                 "you_will_add": "A checked planning decision",

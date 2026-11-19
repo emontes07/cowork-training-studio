@@ -107,7 +107,7 @@ def test_multiple_builds_on_links_have_only_comma_separators(minimal_spec):
     html = render_lab_page(minimal_spec)["html"]
     builds_on = re.findall(r"<dt>Builds on</dt><dd>(.*?)</dd>", html, re.S)
     assert builds_on[-1].strip() == (
-        '<a href="#chapter-1">Start &amp; review</a>, <a href="#chapter-2">Chapter 2</a>'
+        '<a href="#chapter-1">Start &amp; review</a>, <a href="#chapter-2">Extend the story</a>'
     )
 
 

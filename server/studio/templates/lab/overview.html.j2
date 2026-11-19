@@ -1,34 +1,34 @@
 <section id="overview" class="card anchor" aria-labelledby="overview--title">
-  <p class="eyebrow">Step into the story</p>
-  <h2 id="overview--title">Overview</h2>
+  <p class="eyebrow">{{ ui.enter_story }}</p>
+  <h2 id="overview--title">{{ ui.overview }}</h2>
   <p>{{ spec.company.description }}</p>
-  {% if spec.company.is_fictional %}<p class="fictional-badge">Fictional practice company</p>{% endif %}
+  {% if spec.company.is_fictional %}<p class="fictional-badge">{{ ui.fictional_company_badge }}</p>{% endif %}
   <dl class="story">
-    <div><dt>Your role</dt><dd>{{ spec.narrative.role }}</dd></div>
-    <div><dt>Situation</dt><dd>{{ spec.narrative.situation }}</dd></div>
-    <div><dt>Trigger</dt><dd>{{ spec.narrative.trigger }}</dd></div>
-    <div><dt>Deadline</dt><dd>{{ spec.narrative.deadline }}</dd></div>
+    <div><dt>{{ ui.your_role }}</dt><dd>{{ spec.narrative.role }}</dd></div>
+    <div><dt>{{ ui.situation }}</dt><dd>{{ spec.narrative.situation }}</dd></div>
+    <div><dt>{{ ui.trigger }}</dt><dd>{{ spec.narrative.trigger }}</dd></div>
+    <div><dt>{{ ui.deadline }}</dt><dd>{{ spec.narrative.deadline }}</dd></div>
   </dl>
   {% if spec.through_line %}
   <aside class="callout callout-note through-line">
-    <strong>Keep your work together: {{ spec.through_line.name }}</strong>
-    <p><b>Where:</b> {{ spec.through_line.location }}</p>
+    <strong>{{ ui.keep_work }} {{ spec.through_line.name }}</strong>
+    <p><b>{{ ui.where_colon }}</b> {{ spec.through_line.location }}</p>
     <p>{{ spec.through_line.description }}</p>
   </aside>
   {% endif %}
 </section>
 <section id="setup" class="card anchor" aria-labelledby="setup--title">
-  <p class="eyebrow">Prepare your workspace</p>
-  <h2 id="setup--title">Setup</h2>
+  <p class="eyebrow">{{ ui.prepare_workspace }}</p>
+  <h2 id="setup--title">{{ ui.setup }}</h2>
   <ol>{% for step in spec.setup.steps %}<li>{{ step }}</li>{% endfor %}</ol>
   {% if spec.setup.modes %}
-  <h3>Choose the right mode</h3>
+  <h3>{{ ui.choose_mode }}</h3>
   <dl class="story">
     {% for mode in spec.setup.modes %}<div><dt>{{ mode.name }}</dt><dd>{{ mode.description }}</dd></div>{% endfor %}
   </dl>
   {% endif %}
   {% if spec.setup.ground_rules %}
-  <h3>Ground rules</h3>
+  <h3>{{ ui.ground_rules }}</h3>
   <ul>{% for rule in spec.setup.ground_rules %}<li>{{ rule }}</li>{% endfor %}</ul>
   {% endif %}
 </section>

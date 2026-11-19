@@ -11,6 +11,7 @@ Mode = Literal["chat", "plan", "edit", "agent", "researcher", "analyst", "cowork
 FileKind = Literal["source", "checkpoint", "answer_key", "worksheet", "extra"]
 CalloutType = Literal["tip", "warning", "important", "note", "instructor", "real_world", "stretch"]
 Minutes = Annotated[int, Field(gt=0)]
+Locale = Literal["en", "es"]
 
 
 def nonblank_prompt(value: str) -> str:
@@ -172,6 +173,7 @@ class LabSpec(Contract):
     """LabSpec 2.0/2.1: one fictional story with optional typed evidence."""
 
     schema_version: Literal["2.0", "2.1"]
+    locale: Locale = "en"
     title: Text
     subtitle: Text
     audience: Text

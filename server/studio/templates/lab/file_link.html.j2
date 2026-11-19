@@ -1,3 +1,3 @@
 {% macro file_link(file) %}
-{% if file.audience == "facilitator" %}<span class="file-name">{{ file.filename }}</span> <span class="provided-separately">Facilitator only</span>{% elif file.href %}<a class="file-download" href="{{ file.href }}" download="{{ file.filename }}" target="_blank" rel="noopener noreferrer">{{ file.filename }}</a>{% else %}<span class="file-name">{{ file.filename }}</span> <span class="provided-separately">Provided separately</span>{% endif %}
+{% if file.audience == "facilitator" %}<span class="file-name">{{ file.filename }}</span> <span class="provided-separately">{{ ui.facilitator_only }}</span>{% elif file.href %}<a class="file-download" href="{{ file.href }}" download="{{ file.filename }}" target="_blank" rel="noopener noreferrer">{{ file.filename }}</a>{% else %}<span class="file-name">{{ file.filename }}</span> <span class="provided-separately">{{ ui.provided_separately }}</span>{% endif %}
 {% endmacro %}

@@ -1,25 +1,25 @@
-{% from "file_link.html.j2" import file_link %}
+{% from "file_link.html.j2" import file_link with context %}
 <details class="chapter card anchor" id="{{ chapter.id }}"{% if chapter_open %} open{% endif %}>
   <summary>
-    <span class="eyebrow">Chapter {{ chapter_number }} / {{ chapter.minutes }} minutes / {{ chapter.format | capitalize }}</span>
+    <span class="eyebrow">{{ ui.chapter }} {{ chapter_number }} / {{ chapter.minutes }} {{ ui.minutes }} / {{ ui["format_" ~ chapter.format] }}</span>
     <h2>{{ chapter.title }}</h2>
-    <span class="summary-hint">{{ chapter.steps | length }} {{ "step" if chapter.steps | length == 1 else "steps" }} / select to expand or collapse</span>
+    <span class="summary-hint">{{ chapter.steps | length }} {{ ui.step if chapter.steps | length == 1 else ui.steps }} / {{ ui.toggle_hint }}</span>
   </summary>
   <div class="chapter-body">
     <dl class="story">
-      <div><dt>The story so far</dt><dd>{{ chapter.story_so_far }}</dd></div>
-      <div><dt>Builds on</dt><dd>
-        {% for chapter_id in chapter.builds_on %}<a href="#{{ chapter_id }}">{{ chapters_by_id[chapter_id].title }}</a>{% if not loop.last %}, {% endif %}{% else %}{{ "Start of the story" if chapter_number == 1 else "No earlier chapter listed" }}{% endfor %}
+      <div><dt>{{ ui.story_so_far }}</dt><dd>{{ chapter.story_so_far }}</dd></div>
+      <div><dt>{{ ui.builds_on }}</dt><dd>
+        {% for chapter_id in chapter.builds_on %}<a href="#{{ chapter_id }}">{{ chapters_by_id[chapter_id].title }}</a>{% if not loop.last %}, {% endif %}{% else %}{{ ui.story_start if chapter_number == 1 else ui.no_previous_chapter }}{% endfor %}
       </dd></div>
-      <div><dt>You will add</dt><dd>{{ chapter.you_will_add }}</dd></div>
+      <div><dt>{{ ui.you_add }}</dt><dd>{{ chapter.you_will_add }}</dd></div>
     </dl>
     {% if chapter.checkpoint_file_id %}
     <aside class="callout callout-note checkpoint">
-      <strong>Behind? Jump in here</strong>
+      <strong>{{ ui.rejoin }}</strong>
       {% set checkpoint = files_by_id[chapter.checkpoint_file_id] %}
       <p>{{ file_link(checkpoint) }}</p>
       <p>{{ checkpoint.purpose }}</p>
-      <p>Only if you fall behind: use this starting state instead of repeating earlier chapters.</p>
+      <p>{{ ui.checkpoint_help }}</p>
     </aside>
     {% endif %}
     {% for step in chapter.steps %}

@@ -1,12 +1,12 @@
 <section id="agenda" class="card anchor" aria-labelledby="agenda--title">
-  <h2 id="agenda--title">Agenda</h2>
-  <p class="muted">Minutes from the start, including time to try each activity and discuss what you find.</p>
-  <div class="table-scroll" role="region" aria-label="Agenda table" tabindex="0">
+  <h2 id="agenda--title">{{ ui.agenda }}</h2>
+  <p class="muted">{{ ui.agenda_intro }}</p>
+  <div class="table-scroll" role="region" aria-label="{{ ui.agenda_table }}" tabindex="0">
     <table>
-      <thead><tr><th scope="col">Minutes</th><th scope="col">Chapter</th><th scope="col">Format</th><th scope="col">You will add</th></tr></thead>
+      <thead><tr><th scope="col">{{ ui.minutes_heading }}</th><th scope="col">{{ ui.chapter }}</th><th scope="col">{{ ui.format }}</th><th scope="col">{{ ui.you_add }}</th></tr></thead>
       <tbody>
         {% for chapter in spec.chapters %}
-        <tr><td>{{ time_ranges[chapter.id][0] }}-{{ time_ranges[chapter.id][1] }}</td><th scope="row"><a href="#{{ chapter.id }}">{{ loop.index }}. {{ chapter.title }}</a></th><td>{{ chapter.format | capitalize }}</td><td>{{ chapter.you_will_add }}</td></tr>
+        <tr><td>{{ time_ranges[chapter.id][0] }}-{{ time_ranges[chapter.id][1] }}</td><th scope="row"><a href="#{{ chapter.id }}">{{ loop.index }}. {{ chapter.title }}</a></th><td>{{ ui["format_" ~ chapter.format] }}</td><td>{{ chapter.you_will_add }}</td></tr>
         {% endfor %}
       </tbody>
     </table>

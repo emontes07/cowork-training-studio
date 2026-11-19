@@ -7,12 +7,12 @@ own tools save and send it.
 LabSpec **2.1** retains **2.0** support:
 `get_lab_spec_schema` -> `validate_lab_spec` -> `render_lab_page`.
 The result is one self-contained HTML page, returned to Cowork rather than
-saved by the server. Plugin **0.1.4** includes three workshop blueprints, the
+saved by the server. Plugin **0.1.5** includes three workshop blueprints, the
 checked learner/facilitator lab workflow, and the new demo-pack skill.
 Version 2 replaces M2's scenario/lab contract; v1 specs are rejected.
 
-M5b deploys the **DemoPackSpec 1.0** pipeline below: eight tools locally and on
-Azure revision `0000005`. `demo_pack` is available via `build-demo-pack`, with
+The **DemoPackSpec 1.0** pipeline below exposes eight tools locally and on
+Azure revision `0000006`. `demo_pack` is available via `build-demo-pack`, with
 fictional Office inputs, checked payoffs, a presenter guide and optional self-only
 seeding. The server never performs the skill's file or mailbox operations.
 
@@ -168,7 +168,7 @@ The server saves nothing, fetches no public sources, and creates/sends no files,
 email, chats or calendar items. Inputs must be built fully before the prompt
 pack, never in parallel; `build-demo-pack` owns those operations with permission.
 
-The [126-line skill](plugin/skills/build-demo-pack/SKILL.md) asks for inputs in
+The [128-line skill](plugin/skills/build-demo-pack/SKILL.md) asks for inputs in
 one round with defaults, researches public sources separately from assumptions,
 validates to 0/0, and creates real .xlsx/.docx inputs rather than Markdown
 substitutes. It saves the exact guide and README at `<PREFIX>-demo-pack/`, with
@@ -214,6 +214,23 @@ files never link. Source files are not bundled or fetched.
 The [function fixture](tests/fixtures/demo_pack_function.json) and
 [prompt fixture](tests/fixtures/demo_pack_prompt.json) both validate at 0/0.
 Approaches are credited in [CREDITS.md](CREDITS.md) and every returned README.
+
+## Page language and title numbering
+
+LabSpec 2.0/2.1 and DemoPackSpec 1.0 accept optional `locale`: `"en"` (default)
+or `"es"`; any other value is a validation error. Set `"es"` for neutral
+Latin American Spanish page labels and `<html lang="es">`. One
+[string table](server/studio/data/ui_strings.json) covers navigation, buttons,
+aria-labels, badges, file labels, copy feedback and the generated demo README.
+Authored content, prompts, filenames and IDs are not translated; validation
+messages remain English. Omitted locale and explicit `"en"` preserve prior
+English output byte for byte, including both demo guides and the golden lab.
+
+The warning-only `numbered_title` check flags chapter/step title prefixes such
+as `0. Arranque`, `Chapter 2:` and `Step 3 -`, with the fix
+`the guide numbers chapters automatically; remove the prefix`.
+It does not rewrite titles or flag `3 alertas clave` and `2026 en cifras`.
+Both skills set locale from the content language and avoid numbered titles.
 
 ## Spec-first lab pipeline
 
@@ -334,7 +351,7 @@ checkpoint callouts. This presentation rule is not access control on the URL.
 Files and checkpoint states are produced later by the learner or Cowork skills,
 not by this server. Links are inert until clicked; no remote assets are embedded.
 
-### Facilitator pack workflow (plugin 0.1.4)
+### Facilitator pack workflow (plugin 0.1.5)
 
 After clean validation, Cowork builds the practice files from the typed key facts,
 with learner permission. Use real .docx/.xlsx where learners would receive Word
@@ -431,7 +448,7 @@ python scripts/smoke_client.py
 This lists and calls all eight local tools, checks blueprint summaries/details,
 validates/renders the golden lab and both demo fixtures, and verifies invalid
 lab input returns no HTML. It never saves the response. This checkout's smoke
-client and plugin 0.1.4 catalog builder expect the eight-tool M5b deployment.
+client and plugin 0.1.5 catalog builder expect the eight-tool deployment.
 
 Docker must be installed with a running engine for the build. To run the image:
 

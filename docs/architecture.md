@@ -52,7 +52,11 @@ implemented alongside the format catalog and the M4b read-only blueprint tool.
 | `validate_demo_pack` | M5a; deployed M5b | `spec` object | `{valid, errors, warnings, stats}` with paths and one-line fixes. |
 | `render_demo_guide` | M5a; deployed M5b | `spec` object | `{html, filename, readme_md, stats, warnings}`; failures return `{errors, stats, warnings}` without assets. |
 
-M5b deploys all eight tools on Azure revision `0000005` and ships plugin 0.1.4.
+M5c deploys all eight tools on Azure revision `0000006` and ships plugin 0.1.5.
+LabSpec 2.0/2.1 and DemoPackSpec share optional `locale` (`en` default, or `es`).
+The bundled [UI table](../server/studio/data/ui_strings.json) localizes labels,
+accessibility/copy feedback and demo README text, not authored content or IDs.
+English bytes remain unchanged; numbered lab chapter/step titles now warn.
 Demo objects stay at the top level, with matching JSON text.
 
 Each format includes `id`, `name`, `description`, `best_for`, `required_inputs`
@@ -125,7 +129,7 @@ Learner links open in a new tab with `noopener noreferrer`. Optional file
 marked "Facilitator only", and never linked. Existing default/no-href markup
 and the 84,022-byte golden page are unchanged.
 
-Plugin 0.1.4's lab skill uses 2.1 typed facts/headings, requires zero warnings, and
+Plugin 0.1.5's lab skill uses 2.1 typed facts/headings, requires zero warnings, and
 builds the pack with Cowork tools before the final render. Learner files live in
 `learner/`; keys and run-of-show notes live in `facilitator/`. It sets relative
 hrefs only after saves, validates/re-renders, writes exact HTML, re-reads files,

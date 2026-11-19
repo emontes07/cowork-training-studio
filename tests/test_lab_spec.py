@@ -36,6 +36,34 @@ def test_v2_schema_and_stats(minimal_spec):
     assert schema["properties"]["schema_version"]["enum"] == ["2.0", "2.1"]
 
 
+@pytest.mark.parametrize("scope", ["chapter", "step"])
+@pytest.mark.parametrize(("title", "warns"), [
+    ("0. Arranque", True),
+    ("Cap\u00edtulo 2:", True),
+    ("Step 3 -", True),
+    ("Chapter 1", True),
+    ("  PASO 4: Revisar", True),
+    ("2) Comprobar", True),
+    ("3 alertas clave", False),
+    ("2026 en cifras", False),
+    ("2026-03-01", False),
+    ("3.14 como referencia", False),
+])
+def test_numbered_titles_warn_without_changing_content(minimal_spec, scope, title, warns):
+    chapter = minimal_spec["chapters"][0]
+    target = chapter if scope == "chapter" else chapter["steps"][0]
+    target["title"] = title
+    before = deepcopy(minimal_spec)
+    result = validate_lab_spec(minimal_spec)
+    assert result["valid"] and result["errors"] == []
+    assert minimal_spec == before
+    path = "chapters.0.title" if scope == "chapter" else "chapters.0.steps.0.title"
+    assert result["warnings"] == ([{
+        "code": "numbered_title", "path": path,
+        "message": "the guide numbers chapters automatically; remove the prefix",
+    }] if warns else [])
+
+
 @pytest.mark.parametrize("version", ["2.0", "2.1"])
 def test_typed_key_facts_are_additive_and_unknown_kinds_fail(minimal_spec, version):
     minimal_spec["schema_version"] = version
