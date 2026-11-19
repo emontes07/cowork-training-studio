@@ -244,7 +244,7 @@ def test_demo_quality_warnings_never_block_rendering(function_demo, path, value,
     if code == "talk_track_length":
         assert "40 words" in matches[0]["message"]
     if code == "customer_in_seeded_data":
-        assert all(item["message"] == "use a fictional stand-in company; keep the customer name in the audience/title only" for item in matches)
+        assert all(item["message"] == "Use a fictional stand-in company; keep the customer name in the audience/title only." for item in matches)
 
 
 @pytest.mark.parametrize("change", ["unused_payoff", "unused_file", "cast_size", "tension_count", "duplicate_assumption", "empty_context", "similar_prompts"])

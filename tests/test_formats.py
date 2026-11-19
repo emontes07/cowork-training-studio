@@ -41,7 +41,7 @@ def test_catalog_is_complete_and_json_serializable():
         assert isinstance(item["default_duration_minutes"], int)
         assert item["default_duration_minutes"] > 0
         assert item["status"] in {"available", "coming_soon"}
-        assert item["produced_by_skill"] in {"build-training-lab", None}
+        assert item["produced_by_skill"] in {"build-training-lab", "build-demo-pack", None}
         assert item["required_inputs"]
         input_names = [field["name"] for field in item["required_inputs"]]
         assert len(input_names) == len(set(input_names))
@@ -61,13 +61,14 @@ def test_format_skills_are_shipped_and_planned_formats_are_unavailable():
             assert item["status"] == "coming_soon"
             assert "not available yet; planned" in item["description"].casefold()
     assert list_session_formats("html_lab")[0]["produced_by_skill"] == "build-training-lab"
+    assert list_session_formats("demo_pack")[0]["produced_by_skill"] == "build-demo-pack"
     assert all(
         list_session_formats(identifier)[0]["produced_by_skill"] is None
-        for identifier in ("word_guide", "demo_pack", "prompt_a_thon")
+        for identifier in ("word_guide", "prompt_a_thon")
     )
 
 
-@pytest.mark.parametrize("id", [None, "html_lab"])
+@pytest.mark.parametrize("id", [None, "html_lab", "demo_pack"])
 def test_format_catalog_satisfies_live_mcp_output_schema(id):
     from fastmcp import Client
     from main import mcp
