@@ -4,7 +4,7 @@ description: "Build a demo pack or demo prompt pack, prepare a Cowork demo for <
 license: MIT
 metadata:
   author: Cowork Training Studio
-  version: "0.1.4"
+  version: "0.1.5"
 ---
 
 # Build a demo pack
@@ -40,6 +40,8 @@ If a required capability is missing, report the blocker, not invented success.
    and disclose the limitation. Never invent citations or turn guesses into facts.
    Omit an unverified website. Without a customer, use fictional assumptions.
 3. Call `get_demo_pack_schema` and draft the returned DemoPackSpec 1.0 contract.
+   Set `locale` to the content language: `"es"` for Spanish, `"en"` for English.
+   Never number chapter, step or scenario titles.
    Set `as_of_date` explicitly and `default_minutes` to the agreed duration.
    For `prompt_pack`, retain `source_prompt` verbatim; label any agreed default.
    Plan input files and payoffs first; finish every input before producing the

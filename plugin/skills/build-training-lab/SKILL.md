@@ -4,7 +4,7 @@ description: "Build a training lab, create a hands-on workshop, or make a story-
 license: MIT
 metadata:
   author: Cowork Training Studio
-  version: "0.1.4"
+  version: "0.1.5"
 ---
 
 # Build a training lab
@@ -29,6 +29,8 @@ a tool name. If a required tool is missing, report the blocker explicitly.
    Keep the same invented company across the day; never invent available formats.
 2. Call `get_lab_spec_schema` and use the returned contract, not a remembered
    version. Write `schema_version: "2.1"` using fictional practice content.
+   Set `locale` to the content language: `"es"` for Spanish, `"en"` for English.
+   Never number chapter or step titles; the guide adds chapter numbers.
    Use typed `expected.key_facts`: `quote` or `clause` for document quotations,
    with `source_file` naming a declared file ID and `section` matching its source.
    Use `number` for checked figures and `fact` for other evidence.
