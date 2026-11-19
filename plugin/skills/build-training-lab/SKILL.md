@@ -4,7 +4,7 @@ description: "Build a training lab, create a hands-on workshop, or make a story-
 license: MIT
 metadata:
   author: Cowork Training Studio
-  version: "0.1.3"
+  version: "0.1.4"
 ---
 
 # Build a training lab
@@ -12,6 +12,8 @@ metadata:
 Help the learner make a workshop they can follow, finish, and reuse.
 Use this skill for "build a training lab", "create a hands-on workshop",
 or "make a story-driven Copilot lab".
+Use the connector's tool names EXACTLY as listed, including prefixes; never guess
+a tool name. If a required tool is missing, report the blocker explicitly.
 
 ## Plan the experience
 
@@ -57,6 +59,8 @@ or "make a story-driven Copilot lab".
 
 5. After clean validation, use Cowork's own file tools, with learner permission,
    to build the practice files from the key facts. Save in the output location:
+   - Use real .docx or .xlsx where learners would receive Word or Excel files.
+     Use Markdown only for plain notes; never rename text files as Office files.
    - `<lab-slug>/learner/`: sources, fresh test data, worksheets and checkpoints.
    - `<lab-slug>/facilitator/`: answer keys and `facilitator-notes.md`.
    - The notes give a run of show by chapter, what to hand out, dates and

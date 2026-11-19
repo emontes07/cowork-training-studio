@@ -18,7 +18,7 @@ class SessionFormat(TypedDict):
     best_for: list[str]
     required_inputs: list[RequiredInput]
     default_duration_minutes: int
-    produced_by_skill: Literal["build-training-lab"] | None
+    produced_by_skill: Literal["build-training-lab", "build-demo-pack"] | None
 
 
 _DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "session_formats.json"
@@ -32,8 +32,9 @@ def list_session_formats(id: str | None = None) -> list[SessionFormat]:
     Call before choosing a format or gathering inputs for a training skill.
     Each item includes id, name, description, best_for, required_inputs
     (name, description, example), default_duration_minutes, status, and produced_by_skill.
-    Only html_lab is available, through the shipped build-training-lab skill.
-    Other formats are coming_soon with no skill; do not offer them as available.
+    html_lab and demo_pack are available through the shipped build-training-lab
+    and build-demo-pack skills. Word guides and prompt-a-thons are coming_soon
+    with no skill; do not offer them as available.
     Omit id to return all formats. Supply an exact, case-sensitive id to return
     a one-item list. An unknown id raises an error. This tool returns metadata only;
     it does not write content, create files, or save or send anything.

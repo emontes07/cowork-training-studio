@@ -28,7 +28,7 @@ mcp = FastMCP(
         "Call get_blueprint if a workshop shape is needed. "
         "Call get_lab_spec_schema, draft a LabSpec, validate_lab_spec, then render_lab_page. "
         "Demo-pack authors can call get_demo_pack_schema, validate_demo_pack and render_demo_guide; "
-        "demo_pack stays coming_soon until its skill ships. Build fictional inputs before prompts, never in parallel. "
+        "demo_pack is available through build-demo-pack. Build fictional inputs before prompts, never in parallel. "
         "Use fictional Zava-style records only; never submit tenant data, real person names, credentials or secrets. "
         "LabSpecs remain wholly fictional. In DemoPackSpec only, public customer names may appear "
         "in audience/title/talk tracks and the filename prefix, never in seeded records. "

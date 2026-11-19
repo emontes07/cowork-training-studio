@@ -247,7 +247,7 @@ def validate_demo_pack(spec: dict[str, Any]) -> DemoValidationResult:
         for path, text in record_fields:
             if _customer_name_in(text, customer):
                 issue(warnings, "customer_in_seeded_data", path,
-                      "use a fictional stand-in company; keep the customer name in the audience/title only")
+                      "Use a fictional stand-in company; keep the customer name in the audience/title only.")
     for kind, count, limit in (("email", stats["email_count"], 8), ("meeting", stats["meeting_count"], 5)):
         if count > limit:
             issue(warnings, "seeded_item_count", "seeded_items", f"Reduce {kind} items to at most {limit}; currently {count}.")

@@ -77,8 +77,8 @@
   {
     "id": "demo_pack",
     "name": "Cowork demo pack",
-    "description": "Not available yet; planned: fictional source documents, seeded email content, and calendar event drafts for a Cowork demo. This server never creates mailbox or calendar items.",
-    "status": "coming_soon",
+    "description": "A fictional Cowork demo pack with checked Office source files, copy-ready prompts, a presenter guide, and optional presenter-owned email or calendar drafts. Cowork's own tools create assets with permission; this server never creates files, mailbox or calendar items.",
+    "status": "available",
     "best_for": [
       "Repeatable product demonstrations",
       "Scenario-based walkthroughs",
@@ -107,7 +107,7 @@
       }
     ],
     "default_duration_minutes": 20,
-    "produced_by_skill": null
+    "produced_by_skill": "build-demo-pack"
   },
   {
     "id": "prompt_a_thon",
